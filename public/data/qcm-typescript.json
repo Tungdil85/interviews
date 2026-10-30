@@ -5,13 +5,13 @@
     "difficulty": "easy",
     "question": "Quelle différence principale entre `unknown` et `any` ?",
     "options": [
-      "Aucune",
-      "`unknown` oblige à vérifier/restreindre le type avant usage ; `any` désactive le contrôle de type",
-      "`any` est plus sûr",
-      "`unknown` n'existe qu'en JavaScript"
+      "Les deux sont strictement équivalents pour le compilateur actuel",
+      "any est plus sûr : il impose un contrôle de type avant chaque usage",
+      "unknown impose un narrowing avant usage ; any coupe le contrôle de type",
+      "unknown n'existe qu'en JavaScript et pas dans le compilateur TypeScript"
     ],
     "answer": [
-      1
+      2
     ],
     "explanation": "`unknown` est la version sûre de `any` : on doit narrower (typeof, instanceof, garde de type) avant de l'utiliser."
   },
@@ -21,14 +21,14 @@
     "difficulty": "easy",
     "question": "Quelle syntaxe déclare un tableau de chaînes ?",
     "options": [
-      "string[]",
-      "Array<string>",
+      "string{}",
       "[string]",
-      "string{}"
+      "string[]",
+      "Array<string>"
     ],
     "answer": [
-      0,
-      1
+      2,
+      3
     ],
     "explanation": "`string[]` et `Array<string>` sont équivalents. `[string]` est un tuple d'un seul élément."
   },
@@ -55,13 +55,13 @@
     "difficulty": "medium",
     "question": "Que fait `Omit<User, 'password'>` ?",
     "options": [
-      "Supprime le type User",
-      "Crée un type identique à User sans la propriété `password`",
-      "Rend password optionnel",
-      "Ajoute password"
+      "Crée un type identique à User, sans la propriété password",
+      "Rend la propriété password optionnelle dans le type User",
+      "Supprime entièrement le type User du programme compilé",
+      "Ajoute la propriété password à une copie du type User"
     ],
     "answer": [
-      1
+      0
     ],
     "explanation": "`Omit<T, K>` retire les clés K de T ; `Pick<T, K>` fait l'inverse en ne gardant que K."
   },
@@ -71,13 +71,13 @@
     "difficulty": "medium",
     "question": "Quel est l'intérêt d'une union discriminée ?",
     "options": [
-      "Réduire la taille du bundle",
-      "Permettre au compilateur de restreindre le type via une propriété littérale commune (ex. `kind`)",
-      "Éviter les interfaces",
-      "Accélérer l'exécution"
+      "Cela réduit automatiquement la taille du bundle JavaScript généré en prod",
+      "Cela accélère l'exécution du code JavaScript transpilé en production",
+      "Le compilateur restreint le type grâce à une propriété littérale commune",
+      "Cela remplace entièrement l'usage des interfaces et des classes du projet"
     ],
     "answer": [
-      1
+      2
     ],
     "explanation": "Avec `type Shape = {kind:'c'; r:number} | {kind:'s'; side:number}`, un `switch (shape.kind)` restreint automatiquement le type."
   },
@@ -88,13 +88,13 @@
     "question": "Quel est le type de `x` ?",
     "code": "const x = ['a', 'b'] as const;",
     "options": [
-      "string",
-      "'a' | 'b'",
-      "readonly ['a','b']",
-      "string[]"
+      "string[]",
+      "readonly ['a', 'b']",
+      "readonly string[]",
+      "('a' | 'b')[]"
     ],
     "answer": [
-      2
+      1
     ],
     "explanation": "`as const` fige les littéraux et rend le tableau `readonly` avec types littéraux."
   },
@@ -104,13 +104,13 @@
     "difficulty": "medium",
     "question": "Que signifie `keyof User` ?",
     "options": [
-      "Les valeurs de User",
-      "L'union des noms de propriétés de User",
-      "Une clé de chiffrement",
-      "Le constructeur"
+      "L'union des noms de propriétés de User, en littéraux",
+      "L'union des types de valeurs des propriétés de User",
+      "Une clé de chiffrement associée au type User et à ses valeurs",
+      "Le constructeur de la classe User, exprimé sous forme de type"
     ],
     "answer": [
-      1
+      0
     ],
     "explanation": "Si `User = {id:number; name:string}`, alors `keyof User` vaut `'id' | 'name'`."
   },
@@ -120,13 +120,13 @@
     "difficulty": "medium",
     "question": "Quand préférer `interface` à `type` ?",
     "options": [
-      "Jamais",
-      "Pour décrire la forme d'objets extensibles (extends, fusion de déclarations)",
-      "Pour les unions",
-      "Pour les tuples uniquement"
+      "Pour décrire des objets extensibles (extends, fusion de déclarations)",
+      "Jamais : type remplace interface dans tous les cas d'usage possibles",
+      "Uniquement pour typer des fonctions et des callbacks de l'application",
+      "Pour déclarer des unions, des tuples et des types conditionnels"
     ],
     "answer": [
-      1
+      0
     ],
     "explanation": "Les deux se recoupent largement ; `type` est nécessaire pour unions/tuples/mapped types, `interface` pour l'héritage et la fusion de déclarations."
   },
@@ -136,13 +136,13 @@
     "difficulty": "hard",
     "question": "À quoi sert l'opérateur `satisfies` ?",
     "options": [
-      "À caster sans vérification",
-      "À valider qu'une valeur respecte un type tout en conservant son type inféré précis",
-      "À importer un type",
-      "À déclarer une classe"
+      "Valider qu'une valeur respecte un type en gardant son type inféré",
+      "Caster une valeur vers un autre type en ignorant toute vérification",
+      "Déclarer qu'une classe implémente plusieurs interfaces à la fois",
+      "Importer un type depuis un module externe sans l'exécuter au runtime"
     ],
     "answer": [
-      1
+      0
     ],
     "explanation": "`const c = {...} satisfies Config` vérifie la conformité sans élargir le type (contrairement à une annotation)."
   },
@@ -153,13 +153,13 @@
     "question": "Que retourne cette fonction de garde ?",
     "code": "function isString(v: unknown): v is string {\n  return typeof v === 'string';\n}",
     "options": [
-      "boolean simple, sans effet sur le typage",
-      "boolean, et restreint `v` à string dans la branche vraie",
-      "string",
-      "void"
+      "Un booléen qui, vrai, restreint v au type string dans la branche",
+      "void : la fonction ne retourne rien d'exploitable par l'appelant",
+      "Un booléen simple, sans aucun effet sur le typage dans la branche",
+      "Une chaîne de caractères qui décrit le type de la variable v"
     ],
     "answer": [
-      1
+      0
     ],
     "explanation": "Un prédicat de type (`v is string`) informe le compilateur du narrowing."
   },
@@ -169,13 +169,13 @@
     "difficulty": "easy",
     "question": "Que fait l'opérateur `?.` ?",
     "options": [
-      "Déclare une propriété optionnelle",
-      "Évalue à undefined si la valeur à gauche est null/undefined au lieu de lever une erreur",
-      "Compare deux valeurs",
-      "Force le type non-null"
+      "Force le type en non-null, sans la moindre vérification à l'exécution",
+      "Compare deux valeurs en ignorant leur type et leur référence",
+      "Déclare qu'une propriété d'une interface est optionnelle ou absente",
+      "Court-circuite en undefined si la valeur à gauche est null/undefined"
     ],
     "answer": [
-      1
+      3
     ],
     "explanation": "L'optional chaining court-circuite : `user?.address?.city`."
   },
@@ -185,13 +185,13 @@
     "difficulty": "medium",
     "question": "Que fait l'opérateur `!` en suffixe (`value!`) ?",
     "options": [
-      "Nie la valeur",
-      "Affirme au compilateur que la valeur n'est ni null ni undefined, sans aucune vérification à l'exécution",
-      "Convertit en booléen",
-      "Lance une erreur si null"
+      "Lance une erreur à l'exécution si la valeur est null ou undefined",
+      "Nie la valeur puis retourne son booléen opposé à l'exécution",
+      "Affirme que la valeur n'est ni null ni undefined, sans test runtime",
+      "Convertit la valeur en booléen strict avant de la retourner"
     ],
     "answer": [
-      1
+      2
     ],
     "explanation": "Le non-null assertion supprime l'erreur de compilation mais n'ajoute aucun contrôle runtime : à utiliser avec parcimonie."
   },
@@ -201,13 +201,13 @@
     "difficulty": "medium",
     "question": "Que décrit `Record<string, number>` ?",
     "options": [
-      "Un tableau de nombres",
-      "Un objet dont toutes les clés sont des chaînes et les valeurs des nombres",
-      "Un tuple",
-      "Une classe"
+      "Un tableau dont tous les éléments sont des nombres, indexés par clé",
+      "Une classe générique avec un paramètre de clé et un de valeur",
+      "Un tuple de longueur fixe contenant une chaîne puis un nombre",
+      "Un objet avec des clés de type chaîne et des valeurs de type nombre"
     ],
     "answer": [
-      1
+      3
     ],
     "explanation": "`Record<K, V>` est un mapped type : `{ [P in K]: V }`."
   },
@@ -217,13 +217,13 @@
     "difficulty": "hard",
     "question": "Que signifie le type `never` ?",
     "options": [
-      "Une valeur qui peut être null",
-      "Le type des valeurs qui n'existent jamais (fonction qui ne retourne pas, cas exhaustif impossible)",
-      "Identique à void",
-      "Un alias de unknown"
+      "Le type d'une valeur qui peut être null ou undefined selon le contexte",
+      "Un alias strictement identique à void dans tous les contextes d'usage",
+      "Le type des valeurs impossibles, ex. le retour d'une fonction qui lève",
+      "Un alias de unknown, réservé au typage des entrées externes"
     ],
     "answer": [
-      1
+      2
     ],
     "explanation": "`never` sert aux fonctions qui lèvent une exception en permanence et aux vérifications d'exhaustivité d'un switch."
   },
@@ -233,13 +233,13 @@
     "difficulty": "easy",
     "question": "Quelle option tsconfig active l'ensemble des vérifications strictes ?",
     "options": [
-      "\"strict\": true",
       "\"safe\": true",
+      "\"strict\": true",
       "\"lint\": true",
       "\"noAny\": true"
     ],
     "answer": [
-      0
+      1
     ],
     "explanation": "`strict` active notamment `strictNullChecks`, `noImplicitAny`, `strictFunctionTypes`, `strictPropertyInitialization`."
   }

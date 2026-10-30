@@ -30,7 +30,7 @@ export class QuizService {
             (!filter.onlyIds || filter.onlyIds.includes(q.id)),
         ),
       ),
-      map((pool) => this.shuffle(pool).slice(0, filter.count)),
+      map((pool) => this.shuffle(pool).slice(0, filter.count).map((q) => this.shuffleOptions(q))),
     );
   }
 
@@ -45,6 +45,16 @@ export class QuizService {
     if (selected.length !== question.correct.length) return false;
     const sorted = [...selected].sort((a, b) => a - b);
     return question.correct.every((value, i) => value === sorted[i]);
+  }
+
+  /** Mélange l'ordre des options et recalcule les indices des bonnes réponses. */
+  shuffleOptions(question: Question): Question {
+    const order = this.shuffle(question.options.map((_, i) => i));
+    return {
+      ...question,
+      options: order.map((i) => question.options[i]),
+      correct: question.correct.map((c) => order.indexOf(c)).sort((a, b) => a - b),
+    };
   }
 
   /** Fisher–Yates. */

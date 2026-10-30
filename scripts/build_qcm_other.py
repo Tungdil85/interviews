@@ -3,6 +3,7 @@
 Le CSS est ensuite enrichi par scripts/import_fcc_css.py (questions BSD-3 de freeCodeCamp).
 """
 import json, pathlib
+from qcm_options import finalize
 
 E, M, H = "easy", "medium", "hard"
 DATA = pathlib.Path(__file__).resolve().parent.parent / "public/data"
@@ -122,7 +123,7 @@ def dump(name, items, prefix, cat):
         item = {"id": f"{prefix}-{i:03d}", "category": cat, "difficulty": d, "question": q}
         if code: item["code"] = code
         item.update({"options": opts, "answer": ans, "explanation": expl})
-        out.append(item)
+        out.append(finalize(item))
     (DATA / f"qcm-{name}.json").write_text(json.dumps(out, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(name, len(out))
 

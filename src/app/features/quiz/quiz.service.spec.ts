@@ -76,4 +76,20 @@ describe('QuizService', () => {
   it('shuffle conserve les éléments', () => {
     expect(service.shuffle([1, 2, 3, 4]).sort()).toEqual([1, 2, 3, 4]);
   });
+
+  it('mélange les options sans perdre les bonnes réponses', () => {
+    const q = { options: ['a', 'b', 'c', 'd'], correct: [1, 3] } as Question;
+    for (let i = 0; i < 20; i++) {
+      const shuffled = service.shuffleOptions(q);
+      expect([...shuffled.options].sort()).toEqual(['a', 'b', 'c', 'd']);
+      expect(shuffled.correct.map((c) => shuffled.options[c]).sort()).toEqual(['b', 'd']);
+    }
+  });
+
+  it('loadQuestions renvoie des options mélangées mais cohérentes', () => {
+    let result: Question[] = [];
+    service.loadQuestions({ categories: ['angular'], difficulties: [], count: 5 }).subscribe((r) => (result = r));
+    http.expectOne('data/qcm-angular.json').flush([{ ...dto('1', 'easy'), options: ['bonne', 'x', 'y', 'z'], answer: [0] }]);
+    expect(result[0].options[result[0].correct[0]]).toBe('bonne');
+  });
 });

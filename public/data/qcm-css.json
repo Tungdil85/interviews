@@ -5,13 +5,13 @@
     "difficulty": "easy",
     "question": "Quel effet a `box-sizing: border-box` ?",
     "options": [
-      "Le padding et la bordure sont inclus dans la largeur/hauteur déclarée",
-      "Le padding s'ajoute à la largeur",
-      "Supprime les marges",
-      "Ajoute une bordure"
+      "Le padding et la bordure s'ajoutent à la largeur et hauteur déclarées",
+      "La bordure est ignorée dans le calcul de la hauteur déclarée",
+      "Les marges sont incluses dans la largeur et la hauteur déclarées",
+      "Padding et bordure sont inclus dans la largeur et hauteur déclarées"
     ],
     "answer": [
-      0
+      3
     ],
     "explanation": "Avec `border-box`, `width: 200px` inclut padding et border : le dimensionnement est plus prévisible."
   },
@@ -21,10 +21,10 @@
     "difficulty": "medium",
     "question": "Quel sélecteur a la plus forte spécificité ?",
     "options": [
-      "`.card .title`",
+      "`p.title`",
       "`#title`",
-      "`div p`",
-      "`p.title`"
+      "`.card .title`",
+      "`div p`"
     ],
     "answer": [
       1
@@ -37,13 +37,13 @@
     "difficulty": "easy",
     "question": "Comment centrer un élément enfant horizontalement ET verticalement avec flexbox ?",
     "options": [
+      "margin: 0 auto; padding: 50%;",
       "justify-content: center; align-items: center;",
-      "text-align: center;",
-      "margin: 0 auto;",
-      "float: center;"
+      "float: center; position: relative;",
+      "text-align: center; vertical-align: middle;"
     ],
     "answer": [
-      0
+      1
     ],
     "explanation": "Sur le conteneur : `display:flex; justify-content:center; align-items:center;`. Avec Grid : `place-items:center`."
   },
@@ -53,13 +53,13 @@
     "difficulty": "medium",
     "question": "Que fait `flex: 1` sur un élément flex ?",
     "options": [
-      "Fixe la largeur à 1px",
-      "Équivaut à flex-grow:1 ; flex-shrink:1 ; flex-basis:0%, l'élément occupe l'espace disponible",
-      "Désactive flex",
-      "Fait passer à la ligne"
+      "Force chaque élément à passer à la ligne dans le conteneur",
+      "Fixe la largeur de l'élément à 1px quel que soit son contenu",
+      "Équivaut à grow:1, shrink:1, basis:0% : prend l'espace libre",
+      "Désactive flex sur l'élément et le remet en display:block"
     ],
     "answer": [
-      1
+      2
     ],
     "explanation": "`flex: 1` répartit l'espace restant de manière égale entre éléments partageant cette valeur."
   },
@@ -69,13 +69,13 @@
     "difficulty": "medium",
     "question": "Quelle propriété crée des colonnes de tailles proportionnelles avec Grid ?",
     "options": [
+      "grid-gap: 1fr 2fr; display: flex",
       "grid-template-columns: 1fr 2fr",
-      "columns: 1fr 2fr",
-      "flex-columns",
-      "grid-gap"
+      "columns: 1fr 2fr; display: grid",
+      "grid-columns: 1fr 2fr; display: grid"
     ],
     "answer": [
-      0
+      1
     ],
     "explanation": "L'unité `fr` répartit l'espace libre : ici 1/3 et 2/3."
   },
@@ -86,12 +86,12 @@
     "question": "Quelle position retire l'élément du flux et le place par rapport à son ancêtre positionné le plus proche ?",
     "options": [
       "static",
-      "relative",
       "absolute",
+      "relative",
       "sticky"
     ],
     "answer": [
-      2
+      1
     ],
     "explanation": "`absolute` se positionne par rapport au plus proche ancêtre non `static` (souvent `position: relative`)."
   },
@@ -101,13 +101,13 @@
     "difficulty": "medium",
     "question": "`position: sticky` …",
     "options": [
-      "Fixe l'élément définitivement à l'écran",
-      "Se comporte comme relative puis « colle » au seuil défini (top…) pendant le défilement de son conteneur",
-      "Supprime l'élément du flux",
-      "Équivaut à absolute"
+      "Fixe l'élément définitivement à l'écran, quel que soit le défilement du parent",
+      "Équivaut à static mais autorise z-index sans autre effet",
+      "Se comporte comme relative puis colle au seuil défini pendant le défilement",
+      "Retire l'élément du flux, comme absolute, par rapport au viewport"
     ],
     "answer": [
-      1
+      2
     ],
     "explanation": "Sticky = relative jusqu'à un seuil de scroll, puis fixed dans les limites de son parent."
   },
@@ -117,13 +117,13 @@
     "difficulty": "hard",
     "question": "Pourquoi un `z-index` élevé peut-il ne pas passer au-dessus d'un autre élément ?",
     "options": [
-      "Le z-index n'existe plus",
-      "Les contextes d'empilement (stacking contexts) isolent les z-index de leurs descendants",
-      "Il faut utiliser !important",
-      "Il faut utiliser opacity:1"
+      "Le z-index est ignoré dès qu'un élément est en display: flex",
+      "Il faut aussi définir opacity: 1 sur l'élément et son parent",
+      "Il faut ajouter !important sur la valeur du z-index concerné",
+      "Les contextes d'empilement isolent les z-index de leurs descendants"
     ],
     "answer": [
-      1
+      3
     ],
     "explanation": "Un parent avec `position + z-index`, `transform`, `opacity<1`, etc. crée un contexte : ses enfants ne peuvent pas sortir de ce niveau."
   },
@@ -133,13 +133,13 @@
     "difficulty": "easy",
     "question": "`em` et `rem` : quelle différence ?",
     "options": [
-      "Aucune",
-      "`em` est relatif à la taille de police de l'élément (ou parent) ; `rem` à celle de la racine `<html>`",
-      "`rem` est relatif au parent",
-      "`em` vaut toujours 16px"
+      "em dépend de la police de l'élément ; rem de celle de <html>",
+      "em vaut toujours 16px ; rem s'adapte au contenu affiché",
+      "Les deux dépendent de la largeur du viewport de l'écran",
+      "em dépend de la police de <html> ; rem de celle du parent"
     ],
     "answer": [
-      1
+      0
     ],
     "explanation": "`rem` évite l'effet de composition des `em` imbriqués et facilite l'accessibilité."
   },
@@ -149,13 +149,13 @@
     "difficulty": "easy",
     "question": "Comment cibler les écrans d'au moins 768px (mobile-first) ?",
     "options": [
+      "@viewport 768",
       "@media (min-width: 768px)",
       "@media (max-width: 768px)",
-      "@screen 768",
-      "@viewport 768"
+      "@screen 768"
     ],
     "answer": [
-      0
+      1
     ],
     "explanation": "Approche mobile-first : styles de base pour petit écran, puis `min-width` pour élargir."
   },
@@ -165,13 +165,13 @@
     "difficulty": "medium",
     "question": "Différence entre `:hover` et `::before` ?",
     "options": [
-      "Aucune",
-      "`:hover` est une pseudo-classe (état) ; `::before` est un pseudo-élément (contenu généré)",
-      "`::before` est un état",
-      "Les deux sont des pseudo-éléments"
+      "Les deux sont des pseudo-classes, avec une syntaxe différente",
+      "Les deux sont des pseudo-éléments qui génèrent du contenu",
+      ":hover est une pseudo-classe d'état ; ::before un pseudo-élément",
+      ":hover est un pseudo-élément ; ::before une pseudo-classe d'état"
     ],
     "answer": [
-      1
+      2
     ],
     "explanation": "Une pseudo-classe cible un état d'un élément existant (un seul `:`), un pseudo-élément une partie générée (`::`)."
   },
@@ -181,13 +181,13 @@
     "difficulty": "medium",
     "question": "Que fait `display: none` par rapport à `visibility: hidden` ?",
     "options": [
-      "Idem",
-      "`none` retire l'élément du flux (aucun espace), `hidden` le cache mais conserve son espace",
-      "`hidden` retire l'élément du DOM",
-      "`none` conserve l'espace"
+      "Les deux retirent l'élément du DOM, sans garder de place",
+      "none ne fait que le cacher visuellement ; hidden le retire du flux",
+      "none retire l'élément du flux ; hidden le cache mais garde sa place",
+      "none garde la place de l'élément ; hidden la libère entièrement"
     ],
     "answer": [
-      1
+      2
     ],
     "explanation": "`opacity: 0` cache aussi mais l'élément reste interactif ; `display:none` est ignoré des lecteurs d'écran."
   },
@@ -197,13 +197,13 @@
     "difficulty": "medium",
     "question": "Comment déclare-t-on et utilise-t-on une variable CSS ?",
     "options": [
+      "$gap: 8px; puis var($gap)",
       "--gap: 8px; puis var(--gap)",
-      "$gap: 8px; puis $gap",
-      "@gap: 8px;",
-      "let gap = 8px"
+      "let gap = 8px; puis gap()",
+      "@gap: 8px; puis @gap"
     ],
     "answer": [
-      0
+      1
     ],
     "explanation": "Les custom properties se déclarent avec `--nom` et s'héritent via la cascade ; `var(--nom, fallback)`."
   },
@@ -213,13 +213,13 @@
     "difficulty": "medium",
     "question": "Que fait `clamp(1rem, 2.5vw, 2rem)` ?",
     "options": [
-      "Découpe l'élément",
-      "Retourne une valeur fluide bornée entre un minimum (1rem) et un maximum (2rem)",
-      "Arrondit",
-      "Active une animation"
+      "Retourne une valeur fluide bornée entre un minimum et un maximum",
+      "Anime automatiquement l'élément entre deux tailles de police",
+      "Arrondit la valeur au pixel entier le plus proche possible",
+      "Découpe l'élément pour qu'il ne déborde jamais de son conteneur"
     ],
     "answer": [
-      1
+      0
     ],
     "explanation": "Pratique pour une typographie fluide sans media queries."
   },
@@ -229,13 +229,13 @@
     "difficulty": "hard",
     "question": "Qu'est-ce que l'effondrement des marges (margin collapsing) ?",
     "options": [
-      "Une marge supprimée par erreur",
-      "Les marges verticales adjacentes de blocs en flux normal fusionnent en prenant la plus grande",
-      "Un bug de Grid",
-      "Un reset CSS"
+      "Les marges verticales adjacentes fusionnent en une seule, la plus grande",
+      "Un bug de Grid qui additionne les marges de deux cellules voisines du tableau",
+      "Une marge est supprimée par erreur quand elle dépasse le parent",
+      "Un reset CSS qui remet toutes les marges à zéro par défaut"
     ],
     "answer": [
-      1
+      0
     ],
     "explanation": "Ne s'applique pas aux éléments flex/grid ni aux blocs créant un nouveau contexte de formatage (BFC)."
   },
@@ -245,10 +245,10 @@
     "difficulty": "hard",
     "question": "Quelles propriétés sont les plus performantes à animer ?",
     "options": [
-      "width et height",
-      "transform et opacity",
-      "top et left",
-      "margin"
+      "width et height de l'élément",
+      "transform et opacity de l'élément",
+      "margin et padding de l'élément",
+      "top et left de l'élément"
     ],
     "answer": [
       1
@@ -261,13 +261,13 @@
     "difficulty": "medium",
     "question": "Que fait `gap` en Flex ou Grid ?",
     "options": [
-      "Ajoute des marges aux bords",
-      "Définit l'espacement entre les éléments enfants",
-      "Supprime les bordures",
-      "Aligne verticalement"
+      "Aligne verticalement les éléments sur leur ligne de base",
+      "Supprime les bordures entre les cellules adjacentes de la grille",
+      "Ajoute des marges autour de chaque élément, aux bords inclus",
+      "Définit l'espacement entre les enfants, sans marge aux bords"
     ],
     "answer": [
-      1
+      3
     ],
     "explanation": "`gap` n'ajoute pas d'espace avant le premier ni après le dernier élément, contrairement aux marges."
   },
@@ -277,13 +277,13 @@
     "difficulty": "hard",
     "question": "À quoi servent les container queries (`@container`) ?",
     "options": [
-      "À styler selon la taille du conteneur parent plutôt que celle du viewport",
-      "À conteneuriser Docker",
-      "À remplacer Grid",
-      "À imprimer"
+      "Conteneuriser une application web avec Docker avant son déploiement",
+      "Adapter les styles de la page lors d'une impression papier",
+      "Styler un composant selon la taille de son conteneur, pas du viewport",
+      "Remplacer les grilles CSS par des tableaux responsive à colonnes"
     ],
     "answer": [
-      0
+      2
     ],
     "explanation": "Le composant s'adapte à l'espace dont il dispose (`container-type: inline-size`), indépendamment de la page."
   },
@@ -293,10 +293,10 @@
     "difficulty": "medium",
     "question": "Que fait `object-fit: cover` sur une image ?",
     "options": [
-      "Étire l'image",
-      "Remplit la boîte en conservant le ratio, en rognant l'excédent",
-      "Réduit sans rogner",
-      "Masque l'image"
+      "Étire l'image pour remplir toute la boîte sans garder le ratio",
+      "Remplit la boîte en gardant le ratio, quitte à rogner l'excédent",
+      "Masque l'image et affiche à la place son texte alternatif",
+      "Réduit l'image entière pour qu'elle tienne sans aucun rognage"
     ],
     "answer": [
       1
@@ -309,13 +309,13 @@
     "difficulty": "hard",
     "question": "Quelle est la différence entre `:is()` et `:where()` ?",
     "options": [
-      "Aucune",
-      "`:where()` a une spécificité de 0 ; `:is()` prend celle de son argument le plus spécifique",
-      "`:is()` est déprécié",
-      "`:where()` ne supporte pas les listes"
+      ":where() a une spécificité nulle ; :is() celle de son argument le plus fort",
+      ":is() est déprécié au profit de :where() dans la spécification CSS",
+      ":is() a une spécificité nulle ; :where() celle de son argument le plus fort",
+      "Les deux ont toujours la spécificité d'une classe unique, sans exception"
     ],
     "answer": [
-      1
+      0
     ],
     "explanation": "`:where()` est idéal pour des styles de base faciles à surcharger."
   },
