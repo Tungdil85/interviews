@@ -21,7 +21,7 @@ describe('RunnerAngularService', () => {
     }`;
 
   it('compile un pipe TypeScript décoré et le rend dans un template', async () => {
-    const results = await runner.run(pipeCode, [
+    const { results } = await runner.run(pipeCode, [
       { name: 'rendu', code: `const v = render('{{ t | shout }}', { imports: [ShoutPipe], props: { t: 'salut' } }); assert.equal(v.text(), 'SALUT!');` },
     ]);
     expect(results).toEqual([{ name: 'rendu', passed: true }]);
@@ -35,7 +35,7 @@ describe('RunnerAngularService', () => {
         template: '<button id="inc" (click)="count.set(count() + 1)">+</button><p>{{ count() }}</p>',
       })
       export class Counter { count = signal(0); }`;
-    const results = await runner.run(code, [
+    const { results } = await runner.run(code, [
       { name: 'incrémente', code: `const v = render(Counter); v.click('#inc'); v.click('#inc'); assert.equal(v.text('p'), '2');` },
       { name: 'échec attendu', code: `const v = render(Counter); assert.equal(v.text('p'), '1');` },
     ]);
@@ -53,7 +53,7 @@ describe('RunnerAngularService', () => {
         private el = inject(ElementRef);
         @HostListener('mouseenter') on() { this.el.nativeElement.style.backgroundColor = this.appHl; }
       }`;
-    const results = await runner.run(code, [
+    const { results } = await runner.run(code, [
       { name: 'survol', code: `const v = render('<p appHl="red">x</p>', { imports: [Hl] }); v.trigger('p', 'mouseenter'); assert.equal(v.query('p').style.backgroundColor, 'red');` },
     ]);
     expect(results).toEqual([{ name: 'survol', passed: true }]);
@@ -61,13 +61,26 @@ describe('RunnerAngularService', () => {
 
   it('signale les erreurs de syntaxe et les modules inconnus', async () => {
     const syntax = await runner.run('class {', [{ name: 'x', code: '' }]);
-    expect(syntax[0].message).toContain('syntaxe');
+    expect(syntax.results).toEqual([]);
+    expect(syntax.compileErrors[0].message).toBeTruthy();
     const unknown = await runner.run(`import { x } from 'lodash'; x();`, [{ name: 'x', code: '' }]);
-    expect(unknown[0].message).toContain('Module non disponible');
+    expect(unknown.compileErrors[0].message).toContain('Module non disponible');
+  });
+
+  it('localise une erreur de syntaxe (ligne et colonne)', async () => {
+    const { compileErrors } = await runner.run('const a = 1;\nconst b = ;\n', [{ name: 'x', code: '' }]);
+    expect(compileErrors[0].line).toBe(2);
+    expect(compileErrors[0].column).toBeGreaterThan(0);
+  });
+
+  it('signale une erreur levée au chargement du module, sans exécuter les tests', async () => {
+    const report = await runner.run('throw new Error("boom au chargement");', [{ name: 'x', code: 'assert.ok(true)' }]);
+    expect(report.results).toEqual([]);
+    expect(report.compileErrors[0].message).toContain('boom au chargement');
   });
 
   it('remonte une erreur de template (propriété inconnue)', async () => {
-    const results = await runner.run(pipeCode, [
+    const { results } = await runner.run(pipeCode, [
       { name: 'pipe inconnu', code: `render('{{ t | nope }}', { imports: [ShoutPipe], props: { t: 'a' } });` },
     ]);
     expect(results[0].passed).toBe(false);

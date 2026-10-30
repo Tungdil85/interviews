@@ -25,4 +25,10 @@ describe('ExercisesMapper', () => {
     const e = new ExercisesMapper().toExercise({ ...dto, hints: undefined as unknown as string[] });
     expect(e.hints).toEqual([]);
   });
+
+  it('conserve le code d’aperçu, vide par défaut', () => {
+    const mapper = new ExercisesMapper();
+    expect(mapper.toExercise({ ...dto, preview: 'render(X)' }).preview).toBe('render(X)');
+    expect(mapper.toExercise(dto).preview).toBe('');
+  });
 });

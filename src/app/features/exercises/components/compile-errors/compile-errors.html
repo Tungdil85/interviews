@@ -1,0 +1,17 @@
+@if (errors().length > 0) {
+  <section aria-label="Erreurs de compilation" role="alert" class="border-2 border-brand-red bg-red-50">
+    <h2 class="bg-brand-red px-3 py-1 font-semibold text-white">
+      {{ errors().length === 1 ? '1 erreur de compilation' : errors().length + ' erreurs de compilation' }}
+    </h2>
+    <ul class="divide-y divide-red-200">
+      @for (error of errors(); track $index) {
+        <li class="p-3">
+          @if (error.line) {
+            <p class="text-sm font-semibold text-brand-red">Ligne {{ error.line }}, colonne {{ error.column }}</p>
+          }
+          <p class="whitespace-pre-wrap break-words font-mono text-sm">{{ error.message }}</p>
+        </li>
+      }
+    </ul>
+  </section>
+}

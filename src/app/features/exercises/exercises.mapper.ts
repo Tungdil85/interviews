@@ -16,6 +16,7 @@ export class ExercisesMapper {
       tests: dto.tests.map((t) => ({ name: t.name, code: t.code })),
       hints: dto.hints ?? [],
       solution: dto.solution,
+      preview: dto.preview ?? '',
     };
   }
 }

@@ -844,6 +844,43 @@ export class SearchComponent {
 }
 ''')
 
+
+# ───────────────────────── Aperçus interactifs ─────────────────────────
+# Code exécuté après les tests (même portée que le code de l'utilisateur) pour rendre un exemple
+# avec lequel on peut jouer ; `console.log` alimente la console de la page.
+PREVIEWS = {
+"pipe-truncate": r"""render('<p>{{ "Bonjour tout le monde" | truncate:7 }}</p><p>{{ "Court" | truncate }}</p>', { imports: [TruncatePipe] });""",
+"pipe-filesize": r"""render('<ul><li>{{ 512 | filesize }}</li><li>{{ 1536 | filesize }}</li><li>{{ 1048576 | filesize }}</li><li>{{ 5368709120 | filesize }}</li></ul>', { imports: [FileSizePipe] });""",
+"component-counter": r"""render(CounterComponent);""",
+"component-todo-list": r"""render(TodoListComponent, { inputs: { todos: [{ id: 1, title: "Lire la doc Angular", done: true }, { id: 2, title: "Écrire un pipe", done: false }, { id: 3, title: "Passer l'entretien", done: false }] } });""",
+"card-projection": r"""render('<app-card><h2 card-title>Ma carte</h2><p>Un contenu projeté.</p><button card-footer>Valider</button></app-card>', { imports: [CardComponent] });""",
+"component-rating": r"""render('<app-rating [value]="3" (rated)="log($event)" />', { imports: [RatingComponent], props: { log: (n) => console.log("Note choisie :", n) } });""",
+"component-product-filter": r"""render(ProductListComponent, { inputs: { products: [{ name: "Laptop", price: 900 }, { name: "Phone", price: 500 }, { name: "Phone case", price: 15 }, { name: "Écran", price: 250 }] } });""",
+"form-login": r"""render('<app-login (submitted)="log($event)" />', { imports: [LoginComponent], props: { log: (v) => console.log("Formulaire soumis :", v) } });""",
+"directive-highlight": r"""render('<p appHighlight="lightblue">Survole-moi (bleu)</p><p appHighlight>Survole-moi (jaune)</p>', { imports: [HighlightDirective] });""",
+"directive-click-outside": r"""render('<div appClickOutside (appClickOutside)="log()" style="padding:16px;border:2px dashed #ab79ff">Clique ici, puis en dehors de ce cadre</div>', { imports: [ClickOutsideDirective], props: { log: () => console.log("Clic à l'extérieur !") } });""",
+"directive-unless": r"""render('<button (click)="hidden = !hidden">Basculer hidden ({{ hidden }})</button><p *appUnless="hidden">Visible quand hidden vaut false</p>', { imports: [UnlessDirective], props: { hidden: false } });""",
+"service-cart": r"""class Demo { cart = __ng.inject(CartService); products = [{ id: 1, name: "Stylo", price: 2 }, { id: 2, name: "Cahier", price: 5 }]; }
+__ng.Component({ selector: "app-demo", template: `@for (p of products; track p.id) { <button (click)="cart.add(p)">Ajouter {{ p.name }}</button> } <button (click)="cart.clear()">Vider</button><p>{{ cart.count() }} article(s) — {{ cart.total() }} €</p>` })(Demo);
+render(Demo, { providers: [CartService] });""",
+"service-http-users": r"""const { provideHttpClient } = require("@angular/common/http");
+const { provideHttpClientTesting, HttpTestingController } = require("@angular/common/http/testing");
+const injector = createInjector([UserService, provideHttpClient(), provideHttpClientTesting()]);
+injector.get(UserService).getActiveUsers().subscribe((names) => console.log("Utilisateurs actifs :", names));
+injector.get(HttpTestingController).expectOne("/api/users?active=true").flush([{ id: 1, name: "Ada" }, { id: 2, name: "Linus" }]);""",
+"interceptor-auth": r"""const { HttpClient, provideHttpClient, withInterceptors } = require("@angular/common/http");
+const { provideHttpClientTesting, HttpTestingController } = require("@angular/common/http/testing");
+const injector = createInjector([TokenService, provideHttpClient(withInterceptors([authInterceptor])), provideHttpClientTesting()]);
+injector.get(TokenService).token.set("abc123");
+injector.get(HttpClient).get("/api/me").subscribe();
+const req = injector.get(HttpTestingController).expectOne("/api/me");
+console.log("Authorization :", req.request.headers.get("Authorization"));""",
+"rxjs-search": r"""const { of } = require("rxjs");
+render(SearchComponent, { providers: [{ provide: SearchService, useValue: { search: (q) => { console.log("Recherche :", q); return of([q + " – résultat 1", q + " – résultat 2"]); } } }] });""",
+}
+for item in X:
+    item["preview"] = PREVIEWS.get(item["id"], "")
+
 pathlib.Path(__file__).resolve().parent.parent.joinpath("public/data/exercises.json").write_text(
     json.dumps(X, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 print(len(X), "exercices")

@@ -8,4 +8,5 @@ export interface ExerciseDto {
   tests: { name: string; code: string }[];
   hints: string[];
   solution: string;
+  preview?: string;
 }

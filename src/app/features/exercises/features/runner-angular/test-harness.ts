@@ -50,11 +50,15 @@ export interface Harness {
   dispose(): void;
 }
 
-export function createHarness(parent: EnvironmentInjector, preview?: HTMLElement | null): Harness {
+export function createHarness(
+  parent: EnvironmentInjector,
+  preview?: HTMLElement | null,
+  onError?: (error: unknown) => void,
+): Harness {
   const appRef = parent.get(ApplicationRef);
   const refs: ComponentRef<unknown>[] = [];
   const errors: unknown[] = [];
-  const errorProvider: Provider = { provide: ErrorHandler, useValue: { handleError: (e: unknown) => errors.push(e) } };
+  const errorProvider: Provider = { provide: ErrorHandler, useValue: { handleError: (e: unknown) => (onError?.(e), errors.push(e)) } };
 
   const createInjector = (providers: Provider[] = []) =>
     createEnvironmentInjector([errorProvider, ...providers], parent);

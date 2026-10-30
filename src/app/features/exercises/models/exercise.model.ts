@@ -16,4 +16,6 @@ export interface Exercise {
   tests: ExerciseTest[];
   hints: string[];
   solution: string;
+  /** Code exécuté après les tests pour afficher un exemple interactif dans l'aperçu. */
+  preview: string;
 }

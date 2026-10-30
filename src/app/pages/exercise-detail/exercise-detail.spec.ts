@@ -68,4 +68,23 @@ describe('ExerciseDetail', () => {
     fixture.destroy();
     expect(clear).toHaveBeenCalled();
   });
+
+  it('affiche les erreurs de compilation avec leur position, sans résultats de tests', async () => {
+    const fixture = setup();
+    const el = fixture.nativeElement as HTMLElement;
+    (fixture.componentInstance as unknown as { code: { set(v: string): void } }).code.set('const a = ;');
+    button(el, 'Lancer').click();
+    await vi.waitFor(() => expect(el.textContent).toContain('1 erreur de compilation'));
+    expect(el.textContent).toContain('Ligne 1');
+    expect(el.textContent).toContain('Corrige les erreurs de compilation');
+    expect(el.textContent).not.toContain('tests réussis');
+  });
+
+  it('affiche la console avec les logs du code exécuté', async () => {
+    const fixture = setup();
+    const el = fixture.nativeElement as HTMLElement;
+    (fixture.componentInstance as unknown as { code: { set(v: string): void } }).code.set(`console.log('trace utilisateur');`);
+    button(el, 'Lancer').click();
+    await vi.waitFor(() => expect(el.querySelector('app-console-panel')?.textContent).toContain('trace utilisateur'));
+  });
 });
