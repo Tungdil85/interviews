@@ -1,0 +1,38 @@
+<section class="space-y-8">
+  <div class="space-y-3">
+    <h1 class="text-3xl font-bold text-primary-dark">Prépare ton entretien Angular</h1>
+    <p class="max-w-2xl text-lg">
+      QCM Angular, TypeScript, RxJS et CSS, plus des exercices de code corrigés automatiquement dans ton navigateur.
+    </p>
+  </div>
+
+  <div class="grid gap-4 sm:grid-cols-3">
+    <a routerLink="/quiz" class="block border-2 border-primary bg-white p-5 hover:bg-purple-50">
+      <h2 class="text-xl font-semibold">📝 QCM</h2>
+      <p class="mt-1">Mode entraînement avec correction ou mode examen chronométré.</p>
+    </a>
+    <a routerLink="/exercises" class="block border-2 border-primary bg-white p-5 hover:bg-purple-50">
+      <h2 class="text-xl font-semibold">💻 Exercices</h2>
+      <p class="mt-1">Écris du code, lance les tests, comme sur CodinGame.</p>
+    </a>
+    <a routerLink="/progress" class="block border-2 border-primary bg-white p-5 hover:bg-purple-50">
+      <h2 class="text-xl font-semibold">📈 Progression</h2>
+      <p class="mt-1">Scores par catégorie et questions à retravailler.</p>
+    </a>
+  </div>
+
+  <dl class="grid grid-cols-3 gap-4 text-center">
+    <div class="bg-white p-4">
+      <dt class="text-sm text-gray-600">Sessions</dt>
+      <dd class="text-2xl font-bold">{{ progress.totals().sessions }}</dd>
+    </div>
+    <div class="bg-white p-4">
+      <dt class="text-sm text-gray-600">Réussite</dt>
+      <dd class="text-2xl font-bold">{{ progress.totals().rate }}%</dd>
+    </div>
+    <div class="bg-white p-4">
+      <dt class="text-sm text-gray-600">Exercices résolus</dt>
+      <dd class="text-2xl font-bold">{{ progress.solvedExercises().length }}</dd>
+    </div>
+  </dl>
+</section>

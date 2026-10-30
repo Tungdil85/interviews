@@ -1,0 +1,481 @@
+[
+  {
+    "id": "to-selector",
+    "title": "Nom de classe → sélecteur",
+    "difficulty": "easy",
+    "topic": "Angular / chaînes",
+    "description": "Angular génère des sélecteurs en kebab-case. Écris `toSelector(className)` qui transforme 'MyAwesomeCmp' en 'my-awesome-cmp'.",
+    "starterCode": "function toSelector(className) {\n  // TODO\n}\n",
+    "tests": [
+      {
+        "name": "Cas simple",
+        "code": "assert.equal(toSelector('MyAwesomeCmp'), 'my-awesome-cmp')"
+      },
+      {
+        "name": "Un seul mot",
+        "code": "assert.equal(toSelector('Header'), 'header')"
+      },
+      {
+        "name": "Déjà en minuscules",
+        "code": "assert.equal(toSelector('app'), 'app')"
+      }
+    ],
+    "hints": [
+      "Insère un tiret avant chaque majuscule qui n'est pas en première position.",
+      "Une regex avec replace(/([a-z])([A-Z])/g, ...) fait l'essentiel."
+    ],
+    "solution": "function toSelector(className) {\n  return className.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();\n}\n"
+  },
+  {
+    "id": "parse-query",
+    "title": "Parser des query params",
+    "difficulty": "easy",
+    "topic": "Routing",
+    "description": "Écris `parseQuery(qs)` qui transforme 'a=1&b=hello&c=' (avec ou sans '?' initial) en objet { a: '1', b: 'hello', c: '' }. Les valeurs sont décodées avec decodeURIComponent.",
+    "starterCode": "function parseQuery(qs) {\n  // TODO\n}\n",
+    "tests": [
+      {
+        "name": "Cas simple",
+        "code": "assert.deepEqual(parseQuery('a=1&b=hello'), { a: '1', b: 'hello' })"
+      },
+      {
+        "name": "Ignore le ? initial",
+        "code": "assert.deepEqual(parseQuery('?x=2'), { x: '2' })"
+      },
+      {
+        "name": "Valeur vide",
+        "code": "assert.deepEqual(parseQuery('c='), { c: '' })"
+      },
+      {
+        "name": "Décodage",
+        "code": "assert.deepEqual(parseQuery('q=a%20b'), { q: 'a b' })"
+      },
+      {
+        "name": "Chaîne vide",
+        "code": "assert.deepEqual(parseQuery(''), {})"
+      }
+    ],
+    "hints": [
+      "Retire le '?' avec replace(/^\\?/, '').",
+      "split('&') puis split('=') sur chaque paire."
+    ],
+    "solution": "function parseQuery(qs) {\n  const result = {};\n  const clean = qs.replace(/^\\?/, '');\n  if (!clean) return result;\n  for (const pair of clean.split('&')) {\n    const [key, value = ''] = pair.split('=');\n    result[decodeURIComponent(key)] = decodeURIComponent(value);\n  }\n  return result;\n}\n"
+  },
+  {
+    "id": "flatten",
+    "title": "Aplatir un tableau",
+    "difficulty": "easy",
+    "topic": "JavaScript",
+    "description": "Écris `flatten(arr)` qui aplatit récursivement un tableau imbriqué, sans utiliser Array.prototype.flat. flatten([1,[2,[3,[4]]]]) → [1,2,3,4].",
+    "starterCode": "function flatten(arr) {\n  // TODO\n}\n",
+    "tests": [
+      {
+        "name": "Imbrication profonde",
+        "code": "assert.deepEqual(flatten([1,[2,[3,[4]]]]), [1,2,3,4])"
+      },
+      {
+        "name": "Déjà plat",
+        "code": "assert.deepEqual(flatten([1,2]), [1,2])"
+      },
+      {
+        "name": "Vide",
+        "code": "assert.deepEqual(flatten([]), [])"
+      },
+      {
+        "name": "Sans flat natif",
+        "code": "const orig = Array.prototype.flat; Array.prototype.flat = () => { throw new Error('flat interdit'); }; try { assert.deepEqual(flatten([1,[2]]), [1,2]); } finally { Array.prototype.flat = orig; }"
+      }
+    ],
+    "hints": [
+      "Parcours avec reduce et teste Array.isArray.",
+      "Appelle flatten récursivement sur les sous-tableaux."
+    ],
+    "solution": "function flatten(arr) {\n  return arr.reduce((acc, item) => acc.concat(Array.isArray(item) ? flatten(item) : item), []);\n}\n"
+  },
+  {
+    "id": "group-by",
+    "title": "groupBy",
+    "difficulty": "easy",
+    "topic": "JavaScript",
+    "description": "Écris `groupBy(items, keyFn)` qui retourne un objet regroupant les éléments selon la clé calculée. groupBy([1,2,3,4], n => n % 2 ? 'impair' : 'pair') → { impair: [1,3], pair: [2,4] }.",
+    "starterCode": "function groupBy(items, keyFn) {\n  // TODO\n}\n",
+    "tests": [
+      {
+        "name": "Pair / impair",
+        "code": "assert.deepEqual(groupBy([1,2,3,4], n => n % 2 ? 'impair' : 'pair'), { impair: [1,3], pair: [2,4] })"
+      },
+      {
+        "name": "Par propriété",
+        "code": "assert.deepEqual(groupBy([{t:'a'},{t:'b'},{t:'a'}], o => o.t), { a: [{t:'a'},{t:'a'}], b: [{t:'b'}] })"
+      },
+      {
+        "name": "Liste vide",
+        "code": "assert.deepEqual(groupBy([], x => x), {})"
+      }
+    ],
+    "hints": [
+      "reduce avec un objet accumulateur.",
+      "Initialise acc[key] à [] si elle n'existe pas."
+    ],
+    "solution": "function groupBy(items, keyFn) {\n  return items.reduce((acc, item) => {\n    const key = keyFn(item);\n    (acc[key] ??= []).push(item);\n    return acc;\n  }, {});\n}\n"
+  },
+  {
+    "id": "pipe",
+    "title": "Composer des fonctions (pipe)",
+    "difficulty": "easy",
+    "topic": "Programmation fonctionnelle",
+    "description": "Écris `pipe(...fns)` qui retourne une fonction appliquant les fonctions de gauche à droite : pipe(f, g)(x) = g(f(x)). Comme l'opérateur pipe de RxJS, version synchrone.",
+    "starterCode": "function pipe(...fns) {\n  // TODO\n}\n",
+    "tests": [
+      {
+        "name": "Deux fonctions",
+        "code": "assert.equal(pipe(x => x + 1, x => x * 2)(3), 8)"
+      },
+      {
+        "name": "Aucune fonction : identité",
+        "code": "assert.equal(pipe()(5), 5)"
+      },
+      {
+        "name": "Ordre gauche → droite",
+        "code": "assert.equal(pipe(s => s + 'a', s => s + 'b')(''), 'ab')"
+      }
+    ],
+    "hints": [
+      "reduce sur la liste des fonctions avec la valeur initiale en accumulateur."
+    ],
+    "solution": "function pipe(...fns) {\n  return (input) => fns.reduce((acc, fn) => fn(acc), input);\n}\n"
+  },
+  {
+    "id": "memoize",
+    "title": "memoize",
+    "difficulty": "medium",
+    "topic": "Performance",
+    "description": "Écris `memoize(fn)` qui met en cache le résultat de fn selon ses arguments (ils sont tous sérialisables en JSON). fn ne doit être appelée qu'une fois par jeu d'arguments.",
+    "starterCode": "function memoize(fn) {\n  // TODO\n}\n",
+    "tests": [
+      {
+        "name": "Résultat correct",
+        "code": "const f = memoize((a,b) => a + b); assert.equal(f(1,2), 3)"
+      },
+      {
+        "name": "Mise en cache",
+        "code": "let calls = 0; const f = memoize(x => { calls++; return x * 2; }); f(2); f(2); f(3); assert.equal(calls, 2)"
+      },
+      {
+        "name": "Arguments multiples distincts",
+        "code": "let calls = 0; const f = memoize((a,b) => { calls++; return a + b; }); f(1,2); f(2,1); assert.equal(calls, 2)"
+      },
+      {
+        "name": "Cache aussi les valeurs falsy",
+        "code": "let calls = 0; const f = memoize(() => { calls++; return 0; }); f(); f(); assert.equal(calls, 1)"
+      }
+    ],
+    "hints": [
+      "Utilise une Map dont la clé est JSON.stringify(args).",
+      "Teste cache.has(key) plutôt que la valeur (0 est falsy)."
+    ],
+    "solution": "function memoize(fn) {\n  const cache = new Map();\n  return (...args) => {\n    const key = JSON.stringify(args);\n    if (!cache.has(key)) cache.set(key, fn(...args));\n    return cache.get(key);\n  };\n}\n"
+  },
+  {
+    "id": "debounce",
+    "title": "debounce",
+    "difficulty": "medium",
+    "topic": "RxJS / Performance",
+    "description": "Écris `debounce(fn, ms)` : la fonction retournée n'appelle fn qu'après ms millisecondes sans nouvel appel, avec les derniers arguments (comme debounceTime sur une saisie).",
+    "starterCode": "function debounce(fn, ms) {\n  // TODO\n}\n",
+    "tests": [
+      {
+        "name": "Un seul appel après rafale",
+        "code": "let calls = []; const d = debounce(v => calls.push(v), 30); d(1); d(2); d(3); await new Promise(r => setTimeout(r, 80)); assert.deepEqual(calls, [3])"
+      },
+      {
+        "name": "Pas d'appel immédiat",
+        "code": "let called = false; const d = debounce(() => { called = true; }, 30); d(); assert.equal(called, false); await new Promise(r => setTimeout(r, 80)); assert.equal(called, true)"
+      },
+      {
+        "name": "Appels espacés = plusieurs exécutions",
+        "code": "let n = 0; const d = debounce(() => n++, 20); d(); await new Promise(r => setTimeout(r, 60)); d(); await new Promise(r => setTimeout(r, 60)); assert.equal(n, 2)"
+      }
+    ],
+    "hints": [
+      "Garde l'identifiant du timer dans une variable de closure.",
+      "clearTimeout avant chaque nouveau setTimeout."
+    ],
+    "solution": "function debounce(fn, ms) {\n  let timer;\n  return (...args) => {\n    clearTimeout(timer);\n    timer = setTimeout(() => fn(...args), ms);\n  };\n}\n"
+  },
+  {
+    "id": "event-emitter",
+    "title": "EventEmitter (comme @Output)",
+    "difficulty": "medium",
+    "topic": "Angular / Patterns",
+    "description": "Implémente la classe `EventEmitter` avec `on(event, handler)`, `off(event, handler)` et `emit(event, ...args)`. `on` retourne une fonction de désabonnement. Un événement sans écouteur ne doit pas lever d'erreur.",
+    "starterCode": "class EventEmitter {\n  // TODO\n}\n",
+    "tests": [
+      {
+        "name": "on + emit",
+        "code": "const e = new EventEmitter(); const got = []; e.on('x', v => got.push(v)); e.emit('x', 1); e.emit('x', 2); assert.deepEqual(got, [1,2])"
+      },
+      {
+        "name": "off",
+        "code": "const e = new EventEmitter(); let n = 0; const h = () => n++; e.on('x', h); e.off('x', h); e.emit('x'); assert.equal(n, 0)"
+      },
+      {
+        "name": "on retourne unsubscribe",
+        "code": "const e = new EventEmitter(); let n = 0; const un = e.on('x', () => n++); e.emit('x'); un(); e.emit('x'); assert.equal(n, 1)"
+      },
+      {
+        "name": "Plusieurs écouteurs",
+        "code": "const e = new EventEmitter(); let n = 0; e.on('x', () => n++); e.on('x', () => n++); e.emit('x'); assert.equal(n, 2)"
+      },
+      {
+        "name": "Événement inconnu",
+        "code": "const e = new EventEmitter(); e.emit('rien'); assert.ok(true)"
+      }
+    ],
+    "hints": [
+      "Stocke un Map<string, Set<Function>>.",
+      "emit : boucle sur le Set s'il existe."
+    ],
+    "solution": "class EventEmitter {\n  #handlers = new Map();\n  on(event, handler) {\n    if (!this.#handlers.has(event)) this.#handlers.set(event, new Set());\n    this.#handlers.get(event).add(handler);\n    return () => this.off(event, handler);\n  }\n  off(event, handler) {\n    this.#handlers.get(event)?.delete(handler);\n  }\n  emit(event, ...args) {\n    this.#handlers.get(event)?.forEach((h) => h(...args));\n  }\n}\n"
+  },
+  {
+    "id": "mini-signal",
+    "title": "Mini signal",
+    "difficulty": "medium",
+    "topic": "Angular / Signals",
+    "description": "Implémente `signal(initial)` qui retourne une fonction getter : s() lit la valeur, s.set(v) la remplace et s.update(fn) la calcule depuis l'ancienne. Implémente aussi `computed(fn)` retournant un getter qui recalcule fn() à chaque lecture (version simplifiée).",
+    "starterCode": "function signal(initial) {\n  // TODO\n}\n\nfunction computed(fn) {\n  // TODO\n}\n",
+    "tests": [
+      {
+        "name": "Lecture initiale",
+        "code": "assert.equal(signal(5)(), 5)"
+      },
+      {
+        "name": "set",
+        "code": "const s = signal(1); s.set(2); assert.equal(s(), 2)"
+      },
+      {
+        "name": "update",
+        "code": "const s = signal(1); s.update(v => v + 10); assert.equal(s(), 11)"
+      },
+      {
+        "name": "computed suit le signal",
+        "code": "const a = signal(2); const double = computed(() => a() * 2); assert.equal(double(), 4); a.set(5); assert.equal(double(), 10)"
+      }
+    ],
+    "hints": [
+      "Garde la valeur dans une variable de closure et attache set/update à la fonction getter (Object.assign).",
+      "computed(fn) peut simplement retourner fn."
+    ],
+    "solution": "function signal(initial) {\n  let value = initial;\n  const getter = () => value;\n  getter.set = (v) => { value = v; };\n  getter.update = (fn) => { value = fn(value); };\n  return getter;\n}\n\nfunction computed(fn) {\n  return () => fn();\n}\n"
+  },
+  {
+    "id": "behavior-subject",
+    "title": "BehaviorSubject",
+    "difficulty": "medium",
+    "topic": "RxJS",
+    "description": "Implémente `BehaviorSubject` : constructeur(initial), propriété/getter `value`, `next(v)`, et `subscribe(observer)` qui appelle immédiatement observer avec la valeur courante, puis à chaque next. subscribe retourne une fonction de désabonnement.",
+    "starterCode": "class BehaviorSubject {\n  // TODO\n}\n",
+    "tests": [
+      {
+        "name": "Émet la valeur initiale à l'abonnement",
+        "code": "const s = new BehaviorSubject(1); const got = []; s.subscribe(v => got.push(v)); assert.deepEqual(got, [1])"
+      },
+      {
+        "name": "Émet les next suivants",
+        "code": "const s = new BehaviorSubject(0); const got = []; s.subscribe(v => got.push(v)); s.next(1); s.next(2); assert.deepEqual(got, [0,1,2])"
+      },
+      {
+        "name": "value reflète la dernière valeur",
+        "code": "const s = new BehaviorSubject('a'); s.next('b'); assert.equal(s.value, 'b')"
+      },
+      {
+        "name": "Nouvel abonné reçoit la dernière valeur",
+        "code": "const s = new BehaviorSubject(0); s.next(9); const got = []; s.subscribe(v => got.push(v)); assert.deepEqual(got, [9])"
+      },
+      {
+        "name": "Désabonnement",
+        "code": "const s = new BehaviorSubject(0); const got = []; const un = s.subscribe(v => got.push(v)); un(); s.next(1); assert.deepEqual(got, [0])"
+      }
+    ],
+    "hints": [
+      "Garde un Set d'observers.",
+      "Dans subscribe : appelle observer(this.value) avant de retourner la fonction de désabonnement."
+    ],
+    "solution": "class BehaviorSubject {\n  #value;\n  #observers = new Set();\n  constructor(initial) { this.#value = initial; }\n  get value() { return this.#value; }\n  next(v) {\n    this.#value = v;\n    this.#observers.forEach((o) => o(v));\n  }\n  subscribe(observer) {\n    this.#observers.add(observer);\n    observer(this.#value);\n    return () => this.#observers.delete(observer);\n  }\n}\n"
+  },
+  {
+    "id": "di-container",
+    "title": "Conteneur d'injection",
+    "difficulty": "hard",
+    "topic": "Angular / DI",
+    "description": "Implémente `Container` avec `register(token, factory)` et `resolve(token)`. Chaque service est un singleton (la factory n'est appelée qu'une fois). La factory reçoit le container pour résoudre ses dépendances. Résoudre un token inconnu lève une erreur, et une dépendance circulaire aussi.",
+    "starterCode": "class Container {\n  // TODO\n}\n",
+    "tests": [
+      {
+        "name": "Résolution simple",
+        "code": "const c = new Container(); c.register('a', () => 1); assert.equal(c.resolve('a'), 1)"
+      },
+      {
+        "name": "Singleton",
+        "code": "const c = new Container(); let n = 0; c.register('a', () => ({ id: ++n })); assert.equal(c.resolve('a'), c.resolve('a')); assert.equal(n, 1)"
+      },
+      {
+        "name": "Dépendances",
+        "code": "const c = new Container(); c.register('cfg', () => ({ url: 'x' })); c.register('http', (ct) => ({ base: ct.resolve('cfg').url })); assert.equal(c.resolve('http').base, 'x')"
+      },
+      {
+        "name": "Token inconnu",
+        "code": "const c = new Container(); assert.throws(() => c.resolve('nope'))"
+      },
+      {
+        "name": "Dépendance circulaire",
+        "code": "const c = new Container(); c.register('a', (ct) => ct.resolve('b')); c.register('b', (ct) => ct.resolve('a')); assert.throws(() => c.resolve('a'))"
+      }
+    ],
+    "hints": [
+      "Deux Map : factories et instances.",
+      "Pour détecter la circularité, garde un Set des tokens en cours de résolution."
+    ],
+    "solution": "class Container {\n  #factories = new Map();\n  #instances = new Map();\n  #resolving = new Set();\n  register(token, factory) {\n    this.#factories.set(token, factory);\n  }\n  resolve(token) {\n    if (this.#instances.has(token)) return this.#instances.get(token);\n    const factory = this.#factories.get(token);\n    if (!factory) throw new Error('Token inconnu : ' + String(token));\n    if (this.#resolving.has(token)) throw new Error('Dépendance circulaire : ' + String(token));\n    this.#resolving.add(token);\n    try {\n      const instance = factory(this);\n      this.#instances.set(token, instance);\n      return instance;\n    } finally {\n      this.#resolving.delete(token);\n    }\n  }\n}\n"
+  },
+  {
+    "id": "mini-observable",
+    "title": "Mini Observable + map",
+    "difficulty": "hard",
+    "topic": "RxJS",
+    "description": "Implémente la classe `Observable` : constructeur(subscribeFn) où subscribeFn(observer) peut retourner une fonction de nettoyage ; `subscribe(next)` retourne une fonction de désabonnement qui appelle ce nettoyage ; `pipe(...operators)` applique des opérateurs (fonctions Observable → Observable). Écris aussi l'opérateur `map(fn)`.",
+    "starterCode": "class Observable {\n  // TODO\n}\n\nfunction map(fn) {\n  // TODO\n}\n",
+    "tests": [
+      {
+        "name": "subscribe reçoit les valeurs",
+        "code": "const got = []; new Observable(o => { o.next(1); o.next(2); }).subscribe(v => got.push(v)); assert.deepEqual(got, [1,2])"
+      },
+      {
+        "name": "map",
+        "code": "const got = []; new Observable(o => { o.next(1); o.next(2); }).pipe(map(x => x * 10)).subscribe(v => got.push(v)); assert.deepEqual(got, [10,20])"
+      },
+      {
+        "name": "pipe enchaîne les opérateurs",
+        "code": "const got = []; new Observable(o => o.next(2)).pipe(map(x => x + 1), map(x => x * 2)).subscribe(v => got.push(v)); assert.deepEqual(got, [6])"
+      },
+      {
+        "name": "Désabonnement appelle le nettoyage",
+        "code": "let cleaned = false; const un = new Observable(() => () => { cleaned = true; }).subscribe(() => {}); assert.equal(cleaned, false); un(); assert.equal(cleaned, true)"
+      },
+      {
+        "name": "Cold : chaque abonnement relance la source",
+        "code": "let runs = 0; const o = new Observable(ob => { runs++; ob.next(1); }); o.subscribe(() => {}); o.subscribe(() => {}); assert.equal(runs, 2)"
+      }
+    ],
+    "hints": [
+      "L'observer passé à subscribeFn est { next }.",
+      "pipe : operators.reduce((source, op) => op(source), this).",
+      "map(fn) retourne source => new Observable(o => source.subscribe(v => o.next(fn(v))))."
+    ],
+    "solution": "class Observable {\n  constructor(subscribeFn) { this._subscribe = subscribeFn; }\n  subscribe(next) {\n    const cleanup = this._subscribe({ next });\n    return () => { if (typeof cleanup === 'function') cleanup(); };\n  }\n  pipe(...operators) {\n    return operators.reduce((source, op) => op(source), this);\n  }\n}\n\nfunction map(fn) {\n  return (source) => new Observable((observer) => {\n    const unsubscribe = source.subscribe((v) => observer.next(fn(v)));\n    return unsubscribe;\n  });\n}\n"
+  },
+  {
+    "id": "brackets",
+    "title": "Parenthèses équilibrées",
+    "difficulty": "medium",
+    "topic": "Algorithmique",
+    "description": "Écris `isBalanced(str)` qui retourne true si les (), [] et {} sont correctement fermés et imbriqués (les autres caractères sont ignorés). Utile pour valider un template !",
+    "starterCode": "function isBalanced(str) {\n  // TODO\n}\n",
+    "tests": [
+      {
+        "name": "Équilibré",
+        "code": "assert.equal(isBalanced('{[()]}'), true)"
+      },
+      {
+        "name": "Mauvais ordre",
+        "code": "assert.equal(isBalanced('([)]'), false)"
+      },
+      {
+        "name": "Fermeture manquante",
+        "code": "assert.equal(isBalanced('(('), false)"
+      },
+      {
+        "name": "Fermeture en trop",
+        "code": "assert.equal(isBalanced('())'), false)"
+      },
+      {
+        "name": "Texte ignoré",
+        "code": "assert.equal(isBalanced('a(b[c]{d})e'), true)"
+      },
+      {
+        "name": "Chaîne vide",
+        "code": "assert.equal(isBalanced(''), true)"
+      }
+    ],
+    "hints": [
+      "Utilise une pile (tableau).",
+      "À chaque fermant, le dernier ouvrant empilé doit correspondre."
+    ],
+    "solution": "function isBalanced(str) {\n  const pairs = { ')': '(', ']': '[', '}': '{' };\n  const stack = [];\n  for (const ch of str) {\n    if ('([{'.includes(ch)) stack.push(ch);\n    else if (ch in pairs && stack.pop() !== pairs[ch]) return false;\n  }\n  return stack.length === 0;\n}\n"
+  },
+  {
+    "id": "chunk",
+    "title": "Découper en lots",
+    "difficulty": "easy",
+    "topic": "JavaScript",
+    "description": "Écris `chunk(arr, size)` qui découpe un tableau en sous-tableaux de taille size (le dernier peut être plus court). chunk([1,2,3,4,5], 2) → [[1,2],[3,4],[5]]. Utile pour la pagination.",
+    "starterCode": "function chunk(arr, size) {\n  // TODO\n}\n",
+    "tests": [
+      {
+        "name": "Reste",
+        "code": "assert.deepEqual(chunk([1,2,3,4,5], 2), [[1,2],[3,4],[5]])"
+      },
+      {
+        "name": "Taille multiple",
+        "code": "assert.deepEqual(chunk([1,2,3,4], 2), [[1,2],[3,4]])"
+      },
+      {
+        "name": "Taille supérieure",
+        "code": "assert.deepEqual(chunk([1,2], 5), [[1,2]])"
+      },
+      {
+        "name": "Vide",
+        "code": "assert.deepEqual(chunk([], 3), [])"
+      },
+      {
+        "name": "Ne modifie pas l'entrée",
+        "code": "const a = [1,2,3]; chunk(a, 2); assert.deepEqual(a, [1,2,3])"
+      }
+    ],
+    "hints": [
+      "Boucle avec un pas de size et slice(i, i + size)."
+    ],
+    "solution": "function chunk(arr, size) {\n  const result = [];\n  for (let i = 0; i < arr.length; i += size) result.push(arr.slice(i, i + size));\n  return result;\n}\n"
+  },
+  {
+    "id": "deep-equal-immutable",
+    "title": "Mise à jour immuable",
+    "difficulty": "medium",
+    "topic": "Angular / Signals & NgRx",
+    "description": "Avec OnPush et les signaux, on met l'état à jour de façon immuable. Écris `updateTodo(state, id, patch)` qui retourne un NOUVEL état { todos: [...] } où le todo d'identifiant id est fusionné avec patch, sans muter l'état d'origine ni les todos non concernés (ils gardent la même référence).",
+    "starterCode": "function updateTodo(state, id, patch) {\n  // TODO\n}\n",
+    "tests": [
+      {
+        "name": "Fusionne le patch",
+        "code": "const s = { todos: [{id:1,done:false},{id:2,done:false}] }; const n = updateTodo(s, 2, { done: true }); assert.deepEqual(n.todos[1], { id: 2, done: true })"
+      },
+      {
+        "name": "Ne mute pas l'original",
+        "code": "const s = { todos: [{id:1,done:false}] }; updateTodo(s, 1, { done: true }); assert.equal(s.todos[0].done, false)"
+      },
+      {
+        "name": "Nouvelle référence d'état",
+        "code": "const s = { todos: [{id:1}] }; assert.ok(updateTodo(s, 1, {}) !== s)"
+      },
+      {
+        "name": "Todos inchangés conservent leur référence",
+        "code": "const s = { todos: [{id:1},{id:2}] }; const n = updateTodo(s, 2, { x: 1 }); assert.ok(n.todos[0] === s.todos[0])"
+      }
+    ],
+    "hints": [
+      "map sur state.todos : retourne {...todo, ...patch} seulement si todo.id === id."
+    ],
+    "solution": "function updateTodo(state, id, patch) {\n  return { ...state, todos: state.todos.map((t) => (t.id === id ? { ...t, ...patch } : t)) };\n}\n"
+  }
+]

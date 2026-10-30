@@ -1,0 +1,40 @@
+<article class="space-y-4">
+  <header class="flex flex-wrap items-center gap-2 text-sm">
+    <span class="bg-primary-dark px-2 py-1 font-semibold text-white">{{ category() }}</span>
+    <span class="bg-gray-200 px-2 py-1">{{ difficulty() }}</span>
+    @if (question().multiple) {
+      <span class="bg-primary px-2 py-1 text-white">Plusieurs réponses possibles</span>
+    }
+  </header>
+
+  <fieldset class="space-y-3">
+    <legend class="mb-3 text-lg font-semibold">{{ question().text }}</legend>
+
+    @if (question().code) {
+      <pre class="overflow-x-auto bg-gray-900 p-4 text-sm text-gray-100"><code>{{ question().code }}</code></pre>
+    }
+
+    @for (option of question().options; track $index) {
+      <button
+        type="button"
+        [class]="optionClasses($index)"
+        [attr.aria-pressed]="selected().includes($index)"
+        [disabled]="revealed()"
+        (click)="optionToggled.emit($index)"
+      >
+        <span class="font-mono font-bold" aria-hidden="true">{{ letters[$index] }}</span>
+        <span class="whitespace-pre-wrap">{{ option }}</span>
+        @if (feedback($index); as text) {
+          <span class="sr-only">{{ text }}</span>
+        }
+      </button>
+    }
+  </fieldset>
+
+  @if (revealed()) {
+    <section class="border-l-4 border-primary bg-white p-4" aria-live="polite">
+      <h3 class="font-semibold">Explication</h3>
+      <p class="mt-1 whitespace-pre-wrap">{{ question().explanation }}</p>
+    </section>
+  }
+</article>

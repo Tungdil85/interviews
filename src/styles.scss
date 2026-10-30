@@ -1,0 +1,20 @@
+:root {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: #f7f4fb;
+  color: #1f1530;
+}
+
+button,
+a {
+  min-height: 44px;
+}
+
+:focus-visible {
+  outline: 3px solid #ab79ff;
+  outline-offset: 2px;
+}

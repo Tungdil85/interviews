@@ -1,0 +1,2518 @@
+[
+  {
+    "id": "css-001",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "Quel effet a `box-sizing: border-box` ?",
+    "options": [
+      "Le padding et la bordure sont inclus dans la largeur/hauteur déclarée",
+      "Le padding s'ajoute à la largeur",
+      "Supprime les marges",
+      "Ajoute une bordure"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Avec `border-box`, `width: 200px` inclut padding et border : le dimensionnement est plus prévisible."
+  },
+  {
+    "id": "css-002",
+    "category": "css",
+    "difficulty": "medium",
+    "question": "Quel sélecteur a la plus forte spécificité ?",
+    "options": [
+      "`.card .title`",
+      "`#title`",
+      "`div p`",
+      "`p.title`"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Spécificité (id, classe/attribut/pseudo-classe, élément) : `#title` = (1,0,0) l'emporte sur `.card .title` (0,2,0)."
+  },
+  {
+    "id": "css-003",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "Comment centrer un élément enfant horizontalement ET verticalement avec flexbox ?",
+    "options": [
+      "justify-content: center; align-items: center;",
+      "text-align: center;",
+      "margin: 0 auto;",
+      "float: center;"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Sur le conteneur : `display:flex; justify-content:center; align-items:center;`. Avec Grid : `place-items:center`."
+  },
+  {
+    "id": "css-004",
+    "category": "css",
+    "difficulty": "medium",
+    "question": "Que fait `flex: 1` sur un élément flex ?",
+    "options": [
+      "Fixe la largeur à 1px",
+      "Équivaut à flex-grow:1 ; flex-shrink:1 ; flex-basis:0%, l'élément occupe l'espace disponible",
+      "Désactive flex",
+      "Fait passer à la ligne"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "`flex: 1` répartit l'espace restant de manière égale entre éléments partageant cette valeur."
+  },
+  {
+    "id": "css-005",
+    "category": "css",
+    "difficulty": "medium",
+    "question": "Quelle propriété crée des colonnes de tailles proportionnelles avec Grid ?",
+    "options": [
+      "grid-template-columns: 1fr 2fr",
+      "columns: 1fr 2fr",
+      "flex-columns",
+      "grid-gap"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "L'unité `fr` répartit l'espace libre : ici 1/3 et 2/3."
+  },
+  {
+    "id": "css-006",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "Quelle position retire l'élément du flux et le place par rapport à son ancêtre positionné le plus proche ?",
+    "options": [
+      "static",
+      "relative",
+      "absolute",
+      "sticky"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "`absolute` se positionne par rapport au plus proche ancêtre non `static` (souvent `position: relative`)."
+  },
+  {
+    "id": "css-007",
+    "category": "css",
+    "difficulty": "medium",
+    "question": "`position: sticky` …",
+    "options": [
+      "Fixe l'élément définitivement à l'écran",
+      "Se comporte comme relative puis « colle » au seuil défini (top…) pendant le défilement de son conteneur",
+      "Supprime l'élément du flux",
+      "Équivaut à absolute"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Sticky = relative jusqu'à un seuil de scroll, puis fixed dans les limites de son parent."
+  },
+  {
+    "id": "css-008",
+    "category": "css",
+    "difficulty": "hard",
+    "question": "Pourquoi un `z-index` élevé peut-il ne pas passer au-dessus d'un autre élément ?",
+    "options": [
+      "Le z-index n'existe plus",
+      "Les contextes d'empilement (stacking contexts) isolent les z-index de leurs descendants",
+      "Il faut utiliser !important",
+      "Il faut utiliser opacity:1"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Un parent avec `position + z-index`, `transform`, `opacity<1`, etc. crée un contexte : ses enfants ne peuvent pas sortir de ce niveau."
+  },
+  {
+    "id": "css-009",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "`em` et `rem` : quelle différence ?",
+    "options": [
+      "Aucune",
+      "`em` est relatif à la taille de police de l'élément (ou parent) ; `rem` à celle de la racine `<html>`",
+      "`rem` est relatif au parent",
+      "`em` vaut toujours 16px"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "`rem` évite l'effet de composition des `em` imbriqués et facilite l'accessibilité."
+  },
+  {
+    "id": "css-010",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "Comment cibler les écrans d'au moins 768px (mobile-first) ?",
+    "options": [
+      "@media (min-width: 768px)",
+      "@media (max-width: 768px)",
+      "@screen 768",
+      "@viewport 768"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Approche mobile-first : styles de base pour petit écran, puis `min-width` pour élargir."
+  },
+  {
+    "id": "css-011",
+    "category": "css",
+    "difficulty": "medium",
+    "question": "Différence entre `:hover` et `::before` ?",
+    "options": [
+      "Aucune",
+      "`:hover` est une pseudo-classe (état) ; `::before` est un pseudo-élément (contenu généré)",
+      "`::before` est un état",
+      "Les deux sont des pseudo-éléments"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Une pseudo-classe cible un état d'un élément existant (un seul `:`), un pseudo-élément une partie générée (`::`)."
+  },
+  {
+    "id": "css-012",
+    "category": "css",
+    "difficulty": "medium",
+    "question": "Que fait `display: none` par rapport à `visibility: hidden` ?",
+    "options": [
+      "Idem",
+      "`none` retire l'élément du flux (aucun espace), `hidden` le cache mais conserve son espace",
+      "`hidden` retire l'élément du DOM",
+      "`none` conserve l'espace"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "`opacity: 0` cache aussi mais l'élément reste interactif ; `display:none` est ignoré des lecteurs d'écran."
+  },
+  {
+    "id": "css-013",
+    "category": "css",
+    "difficulty": "medium",
+    "question": "Comment déclare-t-on et utilise-t-on une variable CSS ?",
+    "options": [
+      "--gap: 8px; puis var(--gap)",
+      "$gap: 8px; puis $gap",
+      "@gap: 8px;",
+      "let gap = 8px"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Les custom properties se déclarent avec `--nom` et s'héritent via la cascade ; `var(--nom, fallback)`."
+  },
+  {
+    "id": "css-014",
+    "category": "css",
+    "difficulty": "medium",
+    "question": "Que fait `clamp(1rem, 2.5vw, 2rem)` ?",
+    "options": [
+      "Découpe l'élément",
+      "Retourne une valeur fluide bornée entre un minimum (1rem) et un maximum (2rem)",
+      "Arrondit",
+      "Active une animation"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Pratique pour une typographie fluide sans media queries."
+  },
+  {
+    "id": "css-015",
+    "category": "css",
+    "difficulty": "hard",
+    "question": "Qu'est-ce que l'effondrement des marges (margin collapsing) ?",
+    "options": [
+      "Une marge supprimée par erreur",
+      "Les marges verticales adjacentes de blocs en flux normal fusionnent en prenant la plus grande",
+      "Un bug de Grid",
+      "Un reset CSS"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Ne s'applique pas aux éléments flex/grid ni aux blocs créant un nouveau contexte de formatage (BFC)."
+  },
+  {
+    "id": "css-016",
+    "category": "css",
+    "difficulty": "hard",
+    "question": "Quelles propriétés sont les plus performantes à animer ?",
+    "options": [
+      "width et height",
+      "transform et opacity",
+      "top et left",
+      "margin"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "`transform` et `opacity` peuvent être animées par le compositeur GPU sans relayout/repaint coûteux."
+  },
+  {
+    "id": "css-017",
+    "category": "css",
+    "difficulty": "medium",
+    "question": "Que fait `gap` en Flex ou Grid ?",
+    "options": [
+      "Ajoute des marges aux bords",
+      "Définit l'espacement entre les éléments enfants",
+      "Supprime les bordures",
+      "Aligne verticalement"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "`gap` n'ajoute pas d'espace avant le premier ni après le dernier élément, contrairement aux marges."
+  },
+  {
+    "id": "css-018",
+    "category": "css",
+    "difficulty": "hard",
+    "question": "À quoi servent les container queries (`@container`) ?",
+    "options": [
+      "À styler selon la taille du conteneur parent plutôt que celle du viewport",
+      "À conteneuriser Docker",
+      "À remplacer Grid",
+      "À imprimer"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Le composant s'adapte à l'espace dont il dispose (`container-type: inline-size`), indépendamment de la page."
+  },
+  {
+    "id": "css-019",
+    "category": "css",
+    "difficulty": "medium",
+    "question": "Que fait `object-fit: cover` sur une image ?",
+    "options": [
+      "Étire l'image",
+      "Remplit la boîte en conservant le ratio, en rognant l'excédent",
+      "Réduit sans rogner",
+      "Masque l'image"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "`contain` conserve l'image entière avec éventuelles bandes vides ; `cover` remplit en rognant."
+  },
+  {
+    "id": "css-020",
+    "category": "css",
+    "difficulty": "hard",
+    "question": "Quelle est la différence entre `:is()` et `:where()` ?",
+    "options": [
+      "Aucune",
+      "`:where()` a une spécificité de 0 ; `:is()` prend celle de son argument le plus spécifique",
+      "`:is()` est déprécié",
+      "`:where()` ne supporte pas les listes"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "`:where()` est idéal pour des styles de base faciles à surcharger."
+  },
+  {
+    "id": "css-fcc-001",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, Flex is a shorthand property for which of the following properties?",
+    "options": [
+      "flex-direction, flex-wrap, and flex-flow",
+      "justify-content, align-items, and align-content",
+      "flex-direction, order, and flex-flow",
+      "flex-grow, flex-shrink, and flex-basis"
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Flex is a shorthand property for all three of these properties: flex-grow, flex-shrink, and flex-basis.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-002",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "Which CSS property is used to represent the transparency of an element?",
+    "options": [
+      "Hover",
+      "Transparent",
+      "Opacity",
+      "Dark"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Opacity is used to represent the transparency of an element in CSS.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-003",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "Which of the following CSS properties represents the order of flex items in a container?",
+    "options": [
+      "float",
+      "int",
+      "overflow",
+      "order"
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "order is used to represent the order of flex items.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-004",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what selector is used to set the style of links for the moment they are clicked?",
+    "options": [
+      "a:hover",
+      "a:visited",
+      "a:active",
+      "a:link"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "With a:active you can set the style of links for the moment they are clicked.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-005",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, which one of these values represents 20% of the viewport height?",
+    "options": [
+      "200vh",
+      "2vh",
+      "2000vh",
+      "20vh"
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "20vh is equivalent to 20% of the viewport height.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-006",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, which one of these values represents 10% of the viewport width?",
+    "options": [
+      "10vh",
+      "1000vw",
+      "100vw",
+      "10vw"
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "10vw is equivalent to 10% of the viewport width.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-007",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what does the animation-fill-mode property do?",
+    "options": [
+      "It sets how many times an animation should run.",
+      "It sets a delay for the animation to start.",
+      "It is used to style the element after the animation ends.",
+      "It determines how long an animation should last in seconds."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "The animation-fill-mode property is used to style the element after the animation ends.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-008",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS Grid, what is the name of the grid property used to set the number and width of columns?",
+    "options": [
+      "grid-columns",
+      "template-columns-grid",
+      "grid-template-columns",
+      "flex-template-columns"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "The grid-template-columns property is used to set the number and width of the columns.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-009",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, this type of unit is defined by comparing to another length value.",
+    "options": [
+      "Relative",
+      "Fixed",
+      "Absolute",
+      "Dynamic"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "In CSS, relative units are relative to other length values. Several of the relative units depend on the viewport size.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-010",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what is the name of the CSS grid property used to position items inside grid containers along the main axis?",
+    "options": [
+      "justify-rows",
+      "justify-columns",
+      "justify-items",
+      "justify-content"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "The justify-items property is used to position items within a grid container along the x-axis (main axis).",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-011",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what is the all media type in a CSS media query?",
+    "options": [
+      "A category of media that only works for print media.",
+      "A category of media that only works for mobile devices.",
+      "A category of media that only works for tablets.",
+      "A category of media that works for all devices."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "The all media type is a category of media that will work for all media devices.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-012",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, how can you abbreviate the following Hex code? #FF0000",
+    "options": [
+      "#0FF0",
+      "#00F",
+      "#0F0",
+      "#F00"
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "To abbreviate a Hex code in CSS, include one digit of each pair of digits in the code.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-013",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what does the animation-direction property do?",
+    "options": [
+      "It pauses the animation if the animation is running.",
+      "It sets how many times an animation should run.",
+      "It sets the direction of the animation.",
+      "It is used to style the element after the animation ends."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "The animation-direction property sets the direction of the animation.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-014",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what is the name of the value that stretches the repeated images in the background-repeat property?",
+    "options": [
+      "around",
+      "rounding",
+      "space",
+      "round"
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "The round value is used to stretch the repeated images in the background-repeat property.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-015",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what is the speech media type in a CSS media query?",
+    "options": [
+      "A category of media that works for devices like screen readers where the content is read out loud to the user.",
+      "A category of media that works for devices with screens.",
+      "A category of media that only works for mobile devices.",
+      "A category of media that works for devices where the media is in print preview mode."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "The speech media type works for devices like screen readers where the content is read out loud to the user.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-016",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, which one is NOT an example of a relative unit?",
+    "options": [
+      "vh",
+      "px",
+      "em",
+      "rem"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Relative units in CSS include rem, em, vh, and vw",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-017",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what does the animation-duration property do?",
+    "options": [
+      "It is used to style the element after the animation ends.",
+      "It pauses the animation if the animation is running.",
+      "It sets the direction of the element.",
+      "It determines how long an animation should last in seconds."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "The animation-duration property is used to determine how long an animation should last in seconds.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-018",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what is the media type in a CSS media query?",
+    "options": [
+      "A set of rules that only applies to mobile devices",
+      "A category only for speech.",
+      "The category of media for the device.",
+      "A category only for print media."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "A media type refers to the category of media for the device.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-019",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS Flexbox, what does align-items do?",
+    "options": [
+      "aligns the items to the right of the z axis",
+      "aligns the items to the right of the x axis",
+      "aligns the items to the right of the y axis",
+      "aligns the items along the cross axis"
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "In CSS Flexbox, align-items aligns the items along the cross axis",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-020",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS Flexbox, how do you allow items to move to a new line?",
+    "options": [
+      "flex-wrap: wrap;",
+      "flex: wrap;",
+      "flex-wrap: wrap-items;",
+      "flex-wrap: item-wrap;"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "In CSS Flexbox, flex-wrap: wrap; will tell the computer to move items to a new line if there is not enough space",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-021",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, how do you change the background color?",
+    "options": [
+      "background-color: pink;",
+      "backgroundColor: pink;",
+      "b-color: pink;",
+      "bg-color: pink;"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "You can use the background property in CSS to change the background color of an element",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-022",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what is the default position property?",
+    "options": [
+      "position: static;",
+      "position: absolute;",
+      "position: top;",
+      "position: relative;"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "The default property in CSS is position: static; which means it follows the order of the HTML",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-023",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what is the name of the property used to position items inside the grid container along the y-axis?",
+    "options": [
+      "grid-columns",
+      "fraction-unit",
+      "grid-template-columns",
+      "align-items"
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "The align-items property is used to position items inside the grid container along the y-axis.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-024",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what selector is used to set the style of links when the user moves the mouse over them?",
+    "options": [
+      "a:active",
+      "a:link",
+      "a:hover",
+      "a:visited"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "With a:hover you can set the style of links when the user mouses over them.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-025",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what is the name of the CSS grid property used to set the number and height of the rows?",
+    "options": [
+      "grid-rows",
+      "grid-template-rows",
+      "grid-template-columns",
+      "grid-unit-rows"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "The grid-template-rows property is used to set the number and height of the rows.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-026",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what does the no-repeat value do in the background-repeat property?",
+    "options": [
+      "Repeats the image along the z-axis",
+      "Repeats the image along the x-axis",
+      "Sets no repetition for the background image",
+      "Repeats the image along the y-axis"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "The no-repeat value of the background-repeat property sets no repetition for the background image.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-027",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, which one of these options is NOT a value used for the justify-content property?",
+    "options": [
+      "space-evenly",
+      "space-between",
+      "space-around",
+      "repeat"
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "The justify-content property can accept seven values including space-around, space-between, start, and end.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-028",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what does the animation-iteration-count property do?",
+    "options": [
+      "It sets a name used to describe the animation applied to the element.",
+      "It sets a delay for the animation to start.",
+      "It sets how many times an animation should run.",
+      "It determines how long an animation should last in seconds."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "The animation-iteration-count property sets how many times the animation should run.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-029",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what is the name of the property used to position one grid item in a container along the y-axis?",
+    "options": [
+      "grid-template-columns",
+      "grid-columns",
+      "align-self",
+      "space-around"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "The align-self property is used to position one grid item in a container along the y-axis",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-030",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what does the animation-play-state property do?",
+    "options": [
+      "It is used to pause the animation if it is set to paused.",
+      "It determines how long an animation should last in seconds.",
+      "It is used to style the element after the animation ends.",
+      "It sets the direction for the animation."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "The animation-play-state property is used to pause the animation if set to paused.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-031",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, how do you add a smooth scroll to an HTML element?",
+    "options": [
+      "scroll: smooth;",
+      "scroll-behavior: smooth;",
+      "behavior: smooth;",
+      "scroll-behavior: smooth-scroll;"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "You can use scroll-behavior: smooth; to add a smooth scroll to the html element",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-032",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what is the name of the function used to set the width of all columns in CSS grid?",
+    "options": [
+      "repeat()",
+      "width-container()",
+      "width-all()",
+      "set-width()"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "The repeat() function is used to set the width of all of the columns in the grid container.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-033",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what is the name of the property used to repeat a background image?",
+    "options": [
+      "background-repeat",
+      "background-position-x",
+      "background-position-y",
+      "background-origin"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "The background-repeat property is used to repeat the background image.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-034",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what selector would you use to select all elements with the class of blue-text?",
+    "options": [
+      "#blue-text",
+      "blue-text",
+      ".blue-text",
+      "a[blue-text]"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "In CSS, you can select all the elements with a given class with a dot before its name.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-035",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what is the media attribute in the link tag?",
+    "options": [
+      "tells the computer to import the linked content for phones only",
+      "tells the computer to import the linked content for laptops only",
+      "Specifies the type of media that should be used when importing the linked content",
+      "tells the computer to import the linked content for tablets only"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "The media attribute specifies the type of media that should be used when importing the linked content",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-036",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what is the name of the property that clips the background image to inside the container?",
+    "options": [
+      "background-color",
+      "background-position",
+      "background-size",
+      "background-clip"
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "The background-clip property is used to clip the background image to inside the container.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-037",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS Flexbox, how do you set the flex container to reverse the items in a row?",
+    "options": [
+      "flex-direction: reverse-row;",
+      "flex-direction: row-reverse;",
+      "flex-row: row-reverse;",
+      "flex-direction: set-row-reverse;"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "In CSS Flexbox, you can apply flex-direction: row-reverse; to the container whose items you want to display in a row, with their order reversed.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-038",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS Flexbox, how do you set the flex container to reverse the items in a column?",
+    "options": [
+      "flex-direction: column-reverse;",
+      "flex-direction: column-r;",
+      "flex-direction: reverse-c;",
+      "flex-direction: column-rev;"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "In CSS Flexbox, you can apply flex-direction: column-reverse; to the container whose items you want to display in a column, with their order reversed.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-039",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what does list-style-type: circle; do?",
+    "options": [
+      "Applies discs to all of the list items in an unordered list.",
+      "Applies circles to all of the list items in an unordered list.",
+      "Applies squares to all of the list items in an unordered list.",
+      "Applies decimals to all of the list items in an unordered list."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "list-style-type: circle; will apply circles to all of the list items of an unordered list.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-040",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, which one of these values is NOT used for the background-position property?",
+    "options": [
+      "right",
+      "top",
+      "bottom",
+      "side-left"
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "The background-position property can take in many values including of top, right, left and bottom.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-041",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what does the vw unit stand for?",
+    "options": [
+      "viewport height",
+      "view width height",
+      "viewport width",
+      "viewport weight"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "The vw unit stands for viewport width.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-042",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS Flexbox, what does align-self do?",
+    "options": [
+      "adjusts the alignment for hr elements",
+      "adjust the alignment for all elements",
+      "adjusts the alignment for an element",
+      "adjusts the alignment for an img element"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "In CSS Flexbox, align-self adjusts the alignment for an element",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-043",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what does the animation-name property do?",
+    "options": [
+      "It sets how many times an animation should run.",
+      "It sets the duration of the animation.",
+      "It sets a delay for the animation to start.",
+      "It is a name used to describe the animation applied to the element."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "The animation-name property is used to describe the animation applied to the element.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-044",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what is the name of the grid property used to set the space for grid cells in rows and columns?",
+    "options": [
+      "repeat",
+      "grid-template-areas",
+      "fraction unit",
+      "grid-template-rows"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "The grid-template-areas property is used to set the space for grid cells in rows and columns.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-045",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what is the universal selector?",
+    "options": [
+      "#",
+      "*",
+      "@",
+      "$"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "The asterisk * is the universal selector in CSS. It selects all elements of any type.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-046",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what is the name of the property used to change the position of the background image?",
+    "options": [
+      "background-color",
+      "background-position",
+      "background-origin",
+      "background-clip"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "The background-position is used to change the position of the background image.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-047",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what is the name of the property used to position one individual grid item inside a grid container along the x-axis?",
+    "options": [
+      "justify-rows",
+      "align-content",
+      "grid-template-areas",
+      "justify-self"
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "The justify-self property is used to position one individual grid item inside a grid container along the x-axis.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-048",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, which one of these values does NOT apply to the all shorthand property?",
+    "options": [
+      "unset",
+      "initial",
+      "position",
+      "revert"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "The all CSS shorthand property can accept the following values: initial, inherit, unset, revert.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-049",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS Flexbox, how do you set the flex container to arrange the items in a column?",
+    "options": [
+      "flex-direction: set-column;",
+      "flex-direction: column;",
+      "flex-direction: row;",
+      "flex-column: column;"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "In CSS Flexbox, you can apply flex-direction: column; to the container whose items you want arrange in a column",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-050",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, which one of these values is NOT used for the background-origin property?",
+    "options": [
+      "border-box",
+      "padding-box",
+      "content-box",
+      "box-sizing"
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "The background-origin property can use following values: border-box, padding-box, inherit, and content-box.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-051",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what is the name of the CSS grid property used to create gaps between columns?",
+    "options": [
+      "grid-template-columns",
+      "set-width",
+      "fit-unit",
+      "column-gap"
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "The column-gap property is used to create gaps between columns.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-052",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what does the animation-timing-function property do?",
+    "options": [
+      "It sets the direction for the element.",
+      "It is a name used to describe the animation applied to the element.",
+      "It is used to style the element after the animation ends.",
+      "It determines when the animation should speed up or slow down."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "The animation-timing-function is used to determine when the animation should speed up or slow down.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-053",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what is the name of the relative unit that is based on its parent's font size?",
+    "options": [
+      "em",
+      "vw",
+      "vh",
+      "rem"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "The em unit is based on its parent's font size.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-054",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, this is the type of unit that is tied to physical units of length.",
+    "options": [
+      "Absolute",
+      "Fixed",
+      "Dynamic",
+      "Relative"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "In CSS, absolute units are tied to physical units of length.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-055",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what property is used to customize the marker of a list item?",
+    "options": [
+      "list-markers",
+      "list-style-type",
+      "list-marker-type",
+      "list-style"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "The list-style-type property is used to set the marker of a list item.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-056",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what is an at-rule?",
+    "options": [
+      "A rule that dictates what the CSS will look like based on certain conditions.",
+      "A rule that only applies to how <p> elements are styled.",
+      "A rule that dictates how to format the HTML.",
+      "A rule that dictates javascript functions."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "An at-rule in CSS will dictate what the CSS will look like based on certain conditions.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-057",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what is the role of media queries?",
+    "options": [
+      "They help create responsive websites",
+      "They create links to other webpages",
+      "They add interactivity to a static webpage",
+      "They change the font of text"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "CSS media queries allow you to create responsive websites across all screen sizes, ranging from desktop to mobile",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-058",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, how is the not operator used in a media query?",
+    "options": [
+      "It joins multiple media features.",
+      "It splits media queries into separate ones.",
+      "It separates multiple media features by commas.",
+      "It reverses a true query into a false query and a false query into a true query."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "The not operator is used to reverse a true query into a false query and a false query into a true query.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-059",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what is the name of the property used to change the origin of the background image?",
+    "options": [
+      "background-clip",
+      "background-color",
+      "background-position",
+      "background-origin"
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "The background-origin property is used to set the origin of the background image.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-060",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "What does CSS stand for?",
+    "options": [
+      "Community Stylish System",
+      "Cascading Style Sheets",
+      "Complete Synchronizes Sheets",
+      "Complex Style Sheets"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "CSS stands for Cascading Style Sheets.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-061",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "What is the main purpose of CSS in a website?",
+    "options": [
+      "Structure",
+      "Functionality",
+      "Sound",
+      "Style"
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "CSS is used to define the style of the elements in a website.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-062",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what is the print media type in a CSS media query?",
+    "options": [
+      "A set of rules only applied to mobile devices.",
+      "A type of media that only works for desktop computers.",
+      "A category of media that works for devices where the media is in print preview mode.",
+      "A type of media only for 4k monitors."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "The print media type works for devices where the media is in print preview mode.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-063",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, how do you make all of the text for an element uppercase?",
+    "options": [
+      "text-transform: toUpper;",
+      "text-transform: set-upper;",
+      "text-transform: uppercase;",
+      "text-transform: upper;"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "You can use the text-transform: uppercase; to make all of the text for that element uppercase",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-064",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, how do you make an image circular or oval?",
+    "options": [
+      "border-radius: 50%;",
+      "border-radius: 10%;",
+      "border-radius: 3px;",
+      "border-radius: 0;"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "You can use the CSS property border-radius with a value of 50% to make an image circular or oval.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-065",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, which one of these values is NOT used for the background-repeat property?",
+    "options": [
+      "repeat-x",
+      "repeat-z-axis",
+      "repeat",
+      "no-repeat"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "The background-repeat property can take in seven values include no-repeat, repeat, repeat-x and repeat-y",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-066",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what do H, S, and L in HSL stand for?",
+    "options": [
+      "Hue, Style, Lightness",
+      "Hue, Saturation, Lightning",
+      "Hue, Saturation, Lightness",
+      "Habitat, Style, Lightness"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "HSL stands for Hue, Saturation, and Lightness.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-067",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what is the name of the property that determines if the background image is in a scroll, fixed, or local position?",
+    "options": [
+      "background-origin",
+      "background-clip",
+      "background-attachment",
+      "background-position"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "The background-attachment property is used to determine if the background image is in a scroll, fixed, or local position.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-068",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what are the conditions that decide if a media rule is applied?",
+    "options": [
+      "Keys",
+      "Breaks",
+      "Points",
+      "Breakpoints"
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "A breakpoint is a key to determine when to change the layout and adapt the new rules inside the media queries.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-069",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, the amount of space between an element's border and its surrounding elements is known as...",
+    "options": [
+      "Margin",
+      "Indentation",
+      "Padding",
+      "White Space"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "The margin is the amount of space between an element's border and its surrounding elements.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-070",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what value should be assigned to the text-decoration property to remove an underline from links?",
+    "options": [
+      "underline",
+      "none",
+      "overline",
+      "line-through"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "The property text-decoration should have the value of none to remove an underline from links.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-071",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS Flexbox, which one is NOT used with align-content?",
+    "options": [
+      "space-around",
+      "center",
+      "stretch",
+      "align-bottom"
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "In CSS Flexbox, some of the options for align-content include center, stretch, space-around and space-between",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-072",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, how is the comma operator used in a media query?",
+    "options": [
+      "It reverses a true query into a false query and a false query into a true query.",
+      "It splits media queries into separate ones.",
+      "It separates multiple media features by commas and it applies the styles inside the curly braces if one of the conditions is true.",
+      "It joins multiple media features."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "The comma operator is used to separate multiple media features by commas and to apply the styles inside the curly braces if one of the conditions is true.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-073",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what does the repeat-x value do in the background-repeat property?",
+    "options": [
+      "It repeats the image along the z-axis.",
+      "It repeats the image along both of the x-axis and y-axis.",
+      "It repeats the image along the x-axis.",
+      "It repeats the image along the y-axis."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "The repeat-x value of the background-repeat property repeats the image along the x-axis.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-074",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, how is the and operator used in a media query?",
+    "options": [
+      "It is used to separate multiple media features by commas.",
+      "It is used to join multiple media features.",
+      "It is used to split media queries into separate ones.",
+      "It is used to reverse a true query into a false query."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "The and operator is used to join multiple media features in a media query.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-075",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what does the A in RGBA stand for?",
+    "options": [
+      "Ancient",
+      "Alpha",
+      "Alphabetical",
+      "Ambiguous"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "The A in RGBA stands for Alpha. This value represents the transparency of the color.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-076",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS Flexbox, which one is NOT used with align-items?",
+    "options": [
+      "flex-start",
+      "baseline",
+      "flex-end",
+      "align-middle"
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "In CSS Flexbox, some of the options for align-items include flex-start, flex-end, baseline and stretch",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-077",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what is the screen media type in a CSS media query?",
+    "options": [
+      "A category of media that works for media in print preview mode.",
+      "A category of media that only works for tablets.",
+      "A category of media that works for devices without screens.",
+      "A category of media that works for devices with screens."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "The screen media type works for devices with screens.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-078",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what does the vh unit stand for?",
+    "options": [
+      "viewport width",
+      "view heights",
+      "viewing height",
+      "viewport height"
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "The vh unit stands for viewport height.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-079",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, how do you add content after an element?",
+    "options": [
+      "::after",
+      "::add",
+      "::after-content",
+      "::before"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "You can use the ::after selector to add content after an element",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-080",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what does the animation-delay property do?",
+    "options": [
+      "It pauses the animation if the animation is running.",
+      "It sets a delay for the animation to start.",
+      "It determines when the animation should speed up or slow down.",
+      "It determines how long an animation should last in seconds."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "The animation-delay property is used to set a delay for the animation to start.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-081",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, which one of these options is NOT a value used for the justify-items property?",
+    "options": [
+      "end",
+      "gap",
+      "stretch",
+      "start"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "The four values that can be used for the justify-items property are: start, end, center, and stretch.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-082",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what is the name of the value that evenly distributes space in the background-repeat property?",
+    "options": [
+      "space",
+      "no-repeat",
+      "repeat",
+      "repeat-x"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "The space value is used to evenly distribute the space in the background-repeat property.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-083",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what is the name of the relative unit that is based on the root element's font size?",
+    "options": [
+      "rem",
+      "vw",
+      "em",
+      "px"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "The rem unit is based on the root element's font size.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-084",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, the amount of space between an element's content and its border is known as...",
+    "options": [
+      "White Space",
+      "Indentation",
+      "Padding",
+      "Margin"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "The padding is the amount of space between the element's content and its border.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-085",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, which one of these values is NOT used for the background-attachment property?",
+    "options": [
+      "fixed",
+      "scroll",
+      "inherit",
+      "local"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "The background-attachment property can take in the fixed, scroll and local values.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-086",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what is a common breakpoint range used for tablet devices in a media query?",
+    "options": [
+      "300px - 7000px",
+      "81px - 700px",
+      "481px - 768px",
+      "2px - 68px"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "The range of 481px - 768px can be used to target tablet devices in a media query.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-087",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, which one of these options is NOT a valid value for the font-weight property?",
+    "options": [
+      "bold",
+      "bolding",
+      "900",
+      "lighter"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Bonne réponse : bolding.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-088",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "What does fr stand for in CSS grid?",
+    "options": [
+      "font units",
+      "fit unit",
+      "flex unit",
+      "fraction unit"
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "fr stands for fraction unit in CSS grid.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-089",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what is a common breakpoint range used for laptop devices in a media query?",
+    "options": [
+      "769px -10,024px",
+      "69px -124px",
+      "769px -1024px",
+      "7px -10px"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "The range of 769px -1024px can be used to target laptop devices in a media query.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-090",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, which one of these options is NOT a value used for the align-content property?",
+    "options": [
+      "center",
+      "row-gap",
+      "start",
+      "space-between"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "The align-content property can accept seven values including space-around, space-between, start, and end.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-091",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, how do you make the text for an element all lowercase?",
+    "options": [
+      "text-transform: set-lower;",
+      "text-transform: lowercase;",
+      "text-transform: to-lower;",
+      "text-transform: lower;"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "You can use the text-transform: lowercase; to make all of the text for that element lowercase",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-092",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what is the name of the property used to adjust the size of a background image?",
+    "options": [
+      "background-position",
+      "background-origin",
+      "background-repeat",
+      "background-size"
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "The background-size property is used to adjust the size for a background image.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-093",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what is the name of the property that sets the opacity of an HTML element?",
+    "options": [
+      "border",
+      "margin",
+      "opacity",
+      "padding"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "The opacity property is used to set the opacity of an HTML element.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-094",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS Flexbox, what does justify-content do?",
+    "options": [
+      "aligns the items along the main axis",
+      "aligns the items to the left of  the x and y axis",
+      "aligns the items to the right of the x axis",
+      "aligns the items to right of the y axis"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "In CSS Flexbox, justify-content is used to align the items in the container along the main axis",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-095",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what is the name of the rule that will override CSS style for an element?",
+    "options": [
+      "!important",
+      "!specific",
+      "!change",
+      "!override"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "The !important rule will override the other CSS style rules for that element",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-096",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "How do you create a Flexbox container in CSS Flexbox?",
+    "options": [
+      "display:flexcontainer;",
+      "display:flex;",
+      "display:flexbox;",
+      "display:flexB;"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "You can apply CSS Flexbox to an HTML container by using display:flex;",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-097",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what is the name of the CSS property used to position the grid inside the grid container along the y-axis?",
+    "options": [
+      "end",
+      "grid-unit-rows",
+      "justify-content",
+      "align-content"
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "The align-content property is used to position the grid inside the grid container along the y-axis.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-098",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what is a common breakpoint range used for desktops and large screens in a media query?",
+    "options": [
+      "25px - 120px",
+      "5px - 12px",
+      "125px - 12,000px",
+      "1025px - 1200px"
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "The range of 1025px - 1200px can be used to target desktops and large screens in a media query.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-099",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what does the A stand for in HSLA?",
+    "options": [
+      "Ancient",
+      "Alphabetical",
+      "Alpha",
+      "Ambiguous"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "The A in HSLA stands for Alpha. This value represents the transparency of the color.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-100",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what does the repeat-y value do in the background-repeat property?",
+    "options": [
+      "It repeats the image along both of the x-axis and y-axis.",
+      "It repeats the image along the x-axis.",
+      "It repeats the image along the z-axis.",
+      "It repeats the image along the y-axis."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "The repeat-y value repeats the image along the y-axis.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-101",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS Flexbox, which one is NOT used with justify-content?",
+    "options": [
+      "space-around",
+      "flex-start",
+      "flex-middle",
+      "flex-end"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "In CSS Flexbox, some of the options for justify-content include space-around, flex-end, flex-start and space-between",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-102",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, how many pixels are equivalent to 1 rem unit?",
+    "options": [
+      "32",
+      "16",
+      "6",
+      "12"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "One rem unit is equivalent to 16 pixels",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-103",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what selector is used to set the style of visited links?",
+    "options": [
+      "a:hover",
+      "a:visited",
+      "a:link",
+      "a:active"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "With a:visited you can set the style of visited links.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-104",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what is a common breakpoint range used for mobile devices in a media query?",
+    "options": [
+      "100px - 150px",
+      "320px - 480px",
+      "200px - 4000px",
+      "1000px - 5000px"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "The range of 320px - 480px can be used to target mobile devices in a media query.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-105",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what is the name of the CSS grid property used to create gaps between rows?",
+    "options": [
+      "grid-template-rows",
+      "repeat",
+      "grid-columns",
+      "row-gap"
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "The row-gap property is used to create gaps between rows.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-106",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what is the code used to create a CSS grid container?",
+    "options": [
+      "display: grid-container;",
+      "display: grid;",
+      "display: flex;",
+      "display: grid-box;"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "You can use display: grid; to create a new CSS grid container.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-107",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, how do you add content before an element?",
+    "options": [
+      "::after",
+      "::add-content",
+      "::before",
+      "::before-content"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "You can use the ::before selector to add content before an element",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-108",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS Grid, what is the name of the CSS property used to position the grid inside the grid container along the x-axis?",
+    "options": [
+      "grid-template-rows",
+      "justify-content",
+      "grid-template-areas",
+      "row-gap"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "The justify-content property is used to position the grid in the grid container along the x-axis.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-109",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, which of the following options is one way to center a div?",
+    "options": [
+      "use  display: flex; on the parent container and  margin: 45%; for the child container",
+      "use  display: flex; on the parent container and  margin: 20px; for the child container",
+      "use  display: flex; on the parent container and  margin: 50px; for the child container",
+      "use  display: flex; on the parent container and  margin: auto; for the child container"
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "To center a div with CSS, apply display: flex; on the parent container and margin: auto; for the child container.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-110",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, 3em units are equivalent to how much in px units?",
+    "options": [
+      "32",
+      "12",
+      "48",
+      "16"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "3em is equivalent to 48 pixels.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-111",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "What color would rgb(255,0,0) give?",
+    "options": [
+      "Blue",
+      "Green",
+      "Red",
+      "Yellow"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Each parameter defines the intensity of each color, rgb(red, green, and blue), with an integer number ranging from 0-255. The minimum value of 0 represents that none of the color is being shown, so it is at its darkest. On the other hand, the maximum value of 255 represents that the full amount of color and the full intensity is on display",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-112",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, which pseudo-class allows you to select the last element of a specific type?",
+    "options": [
+      ":last-of-type",
+      ":last",
+      ":last-child",
+      ":nth-last-child"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "We can use the :last-of-type selector to target an element of a specific type within a container.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-113",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, which of the following properties can be used to set the body color to black?",
+    "options": [
+      "body-color:black",
+      "background-color:black;",
+      "backgroundColor:black",
+      "color:black"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "In CSS, the background-color property is used to set the color of the background.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-114",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "Which of the following is the correct syntax for an attribute selector in CSS?",
+    "options": [
+      "container[value]",
+      "attribute[value]",
+      "value[attribute]",
+      "selector[attribute='value']"
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "The correct syntax for an attribute selector in CSS is selector[attribute='value'].",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-115",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "Which of the following CSS properties is used to add a stroke in the text?",
+    "options": [
+      "text-decoration",
+      "None of the above",
+      "text-transform",
+      "text-stroke"
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "text-stroke is a CSS property that is used to add a stroke in the text.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-116",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, which property is used to apply a groove style to the border?",
+    "options": [
+      "border-bottom-color",
+      "border-length",
+      "border-style",
+      "border-width"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "You can use border-style: groove; to specify groove border styles around HTML elements.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-117",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, what will the following pseudo class selector do :nth-child(2)?",
+    "options": [
+      "None of the above",
+      "Selects the second child of the parent element",
+      "Select 2 children of the parent element",
+      "Select 2 elements of the parent element"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "The :nth-child() pseudo-class selector matches every element that is the second child, third child, etc. of its parent.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-118",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "Which CSS property is utilized to manage the spacing between characters in text?",
+    "options": [
+      "word-spacing",
+      "text-indent",
+      "letter-spacing",
+      "line-height"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "The CSS property 'letter-spacing' is used to control the spacing between characters in a text.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-119",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "Which CSS property is used to control the order of how elements are displayed in relation to each other along the z-axis?",
+    "options": [
+      "z-depth",
+      "z-order",
+      "stack-order",
+      "z-index"
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "The z-index property in CSS is used to control the stacking order of elements in relation to each other along the z-axis (front to back). It's commonly used in the context of positioned or layered elements, such as when using relative or absolute positioning.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-120",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "Which CSS property is used to create a drop shadow for an element?",
+    "options": [
+      "text-shadow",
+      "element-shadow",
+      "box-shadow",
+      "shadow-effect"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "The box-shadow property in CSS is used to create a shadow effect for an element, such as a div or a box. It allows you to add shadow in terms of color, size, blur, spread, and position relative to the element.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-121",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "In CSS, which value is used to make an element take up the full available width of its parent container?",
+    "options": [
+      "max-width",
+      "100%",
+      "auto",
+      "full-width"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "When you set an element's width to 100%, it means that the element should occupy the entire width of its parent container. This is particularly useful for creating responsive web designs where you want elements to adapt to the available space.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "id": "css-fcc-122",
+    "category": "css",
+    "difficulty": "easy",
+    "question": "Which CSS at-rule is used to specify a custom font to display the text in a website?",
+    "options": [
+      "@font-face",
+      "@font-feature-values",
+      "@namespace",
+      "@charset"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "The @font-face CSS at-rule specifies a custom font with which to display text and can be loaded from either via URL or a locally-installed font.",
+    "source": "freeCodeCamp/developer_quiz_site (src/data/css-quiz.ts)",
+    "license": "BSD-3-Clause"
+  }
+]
