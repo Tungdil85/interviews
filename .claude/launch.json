@@ -1,6 +1,6 @@
 {
   "version": "0.0.1",
   "configurations": [
-    { "name": "interviews", "runtimeExecutable": "npm", "runtimeArgs": ["start"], "port": 4200 }
+    { "name": "interviews", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dev"], "port": 4200 }
   ]
 }
