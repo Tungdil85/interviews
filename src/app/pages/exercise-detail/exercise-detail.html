@@ -14,7 +14,7 @@
 
     <p class="whitespace-pre-wrap bg-white p-4">{{ e.description }}</p>
 
-    <app-code-editor [code]="code()" (codeChange)="onCodeChange($event)" ariaLabel="Éditeur de code de l'exercice" />
+    <app-code-editor class="block" [code]="code()" (codeChange)="onCodeChange($event)" ariaLabel="Éditeur de code de l'exercice" />
 
     <div class="flex flex-wrap justify-end gap-3">
       <button type="button" class="px-4 underline" (click)="reset()">Réinitialiser</button>
@@ -32,12 +32,27 @@
       </ol>
     }
 
+    <app-compile-errors class="block" [errors]="compileErrors()" />
+
     <section aria-label="Aperçu du composant" class="space-y-1">
-      <h2 class="text-sm font-semibold text-gray-700">Aperçu (dernier test exécuté)</h2>
-      <div #preview class="min-h-16 border-2 border-dashed border-gray-300 bg-white p-3"></div>
+      <h2 class="text-sm font-semibold text-gray-700">Aperçu interactif <span class="font-normal">(clique dedans !)</span></h2>
+      <div class="overflow-hidden border border-gray-300 bg-white shadow-sm">
+        <div class="flex items-center gap-1.5 border-b border-gray-200 bg-gray-100 px-3 py-1.5" aria-hidden="true">
+          <span class="size-2.5 rounded-full bg-red-400"></span>
+          <span class="size-2.5 rounded-full bg-yellow-400"></span>
+          <span class="size-2.5 rounded-full bg-green-400"></span>
+        </div>
+        <div #preview class="preview min-h-24 p-4"></div>
+      </div>
     </section>
 
-    <app-test-results [results]="results()" [running]="running()" />
+    <app-console-panel class="block" [logs]="logs()" (cleared)="runner.clearLogs()" />
+
+    @if (compileErrors().length > 0 && results() === null) {
+      <p class="bg-white p-3">Corrige les erreurs de compilation ci-dessus, puis relance les tests.</p>
+    } @else {
+      <app-test-results class="block" [results]="results()" [running]="running()" />
+    }
 
     <div>
       <button type="button" class="px-0 underline" (click)="showSolution.set(!showSolution())">

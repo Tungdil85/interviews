@@ -1,0 +1,18 @@
+<section aria-label="Console" class="border border-gray-700 bg-gray-900 text-sm">
+  <header class="flex items-center justify-between border-b border-gray-700 px-3 py-1 text-gray-300">
+    <h2 class="font-semibold">Console</h2>
+    <button type="button" class="min-h-0 px-2 underline disabled:opacity-40" [disabled]="logs().length === 0" (click)="cleared.emit()">
+      Effacer
+    </button>
+  </header>
+  <ol class="max-h-56 overflow-y-auto p-2 font-mono" aria-live="polite">
+    @for (entry of logs(); track $index) {
+      <li class="flex gap-2 whitespace-pre-wrap break-words py-0.5" [class]="levelClass(entry.level)">
+        <span aria-hidden="true">{{ icons[entry.level] }}</span>
+        <span><span class="sr-only">{{ entry.level }} : </span>{{ entry.text }}</span>
+      </li>
+    } @empty {
+      <li class="text-gray-500">Rien pour l'instant : utilise console.log() dans ton code.</li>
+    }
+  </ol>
+</section>

@@ -12,7 +12,8 @@ export interface TsApi {
 }
 
 export interface TsDiagnostic {
-  file?: unknown;
+  file?: { getLineAndCharacterOfPosition(position: number): { line: number; character: number } };
+  start?: number;
   category: number;
   messageText: unknown;
 }

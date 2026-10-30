@@ -28,7 +28,8 @@
       "`value.slice(0, max)` récupère le début du texte.",
       "Compare `value.length` à `max` avant de couper."
     ],
-    "solution": "import { Pipe, PipeTransform } from '@angular/core';\n\n@Pipe({ name: 'truncate' })\nexport class TruncatePipe implements PipeTransform {\n  transform(value: string, max = 20): string {\n    return value.length > max ? value.slice(0, max) + '…' : value;\n  }\n}\n"
+    "solution": "import { Pipe, PipeTransform } from '@angular/core';\n\n@Pipe({ name: 'truncate' })\nexport class TruncatePipe implements PipeTransform {\n  transform(value: string, max = 20): string {\n    return value.length > max ? value.slice(0, max) + '…' : value;\n  }\n}\n",
+    "preview": "render('<p>{{ \"Bonjour tout le monde\" | truncate:7 }}</p><p>{{ \"Court\" | truncate }}</p>', { imports: [TruncatePipe] });"
   },
   {
     "id": "pipe-filesize",
@@ -67,7 +68,8 @@
       "Divise par 1024 tant que la valeur est ≥ 1024, en avançant dans un tableau d'unités ['o', 'Ko', 'Mo', 'Go'].",
       "`Math.round(v * 10) / 10` donne une décimale et supprime le « .0 »."
     ],
-    "solution": "import { Pipe, PipeTransform } from '@angular/core';\n\n@Pipe({ name: 'filesize' })\nexport class FileSizePipe implements PipeTransform {\n  transform(bytes: number | null | undefined): string {\n    if (bytes == null) return '';\n    const units = ['o', 'Ko', 'Mo', 'Go'];\n    let value = bytes;\n    let unit = 0;\n    while (value >= 1024 && unit < units.length - 1) {\n      value /= 1024;\n      unit++;\n    }\n    return `${Math.round(value * 10) / 10} ${units[unit]}`;\n  }\n}\n"
+    "solution": "import { Pipe, PipeTransform } from '@angular/core';\n\n@Pipe({ name: 'filesize' })\nexport class FileSizePipe implements PipeTransform {\n  transform(bytes: number | null | undefined): string {\n    if (bytes == null) return '';\n    const units = ['o', 'Ko', 'Mo', 'Go'];\n    let value = bytes;\n    let unit = 0;\n    while (value >= 1024 && unit < units.length - 1) {\n      value /= 1024;\n      unit++;\n    }\n    return `${Math.round(value * 10) / 10} ${units[unit]}`;\n  }\n}\n",
+    "preview": "render('<ul><li>{{ 512 | filesize }}</li><li>{{ 1536 | filesize }}</li><li>{{ 1048576 | filesize }}</li><li>{{ 5368709120 | filesize }}</li></ul>', { imports: [FileSizePipe] });"
   },
   {
     "id": "component-counter",
@@ -103,7 +105,8 @@
       "Dans le template : `{{ count() }}`, `(click)=\"increment()\"` et `[disabled]=\"count() === 0\"`.",
       "`Math.max(0, n - 1)` évite de passer sous zéro."
     ],
-    "solution": "import { Component, signal } from '@angular/core';\n\n@Component({\n  selector: 'app-counter',\n  template: `\n    <button data-test=\"dec\" [disabled]=\"count() === 0\" (click)=\"decrement()\">−</button>\n    <span data-test=\"value\">{{ count() }}</span>\n    <button data-test=\"inc\" (click)=\"increment()\">+</button>\n  `,\n})\nexport class CounterComponent {\n  count = signal(0);\n\n  increment() {\n    this.count.update((n) => n + 1);\n  }\n\n  decrement() {\n    this.count.update((n) => Math.max(0, n - 1));\n  }\n}\n"
+    "solution": "import { Component, signal } from '@angular/core';\n\n@Component({\n  selector: 'app-counter',\n  template: `\n    <button data-test=\"dec\" [disabled]=\"count() === 0\" (click)=\"decrement()\">−</button>\n    <span data-test=\"value\">{{ count() }}</span>\n    <button data-test=\"inc\" (click)=\"increment()\">+</button>\n  `,\n})\nexport class CounterComponent {\n  count = signal(0);\n\n  increment() {\n    this.count.update((n) => n + 1);\n  }\n\n  decrement() {\n    this.count.update((n) => Math.max(0, n - 1));\n  }\n}\n",
+    "preview": "render(CounterComponent);"
   },
   {
     "id": "component-todo-list",
@@ -143,7 +146,8 @@
       "`[class.done]=\"todo.done\"` ajoute la classe conditionnellement.",
       "`remaining = computed(() => this.todos().filter(t => !t.done).length)`."
     ],
-    "solution": "import { Component, computed, input } from '@angular/core';\n\ninterface Todo {\n  id: number;\n  title: string;\n  done: boolean;\n}\n\n@Component({\n  selector: 'app-todo-list',\n  template: `\n    <ul>\n      @for (todo of todos(); track todo.id) {\n        <li data-test=\"todo\" [class.done]=\"todo.done\">{{ todo.title }}</li>\n      } @empty {\n        <p data-test=\"empty\">Aucune tâche</p>\n      }\n    </ul>\n    <p data-test=\"remaining\">{{ remaining() }} restante(s)</p>\n  `,\n})\nexport class TodoListComponent {\n  todos = input<Todo[]>([]);\n  remaining = computed(() => this.todos().filter((t) => !t.done).length);\n}\n"
+    "solution": "import { Component, computed, input } from '@angular/core';\n\ninterface Todo {\n  id: number;\n  title: string;\n  done: boolean;\n}\n\n@Component({\n  selector: 'app-todo-list',\n  template: `\n    <ul>\n      @for (todo of todos(); track todo.id) {\n        <li data-test=\"todo\" [class.done]=\"todo.done\">{{ todo.title }}</li>\n      } @empty {\n        <p data-test=\"empty\">Aucune tâche</p>\n      }\n    </ul>\n    <p data-test=\"remaining\">{{ remaining() }} restante(s)</p>\n  `,\n})\nexport class TodoListComponent {\n  todos = input<Todo[]>([]);\n  remaining = computed(() => this.todos().filter((t) => !t.done).length);\n}\n",
+    "preview": "render(TodoListComponent, { inputs: { todos: [{ id: 1, title: \"Lire la doc Angular\", done: true }, { id: 2, title: \"Écrire un pipe\", done: false }, { id: 3, title: \"Passer l'entretien\", done: false }] } });"
   },
   {
     "id": "card-projection",
@@ -174,7 +178,8 @@
       "`<ng-content select=\"[card-title]\"></ng-content>` projette les éléments portant cet attribut.",
       "Un `<ng-content></ng-content>` sans `select` récupère tout le contenu restant."
     ],
-    "solution": "import { Component } from '@angular/core';\n\n@Component({\n  selector: 'app-card',\n  template: `\n    <header data-test=\"header\"><ng-content select=\"[card-title]\"></ng-content></header>\n    <div data-test=\"body\"><ng-content></ng-content></div>\n    <footer data-test=\"footer\"><ng-content select=\"[card-footer]\"></ng-content></footer>\n  `,\n})\nexport class CardComponent {}\n"
+    "solution": "import { Component } from '@angular/core';\n\n@Component({\n  selector: 'app-card',\n  template: `\n    <header data-test=\"header\"><ng-content select=\"[card-title]\"></ng-content></header>\n    <div data-test=\"body\"><ng-content></ng-content></div>\n    <footer data-test=\"footer\"><ng-content select=\"[card-footer]\"></ng-content></footer>\n  `,\n})\nexport class CardComponent {}\n",
+    "preview": "render('<app-card><h2 card-title>Ma carte</h2><p>Un contenu projeté.</p><button card-footer>Valider</button></app-card>', { imports: [CardComponent] });"
   },
   {
     "id": "component-rating",
@@ -209,7 +214,8 @@
       "`stars = computed(() => Array.from({ length: this.max() }, (_, i) => i + 1))`.",
       "Dans le template : `(click)=\"rated.emit(star)\"` et `[class.filled]=\"star <= value()\"`."
     ],
-    "solution": "import { Component, computed, input, output } from '@angular/core';\n\n@Component({\n  selector: 'app-rating',\n  template: `\n    @for (star of stars(); track star) {\n      <button data-test=\"star\" type=\"button\" [class.filled]=\"star <= value()\" (click)=\"rated.emit(star)\">★</button>\n    }\n  `,\n})\nexport class RatingComponent {\n  value = input(0);\n  max = input(5);\n  rated = output<number>();\n\n  stars = computed(() => Array.from({ length: this.max() }, (_, i) => i + 1));\n}\n"
+    "solution": "import { Component, computed, input, output } from '@angular/core';\n\n@Component({\n  selector: 'app-rating',\n  template: `\n    @for (star of stars(); track star) {\n      <button data-test=\"star\" type=\"button\" [class.filled]=\"star <= value()\" (click)=\"rated.emit(star)\">★</button>\n    }\n  `,\n})\nexport class RatingComponent {\n  value = input(0);\n  max = input(5);\n  rated = output<number>();\n\n  stars = computed(() => Array.from({ length: this.max() }, (_, i) => i + 1));\n}\n",
+    "preview": "render('<app-rating [value]=\"3\" (rated)=\"log($event)\" />', { imports: [RatingComponent], props: { log: (n) => console.log(\"Note choisie :\", n) } });"
   },
   {
     "id": "component-product-filter",
@@ -245,7 +251,8 @@
       "`filtered = computed(() => this.products().filter(p => p.name.toLowerCase().includes(this.query().toLowerCase())))`.",
       "Pense à `@empty` dans le `@for`."
     ],
-    "solution": "import { Component, computed, input, signal } from '@angular/core';\n\ninterface Product {\n  name: string;\n  price: number;\n}\n\n@Component({\n  selector: 'app-product-list',\n  template: `\n    <input data-test=\"search\" placeholder=\"Rechercher\" (input)=\"query.set($any($event.target).value)\" />\n    <p data-test=\"count\">{{ filtered().length }} résultat(s)</p>\n    <ul>\n      @for (p of filtered(); track p.name) {\n        <li data-test=\"product\">{{ p.name }} – {{ p.price }} €</li>\n      } @empty {\n        <p data-test=\"empty\">Aucun résultat</p>\n      }\n    </ul>\n  `,\n})\nexport class ProductListComponent {\n  products = input<Product[]>([]);\n  query = signal('');\n  filtered = computed(() => {\n    const q = this.query().toLowerCase();\n    return this.products().filter((p) => p.name.toLowerCase().includes(q));\n  });\n}\n"
+    "solution": "import { Component, computed, input, signal } from '@angular/core';\n\ninterface Product {\n  name: string;\n  price: number;\n}\n\n@Component({\n  selector: 'app-product-list',\n  template: `\n    <input data-test=\"search\" placeholder=\"Rechercher\" (input)=\"query.set($any($event.target).value)\" />\n    <p data-test=\"count\">{{ filtered().length }} résultat(s)</p>\n    <ul>\n      @for (p of filtered(); track p.name) {\n        <li data-test=\"product\">{{ p.name }} – {{ p.price }} €</li>\n      } @empty {\n        <p data-test=\"empty\">Aucun résultat</p>\n      }\n    </ul>\n  `,\n})\nexport class ProductListComponent {\n  products = input<Product[]>([]);\n  query = signal('');\n  filtered = computed(() => {\n    const q = this.query().toLowerCase();\n    return this.products().filter((p) => p.name.toLowerCase().includes(q));\n  });\n}\n",
+    "preview": "render(ProductListComponent, { inputs: { products: [{ name: \"Laptop\", price: 900 }, { name: \"Phone\", price: 500 }, { name: \"Phone case\", price: 15 }, { name: \"Écran\", price: 250 }] } });"
   },
   {
     "id": "form-login",
@@ -290,7 +297,8 @@
       "`form.controls.email.touched && form.controls.email.invalid` dans un `@if`.",
       "`this.submitted.emit(this.form.getRawValue())`."
     ],
-    "solution": "import { Component, output } from '@angular/core';\nimport { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';\n\n@Component({\n  selector: 'app-login',\n  imports: [ReactiveFormsModule],\n  template: `\n    <form [formGroup]=\"form\" (ngSubmit)=\"submit()\">\n      <input data-test=\"email\" formControlName=\"email\" type=\"email\" />\n      @if (form.controls.email.touched && form.controls.email.invalid) {\n        <p data-test=\"email-error\">Email invalide</p>\n      }\n      <input data-test=\"password\" formControlName=\"password\" type=\"password\" />\n      <button data-test=\"submit\" type=\"submit\" [disabled]=\"form.invalid\">Se connecter</button>\n    </form>\n  `,\n})\nexport class LoginComponent {\n  submitted = output<{ email: string; password: string }>();\n\n  form = new FormGroup({\n    email: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email] }),\n    password: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(6)] }),\n  });\n\n  submit() {\n    if (this.form.valid) this.submitted.emit(this.form.getRawValue());\n  }\n}\n"
+    "solution": "import { Component, output } from '@angular/core';\nimport { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';\n\n@Component({\n  selector: 'app-login',\n  imports: [ReactiveFormsModule],\n  template: `\n    <form [formGroup]=\"form\" (ngSubmit)=\"submit()\">\n      <input data-test=\"email\" formControlName=\"email\" type=\"email\" />\n      @if (form.controls.email.touched && form.controls.email.invalid) {\n        <p data-test=\"email-error\">Email invalide</p>\n      }\n      <input data-test=\"password\" formControlName=\"password\" type=\"password\" />\n      <button data-test=\"submit\" type=\"submit\" [disabled]=\"form.invalid\">Se connecter</button>\n    </form>\n  `,\n})\nexport class LoginComponent {\n  submitted = output<{ email: string; password: string }>();\n\n  form = new FormGroup({\n    email: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email] }),\n    password: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(6)] }),\n  });\n\n  submit() {\n    if (this.form.valid) this.submitted.emit(this.form.getRawValue());\n  }\n}\n",
+    "preview": "render('<app-login (submitted)=\"log($event)\" />', { imports: [LoginComponent], props: { log: (v) => console.log(\"Formulaire soumis :\", v) } });"
   },
   {
     "id": "directive-highlight",
@@ -321,7 +329,8 @@
       "`@HostListener('mouseenter') onEnter() { ... }` écoute un événement de l'élément hôte.",
       "`this.el.nativeElement.style.backgroundColor = this.appHighlight` applique la couleur."
     ],
-    "solution": "import { Directive, ElementRef, HostListener, Input, inject } from '@angular/core';\n\n@Directive({ selector: '[appHighlight]' })\nexport class HighlightDirective {\n  @Input() appHighlight = 'yellow';\n  private el = inject<ElementRef<HTMLElement>>(ElementRef);\n\n  @HostListener('mouseenter')\n  onEnter() {\n    this.el.nativeElement.style.backgroundColor = this.appHighlight || 'yellow';\n  }\n\n  @HostListener('mouseleave')\n  onLeave() {\n    this.el.nativeElement.style.backgroundColor = '';\n  }\n}\n"
+    "solution": "import { Directive, ElementRef, HostListener, Input, inject } from '@angular/core';\n\n@Directive({ selector: '[appHighlight]' })\nexport class HighlightDirective {\n  @Input() appHighlight = 'yellow';\n  private el = inject<ElementRef<HTMLElement>>(ElementRef);\n\n  @HostListener('mouseenter')\n  onEnter() {\n    this.el.nativeElement.style.backgroundColor = this.appHighlight || 'yellow';\n  }\n\n  @HostListener('mouseleave')\n  onLeave() {\n    this.el.nativeElement.style.backgroundColor = '';\n  }\n}\n",
+    "preview": "render('<p appHighlight=\"lightblue\">Survole-moi (bleu)</p><p appHighlight>Survole-moi (jaune)</p>', { imports: [HighlightDirective] });"
   },
   {
     "id": "directive-click-outside",
@@ -348,7 +357,8 @@
       "`event.target` est le noeud cliqué : `this.el.nativeElement.contains(event.target as Node)` dit s'il est à l'intérieur.",
       "`this.appClickOutside.emit()` pour notifier le parent."
     ],
-    "solution": "import { Directive, ElementRef, HostListener, inject, output } from '@angular/core';\n\n@Directive({ selector: '[appClickOutside]' })\nexport class ClickOutsideDirective {\n  appClickOutside = output<void>();\n  private el = inject<ElementRef<HTMLElement>>(ElementRef);\n\n  @HostListener('document:click', ['$event'])\n  onDocumentClick(event: MouseEvent) {\n    if (!this.el.nativeElement.contains(event.target as Node)) {\n      this.appClickOutside.emit();\n    }\n  }\n}\n"
+    "solution": "import { Directive, ElementRef, HostListener, inject, output } from '@angular/core';\n\n@Directive({ selector: '[appClickOutside]' })\nexport class ClickOutsideDirective {\n  appClickOutside = output<void>();\n  private el = inject<ElementRef<HTMLElement>>(ElementRef);\n\n  @HostListener('document:click', ['$event'])\n  onDocumentClick(event: MouseEvent) {\n    if (!this.el.nativeElement.contains(event.target as Node)) {\n      this.appClickOutside.emit();\n    }\n  }\n}\n",
+    "preview": "render('<div appClickOutside (appClickOutside)=\"log()\" style=\"padding:16px;border:2px dashed #ab79ff\">Clique ici, puis en dehors de ce cadre</div>', { imports: [ClickOutsideDirective], props: { log: () => console.log(\"Clic à l'extérieur !\") } });"
   },
   {
     "id": "directive-unless",
@@ -379,7 +389,8 @@
       "`this.container.createEmbeddedView(this.template)` crée la vue ; `this.container.clear()` la détruit.",
       "Mémorise dans un booléen si la vue est déjà affichée pour éviter les doublons."
     ],
-    "solution": "import { Directive, Input, TemplateRef, ViewContainerRef, inject } from '@angular/core';\n\n@Directive({ selector: '[appUnless]' })\nexport class UnlessDirective {\n  private template = inject(TemplateRef<unknown>);\n  private container = inject(ViewContainerRef);\n  private shown = false;\n\n  @Input() set appUnless(condition: boolean) {\n    if (!condition && !this.shown) {\n      this.container.createEmbeddedView(this.template);\n      this.shown = true;\n    } else if (condition && this.shown) {\n      this.container.clear();\n      this.shown = false;\n    }\n  }\n}\n"
+    "solution": "import { Directive, Input, TemplateRef, ViewContainerRef, inject } from '@angular/core';\n\n@Directive({ selector: '[appUnless]' })\nexport class UnlessDirective {\n  private template = inject(TemplateRef<unknown>);\n  private container = inject(ViewContainerRef);\n  private shown = false;\n\n  @Input() set appUnless(condition: boolean) {\n    if (!condition && !this.shown) {\n      this.container.createEmbeddedView(this.template);\n      this.shown = true;\n    } else if (condition && this.shown) {\n      this.container.clear();\n      this.shown = false;\n    }\n  }\n}\n",
+    "preview": "render('<button (click)=\"hidden = !hidden\">Basculer hidden ({{ hidden }})</button><p *appUnless=\"hidden\">Visible quand hidden vaut false</p>', { imports: [UnlessDirective], props: { hidden: false } });"
   },
   {
     "id": "service-cart",
@@ -423,7 +434,8 @@
       "Cherche la ligne avec `find`, puis `map` pour créer une copie `{ ...line, qty: line.qty + 1 }`.",
       "`reduce` calcule les deux totaux dans les `computed`."
     ],
-    "solution": "import { Injectable, computed, signal } from '@angular/core';\n\nexport interface Product {\n  id: number;\n  name: string;\n  price: number;\n}\n\nexport interface CartLine extends Product {\n  qty: number;\n}\n\n@Injectable({ providedIn: 'root' })\nexport class CartService {\n  readonly lines = signal<CartLine[]>([]);\n\n  readonly count = computed(() => this.lines().reduce((n, l) => n + l.qty, 0));\n  readonly total = computed(() => this.lines().reduce((sum, l) => sum + l.price * l.qty, 0));\n\n  add(product: Product) {\n    this.lines.update((lines) =>\n      lines.some((l) => l.id === product.id)\n        ? lines.map((l) => (l.id === product.id ? { ...l, qty: l.qty + 1 } : l))\n        : [...lines, { ...product, qty: 1 }],\n    );\n  }\n\n  remove(id: number) {\n    this.lines.update((lines) => lines.filter((l) => l.id !== id));\n  }\n\n  clear() {\n    this.lines.set([]);\n  }\n}\n"
+    "solution": "import { Injectable, computed, signal } from '@angular/core';\n\nexport interface Product {\n  id: number;\n  name: string;\n  price: number;\n}\n\nexport interface CartLine extends Product {\n  qty: number;\n}\n\n@Injectable({ providedIn: 'root' })\nexport class CartService {\n  readonly lines = signal<CartLine[]>([]);\n\n  readonly count = computed(() => this.lines().reduce((n, l) => n + l.qty, 0));\n  readonly total = computed(() => this.lines().reduce((sum, l) => sum + l.price * l.qty, 0));\n\n  add(product: Product) {\n    this.lines.update((lines) =>\n      lines.some((l) => l.id === product.id)\n        ? lines.map((l) => (l.id === product.id ? { ...l, qty: l.qty + 1 } : l))\n        : [...lines, { ...product, qty: 1 }],\n    );\n  }\n\n  remove(id: number) {\n    this.lines.update((lines) => lines.filter((l) => l.id !== id));\n  }\n\n  clear() {\n    this.lines.set([]);\n  }\n}\n",
+    "preview": "class Demo { cart = __ng.inject(CartService); products = [{ id: 1, name: \"Stylo\", price: 2 }, { id: 2, name: \"Cahier\", price: 5 }]; }\n__ng.Component({ selector: \"app-demo\", template: `@for (p of products; track p.id) { <button (click)=\"cart.add(p)\">Ajouter {{ p.name }}</button> } <button (click)=\"cart.clear()\">Vider</button><p>{{ cart.count() }} article(s) — {{ cart.total() }} €</p>` })(Demo);\nrender(Demo, { providers: [CartService] });"
   },
   {
     "id": "service-http-users",
@@ -454,7 +466,8 @@
       "`this.http.get<User[]>('/api/users', { params: { active: true } })`.",
       "`.pipe(map(users => users.map(u => u.name)), catchError(() => of([])))`."
     ],
-    "solution": "import { HttpClient } from '@angular/common/http';\nimport { Injectable, inject } from '@angular/core';\nimport { Observable, catchError, map, of } from 'rxjs';\n\nexport interface User {\n  id: number;\n  name: string;\n}\n\n@Injectable({ providedIn: 'root' })\nexport class UserService {\n  private http = inject(HttpClient);\n\n  getActiveUsers(): Observable<string[]> {\n    return this.http.get<User[]>('/api/users', { params: { active: true } }).pipe(\n      map((users) => users.map((u) => u.name)),\n      catchError(() => of([] as string[])),\n    );\n  }\n\n  getUser(id: number): Observable<User> {\n    return this.http.get<User>(`/api/users/${id}`);\n  }\n}\n"
+    "solution": "import { HttpClient } from '@angular/common/http';\nimport { Injectable, inject } from '@angular/core';\nimport { Observable, catchError, map, of } from 'rxjs';\n\nexport interface User {\n  id: number;\n  name: string;\n}\n\n@Injectable({ providedIn: 'root' })\nexport class UserService {\n  private http = inject(HttpClient);\n\n  getActiveUsers(): Observable<string[]> {\n    return this.http.get<User[]>('/api/users', { params: { active: true } }).pipe(\n      map((users) => users.map((u) => u.name)),\n      catchError(() => of([] as string[])),\n    );\n  }\n\n  getUser(id: number): Observable<User> {\n    return this.http.get<User>(`/api/users/${id}`);\n  }\n}\n",
+    "preview": "const { provideHttpClient } = require(\"@angular/common/http\");\nconst { provideHttpClientTesting, HttpTestingController } = require(\"@angular/common/http/testing\");\nconst injector = createInjector([UserService, provideHttpClient(), provideHttpClientTesting()]);\ninjector.get(UserService).getActiveUsers().subscribe((names) => console.log(\"Utilisateurs actifs :\", names));\ninjector.get(HttpTestingController).expectOne(\"/api/users?active=true\").flush([{ id: 1, name: \"Ada\" }, { id: 2, name: \"Linus\" }]);"
   },
   {
     "id": "interceptor-auth",
@@ -485,7 +498,8 @@
       "`const token = inject(TokenService).token();` fonctionne dans un intercepteur fonctionnel.",
       "`req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })` retourne une nouvelle requête."
     ],
-    "solution": "import { HttpInterceptorFn } from '@angular/common/http';\nimport { Injectable, inject, signal } from '@angular/core';\n\n@Injectable({ providedIn: 'root' })\nexport class TokenService {\n  token = signal<string | null>(null);\n}\n\nexport const authInterceptor: HttpInterceptorFn = (req, next) => {\n  const token = inject(TokenService).token();\n  if (!token) return next(req);\n  return next(req.clone({ setHeaders: { Authorization: `Bearer ${token}` } }));\n};\n"
+    "solution": "import { HttpInterceptorFn } from '@angular/common/http';\nimport { Injectable, inject, signal } from '@angular/core';\n\n@Injectable({ providedIn: 'root' })\nexport class TokenService {\n  token = signal<string | null>(null);\n}\n\nexport const authInterceptor: HttpInterceptorFn = (req, next) => {\n  const token = inject(TokenService).token();\n  if (!token) return next(req);\n  return next(req.clone({ setHeaders: { Authorization: `Bearer ${token}` } }));\n};\n",
+    "preview": "const { HttpClient, provideHttpClient, withInterceptors } = require(\"@angular/common/http\");\nconst { provideHttpClientTesting, HttpTestingController } = require(\"@angular/common/http/testing\");\nconst injector = createInjector([TokenService, provideHttpClient(withInterceptors([authInterceptor])), provideHttpClientTesting()]);\ninjector.get(TokenService).token.set(\"abc123\");\ninjector.get(HttpClient).get(\"/api/me\").subscribe();\nconst req = injector.get(HttpTestingController).expectOne(\"/api/me\");\nconsole.log(\"Authorization :\", req.request.headers.get(\"Authorization\"));"
   },
   {
     "id": "rxjs-search",
@@ -525,6 +539,7 @@
       "Appelle `.subscribe(r => this.results.set(r))` à la fin du pipe.",
       "`takeUntilDestroyed()` sans argument ne marche que dans le constructeur (contexte d'injection)."
     ],
-    "solution": "import { Component, inject, Injectable, signal } from '@angular/core';\nimport { takeUntilDestroyed } from '@angular/core/rxjs-interop';\nimport { FormControl, ReactiveFormsModule } from '@angular/forms';\nimport { Observable, of } from 'rxjs';\nimport { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';\n\n@Injectable({ providedIn: 'root' })\nexport class SearchService {\n  search(query: string): Observable<string[]> {\n    return of([]); // remplacé par un faux service dans les tests\n  }\n}\n\n@Component({\n  selector: 'app-search',\n  imports: [ReactiveFormsModule],\n  template: `\n    <input data-test=\"search\" [formControl]=\"query\" />\n    <ul>\n      @for (r of results(); track r) {\n        <li data-test=\"result\">{{ r }}</li>\n      }\n    </ul>\n  `,\n})\nexport class SearchComponent {\n  private service = inject(SearchService);\n  query = new FormControl('', { nonNullable: true });\n  results = signal<string[]>([]);\n\n  constructor() {\n    this.query.valueChanges\n      .pipe(\n        debounceTime(300),\n        filter((q) => q.length >= 2),\n        distinctUntilChanged(),\n        switchMap((q) => this.service.search(q)),\n        takeUntilDestroyed(),\n      )\n      .subscribe((r) => this.results.set(r));\n  }\n}\n"
+    "solution": "import { Component, inject, Injectable, signal } from '@angular/core';\nimport { takeUntilDestroyed } from '@angular/core/rxjs-interop';\nimport { FormControl, ReactiveFormsModule } from '@angular/forms';\nimport { Observable, of } from 'rxjs';\nimport { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';\n\n@Injectable({ providedIn: 'root' })\nexport class SearchService {\n  search(query: string): Observable<string[]> {\n    return of([]); // remplacé par un faux service dans les tests\n  }\n}\n\n@Component({\n  selector: 'app-search',\n  imports: [ReactiveFormsModule],\n  template: `\n    <input data-test=\"search\" [formControl]=\"query\" />\n    <ul>\n      @for (r of results(); track r) {\n        <li data-test=\"result\">{{ r }}</li>\n      }\n    </ul>\n  `,\n})\nexport class SearchComponent {\n  private service = inject(SearchService);\n  query = new FormControl('', { nonNullable: true });\n  results = signal<string[]>([]);\n\n  constructor() {\n    this.query.valueChanges\n      .pipe(\n        debounceTime(300),\n        filter((q) => q.length >= 2),\n        distinctUntilChanged(),\n        switchMap((q) => this.service.search(q)),\n        takeUntilDestroyed(),\n      )\n      .subscribe((r) => this.results.set(r));\n  }\n}\n",
+    "preview": "const { of } = require(\"rxjs\");\nrender(SearchComponent, { providers: [{ provide: SearchService, useValue: { search: (q) => { console.log(\"Recherche :\", q); return of([q + \" – résultat 1\", q + \" – résultat 2\"]); } } }] });"
   }
 ]
