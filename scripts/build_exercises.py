@@ -1,170 +1,848 @@
-"""Génère public/data/exercises.json (exercices originaux, JavaScript).
+"""Génère public/data/exercises.json : exercices Angular concrets (pipe, composant, directive, service…).
 
-Chaque test est le corps d'une fonction async qui voit le code de l'utilisateur et reçoit `assert`.
-exercises.data.spec.ts vérifie que chaque solution passe tous les tests et que le code de départ échoue.
+Le code de départ et la solution sont du TypeScript Angular réel, compilé dans le navigateur (JIT).
+Chaque test est le corps d'une fonction async qui voit le code de l'utilisateur et reçoit
+`assert`, `render(template | Composant, options)`, `createInjector(providers)` et `wait(ms)`.
+exercises.data.spec.ts vérifie que chaque solution passe tous les tests et que le départ en échoue.
 """
 import json, pathlib
 
 E, M, H = "easy", "medium", "hard"
 X = []
 def ex(id, title, diff, topic, desc, starter, tests, hints, solution):
-    X.append({"id": id, "title": title, "difficulty": diff, "topic": topic, "description": desc,
-              "starterCode": starter, "tests": [{"name": n, "code": c} for n, c in tests],
-              "hints": hints, "solution": solution})
+    X.append({"id": id, "title": title, "difficulty": diff, "topic": topic, "description": desc.strip(),
+              "starterCode": starter.lstrip("\n"), "tests": [{"name": n, "code": c.strip()} for n, c in tests],
+              "hints": hints, "solution": solution.lstrip("\n")})
 
-ex("to-selector", "Nom de classe → sélecteur", E, "Angular / chaînes",
- "Angular génère des sélecteurs en kebab-case. Écris `toSelector(className)` qui transforme 'MyAwesomeCmp' en 'my-awesome-cmp'.",
- "function toSelector(className) {\n  // TODO\n}\n",
- [("Cas simple", "assert.equal(toSelector('MyAwesomeCmp'), 'my-awesome-cmp')"),
-  ("Un seul mot", "assert.equal(toSelector('Header'), 'header')"),
-  ("Déjà en minuscules", "assert.equal(toSelector('app'), 'app')")],
- ["Insère un tiret avant chaque majuscule qui n'est pas en première position.", "Une regex avec replace(/([a-z])([A-Z])/g, ...) fait l'essentiel."],
- "function toSelector(className) {\n  return className.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();\n}\n")
+# ───────────────────────── Pipes ─────────────────────────
+ex("pipe-truncate", "Pipe truncate", E, "Pipe",
+ """Complète le pipe `truncate` : `{{ 'Bonjour tout le monde' | truncate:7 }}` doit afficher « Bonjour… ».
+• Au-delà de `max` caractères, on coupe et on ajoute « … » (un seul caractère).
+• Si le texte tient dans `max`, il reste inchangé.
+• `max` vaut 20 par défaut.""",
+ r'''
+import { Pipe, PipeTransform } from '@angular/core';
 
-ex("parse-query", "Parser des query params", E, "Routing",
- "Écris `parseQuery(qs)` qui transforme 'a=1&b=hello&c=' (avec ou sans '?' initial) en objet { a: '1', b: 'hello', c: '' }. Les valeurs sont décodées avec decodeURIComponent.",
- "function parseQuery(qs) {\n  // TODO\n}\n",
- [("Cas simple", "assert.deepEqual(parseQuery('a=1&b=hello'), { a: '1', b: 'hello' })"),
-  ("Ignore le ? initial", "assert.deepEqual(parseQuery('?x=2'), { x: '2' })"),
-  ("Valeur vide", "assert.deepEqual(parseQuery('c='), { c: '' })"),
-  ("Décodage", "assert.deepEqual(parseQuery('q=a%20b'), { q: 'a b' })"),
-  ("Chaîne vide", "assert.deepEqual(parseQuery(''), {})")],
- ["Retire le '?' avec replace(/^\\?/, '').", "split('&') puis split('=') sur chaque paire."],
- "function parseQuery(qs) {\n  const result = {};\n  const clean = qs.replace(/^\\?/, '');\n  if (!clean) return result;\n  for (const pair of clean.split('&')) {\n    const [key, value = ''] = pair.split('=');\n    result[decodeURIComponent(key)] = decodeURIComponent(value);\n  }\n  return result;\n}\n")
+@Pipe({ name: 'truncate' })
+export class TruncatePipe implements PipeTransform {
+  transform(value: string, max = 20): string {
+    // TODO : couper à `max` caractères et ajouter « … »
+    return value;
+  }
+}
+''',
+ [("Coupe et ajoute …", r'''const v = render("{{ t | truncate:7 }}", { imports: [TruncatePipe], props: { t: "Bonjour tout le monde" } }); assert.equal(v.text(), "Bonjour…");'''),
+  ("Texte court inchangé", r'''const v = render("{{ t | truncate:10 }}", { imports: [TruncatePipe], props: { t: "Salut" } }); assert.equal(v.text(), "Salut");'''),
+  ("Longueur exacte inchangée", r'''const v = render("{{ t | truncate:5 }}", { imports: [TruncatePipe], props: { t: "abcde" } }); assert.equal(v.text(), "abcde");'''),
+  ("Valeur par défaut : 20", r'''const v = render("{{ t | truncate }}", { imports: [TruncatePipe], props: { t: "a".repeat(25) } }); assert.equal(v.text(), "a".repeat(20) + "…");''')],
+ ["`value.slice(0, max)` récupère le début du texte.", "Compare `value.length` à `max` avant de couper."],
+ r'''
+import { Pipe, PipeTransform } from '@angular/core';
 
-ex("flatten", "Aplatir un tableau", E, "JavaScript",
- "Écris `flatten(arr)` qui aplatit récursivement un tableau imbriqué, sans utiliser Array.prototype.flat. flatten([1,[2,[3,[4]]]]) → [1,2,3,4].",
- "function flatten(arr) {\n  // TODO\n}\n",
- [("Imbrication profonde", "assert.deepEqual(flatten([1,[2,[3,[4]]]]), [1,2,3,4])"),
-  ("Déjà plat", "assert.deepEqual(flatten([1,2]), [1,2])"),
-  ("Vide", "assert.deepEqual(flatten([]), [])"),
-  ("Sans flat natif", "const orig = Array.prototype.flat; Array.prototype.flat = () => { throw new Error('flat interdit'); }; try { assert.deepEqual(flatten([1,[2]]), [1,2]); } finally { Array.prototype.flat = orig; }")],
- ["Parcours avec reduce et teste Array.isArray.", "Appelle flatten récursivement sur les sous-tableaux."],
- "function flatten(arr) {\n  return arr.reduce((acc, item) => acc.concat(Array.isArray(item) ? flatten(item) : item), []);\n}\n")
+@Pipe({ name: 'truncate' })
+export class TruncatePipe implements PipeTransform {
+  transform(value: string, max = 20): string {
+    return value.length > max ? value.slice(0, max) + '…' : value;
+  }
+}
+''')
 
-ex("group-by", "groupBy", E, "JavaScript",
- "Écris `groupBy(items, keyFn)` qui retourne un objet regroupant les éléments selon la clé calculée. groupBy([1,2,3,4], n => n % 2 ? 'impair' : 'pair') → { impair: [1,3], pair: [2,4] }.",
- "function groupBy(items, keyFn) {\n  // TODO\n}\n",
- [("Pair / impair", "assert.deepEqual(groupBy([1,2,3,4], n => n % 2 ? 'impair' : 'pair'), { impair: [1,3], pair: [2,4] })"),
-  ("Par propriété", "assert.deepEqual(groupBy([{t:'a'},{t:'b'},{t:'a'}], o => o.t), { a: [{t:'a'},{t:'a'}], b: [{t:'b'}] })"),
-  ("Liste vide", "assert.deepEqual(groupBy([], x => x), {})")],
- ["reduce avec un objet accumulateur.", "Initialise acc[key] à [] si elle n'existe pas."],
- "function groupBy(items, keyFn) {\n  return items.reduce((acc, item) => {\n    const key = keyFn(item);\n    (acc[key] ??= []).push(item);\n    return acc;\n  }, {});\n}\n")
+ex("pipe-filesize", "Pipe filesize", M, "Pipe",
+ """Écris un pipe `filesize` qui convertit un nombre d'octets en texte lisible :
+512 → « 512 o » · 1024 → « 1 Ko » · 1536 → « 1.5 Ko » · 1048576 → « 1 Mo » · 5368709120 → « 5 Go ».
+• Une décimale maximum, sans « .0 » inutile.
+• `null` ou `undefined` → chaîne vide.""",
+ r'''
+import { Pipe, PipeTransform } from '@angular/core';
 
-ex("pipe", "Composer des fonctions (pipe)", E, "Programmation fonctionnelle",
- "Écris `pipe(...fns)` qui retourne une fonction appliquant les fonctions de gauche à droite : pipe(f, g)(x) = g(f(x)). Comme l'opérateur pipe de RxJS, version synchrone.",
- "function pipe(...fns) {\n  // TODO\n}\n",
- [("Deux fonctions", "assert.equal(pipe(x => x + 1, x => x * 2)(3), 8)"),
-  ("Aucune fonction : identité", "assert.equal(pipe()(5), 5)"),
-  ("Ordre gauche → droite", "assert.equal(pipe(s => s + 'a', s => s + 'b')(''), 'ab')")],
- ["reduce sur la liste des fonctions avec la valeur initiale en accumulateur."],
- "function pipe(...fns) {\n  return (input) => fns.reduce((acc, fn) => fn(acc), input);\n}\n")
+@Pipe({ name: 'filesize' })
+export class FileSizePipe implements PipeTransform {
+  transform(bytes: number | null | undefined): string {
+    // TODO
+    return '';
+  }
+}
+''',
+ [("Octets", r'''const v = render("{{ n | filesize }}", { imports: [FileSizePipe], props: { n: 512 } }); assert.equal(v.text(), "512 o");'''),
+  ("Kilo-octets", r'''const v = render("{{ n | filesize }}", { imports: [FileSizePipe], props: { n: 1024 } }); assert.equal(v.text(), "1 Ko");'''),
+  ("Une décimale", r'''const v = render("{{ n | filesize }}", { imports: [FileSizePipe], props: { n: 1536 } }); assert.equal(v.text(), "1.5 Ko");'''),
+  ("Mégaoctets", r'''const v = render("{{ n | filesize }}", { imports: [FileSizePipe], props: { n: 1048576 } }); assert.equal(v.text(), "1 Mo");'''),
+  ("Gigaoctets", r'''const v = render("{{ n | filesize }}", { imports: [FileSizePipe], props: { n: 5 * 1024 ** 3 } }); assert.equal(v.text(), "5 Go");'''),
+  ("null et undefined", r'''const v = render("[{{ a | filesize }}][{{ b | filesize }}]", { imports: [FileSizePipe], props: { a: null, b: undefined } }); assert.equal(v.text(), "[][]");''')],
+ ["Divise par 1024 tant que la valeur est ≥ 1024, en avançant dans un tableau d'unités ['o', 'Ko', 'Mo', 'Go'].", "`Math.round(v * 10) / 10` donne une décimale et supprime le « .0 »."],
+ r'''
+import { Pipe, PipeTransform } from '@angular/core';
 
-ex("memoize", "memoize", M, "Performance",
- "Écris `memoize(fn)` qui met en cache le résultat de fn selon ses arguments (ils sont tous sérialisables en JSON). fn ne doit être appelée qu'une fois par jeu d'arguments.",
- "function memoize(fn) {\n  // TODO\n}\n",
- [("Résultat correct", "const f = memoize((a,b) => a + b); assert.equal(f(1,2), 3)"),
-  ("Mise en cache", "let calls = 0; const f = memoize(x => { calls++; return x * 2; }); f(2); f(2); f(3); assert.equal(calls, 2)"),
-  ("Arguments multiples distincts", "let calls = 0; const f = memoize((a,b) => { calls++; return a + b; }); f(1,2); f(2,1); assert.equal(calls, 2)"),
-  ("Cache aussi les valeurs falsy", "let calls = 0; const f = memoize(() => { calls++; return 0; }); f(); f(); assert.equal(calls, 1)")],
- ["Utilise une Map dont la clé est JSON.stringify(args).", "Teste cache.has(key) plutôt que la valeur (0 est falsy)."],
- "function memoize(fn) {\n  const cache = new Map();\n  return (...args) => {\n    const key = JSON.stringify(args);\n    if (!cache.has(key)) cache.set(key, fn(...args));\n    return cache.get(key);\n  };\n}\n")
+@Pipe({ name: 'filesize' })
+export class FileSizePipe implements PipeTransform {
+  transform(bytes: number | null | undefined): string {
+    if (bytes == null) return '';
+    const units = ['o', 'Ko', 'Mo', 'Go'];
+    let value = bytes;
+    let unit = 0;
+    while (value >= 1024 && unit < units.length - 1) {
+      value /= 1024;
+      unit++;
+    }
+    return `${Math.round(value * 10) / 10} ${units[unit]}`;
+  }
+}
+''')
 
-ex("debounce", "debounce", M, "RxJS / Performance",
- "Écris `debounce(fn, ms)` : la fonction retournée n'appelle fn qu'après ms millisecondes sans nouvel appel, avec les derniers arguments (comme debounceTime sur une saisie).",
- "function debounce(fn, ms) {\n  // TODO\n}\n",
- [("Un seul appel après rafale", "let calls = []; const d = debounce(v => calls.push(v), 30); d(1); d(2); d(3); await new Promise(r => setTimeout(r, 80)); assert.deepEqual(calls, [3])"),
-  ("Pas d'appel immédiat", "let called = false; const d = debounce(() => { called = true; }, 30); d(); assert.equal(called, false); await new Promise(r => setTimeout(r, 80)); assert.equal(called, true)"),
-  ("Appels espacés = plusieurs exécutions", "let n = 0; const d = debounce(() => n++, 20); d(); await new Promise(r => setTimeout(r, 60)); d(); await new Promise(r => setTimeout(r, 60)); assert.equal(n, 2)")],
- ["Garde l'identifiant du timer dans une variable de closure.", "clearTimeout avant chaque nouveau setTimeout."],
- "function debounce(fn, ms) {\n  let timer;\n  return (...args) => {\n    clearTimeout(timer);\n    timer = setTimeout(() => fn(...args), ms);\n  };\n}\n")
+# ───────────────────────── Composants ─────────────────────────
+ex("component-counter", "Composant compteur", E, "Composant · Signals",
+ """Complète le composant `CounterComponent` avec un signal :
+• le bouton « + » incrémente, le bouton « − » décrémente ;
+• la valeur ne descend jamais sous 0 ;
+• le bouton « − » est désactivé quand la valeur vaut 0 ;
+• la valeur est affichée dans l'élément `data-test="value"`.""",
+ r'''
+import { Component, signal } from '@angular/core';
 
-ex("event-emitter", "EventEmitter (comme @Output)", M, "Angular / Patterns",
- "Implémente la classe `EventEmitter` avec `on(event, handler)`, `off(event, handler)` et `emit(event, ...args)`. `on` retourne une fonction de désabonnement. Un événement sans écouteur ne doit pas lever d'erreur.",
- "class EventEmitter {\n  // TODO\n}\n",
- [("on + emit", "const e = new EventEmitter(); const got = []; e.on('x', v => got.push(v)); e.emit('x', 1); e.emit('x', 2); assert.deepEqual(got, [1,2])"),
-  ("off", "const e = new EventEmitter(); let n = 0; const h = () => n++; e.on('x', h); e.off('x', h); e.emit('x'); assert.equal(n, 0)"),
-  ("on retourne unsubscribe", "const e = new EventEmitter(); let n = 0; const un = e.on('x', () => n++); e.emit('x'); un(); e.emit('x'); assert.equal(n, 1)"),
-  ("Plusieurs écouteurs", "const e = new EventEmitter(); let n = 0; e.on('x', () => n++); e.on('x', () => n++); e.emit('x'); assert.equal(n, 2)"),
-  ("Événement inconnu", "const e = new EventEmitter(); e.emit('rien'); assert.ok(true)")],
- ["Stocke un Map<string, Set<Function>>.", "emit : boucle sur le Set s'il existe."],
- "class EventEmitter {\n  #handlers = new Map();\n  on(event, handler) {\n    if (!this.#handlers.has(event)) this.#handlers.set(event, new Set());\n    this.#handlers.get(event).add(handler);\n    return () => this.off(event, handler);\n  }\n  off(event, handler) {\n    this.#handlers.get(event)?.delete(handler);\n  }\n  emit(event, ...args) {\n    this.#handlers.get(event)?.forEach((h) => h(...args));\n  }\n}\n")
+@Component({
+  selector: 'app-counter',
+  template: `
+    <button data-test="dec">−</button>
+    <span data-test="value">0</span>
+    <button data-test="inc">+</button>
+  `,
+})
+export class CounterComponent {
+  count = signal(0);
 
-ex("mini-signal", "Mini signal", M, "Angular / Signals",
- "Implémente `signal(initial)` qui retourne une fonction getter : s() lit la valeur, s.set(v) la remplace et s.update(fn) la calcule depuis l'ancienne. Implémente aussi `computed(fn)` retournant un getter qui recalcule fn() à chaque lecture (version simplifiée).",
- "function signal(initial) {\n  // TODO\n}\n\nfunction computed(fn) {\n  // TODO\n}\n",
- [("Lecture initiale", "assert.equal(signal(5)(), 5)"),
-  ("set", "const s = signal(1); s.set(2); assert.equal(s(), 2)"),
-  ("update", "const s = signal(1); s.update(v => v + 10); assert.equal(s(), 11)"),
-  ("computed suit le signal", "const a = signal(2); const double = computed(() => a() * 2); assert.equal(double(), 4); a.set(5); assert.equal(double(), 10)")],
- ["Garde la valeur dans une variable de closure et attache set/update à la fonction getter (Object.assign).", "computed(fn) peut simplement retourner fn."],
- "function signal(initial) {\n  let value = initial;\n  const getter = () => value;\n  getter.set = (v) => { value = v; };\n  getter.update = (fn) => { value = fn(value); };\n  return getter;\n}\n\nfunction computed(fn) {\n  return () => fn();\n}\n")
+  // TODO : increment() et decrement(), puis les relier au template
+}
+''',
+ [("Affiche 0 au départ", r'''const v = render(CounterComponent); assert.equal(v.text("[data-test=value]"), "0");'''),
+  ("Le bouton + incrémente", r'''const v = render(CounterComponent); v.click("[data-test=inc]"); v.click("[data-test=inc]"); assert.equal(v.text("[data-test=value]"), "2");'''),
+  ("Le bouton − décrémente", r'''const v = render(CounterComponent); v.click("[data-test=inc]"); v.click("[data-test=inc]"); v.click("[data-test=dec]"); assert.equal(v.text("[data-test=value]"), "1");'''),
+  ("Jamais sous 0", r'''const v = render(CounterComponent); v.click("[data-test=dec]"); v.click("[data-test=dec]"); assert.equal(v.text("[data-test=value]"), "0");'''),
+  ("− désactivé à 0 seulement", r'''const v = render(CounterComponent); assert.equal(v.query("[data-test=dec]").disabled, true); v.click("[data-test=inc]"); assert.equal(v.query("[data-test=dec]").disabled, false);''')],
+ ["`count.update(n => n + 1)` incrémente un signal.", "Dans le template : `{{ count() }}`, `(click)=\"increment()\"` et `[disabled]=\"count() === 0\"`.", "`Math.max(0, n - 1)` évite de passer sous zéro."],
+ r'''
+import { Component, signal } from '@angular/core';
 
-ex("behavior-subject", "BehaviorSubject", M, "RxJS",
- "Implémente `BehaviorSubject` : constructeur(initial), propriété/getter `value`, `next(v)`, et `subscribe(observer)` qui appelle immédiatement observer avec la valeur courante, puis à chaque next. subscribe retourne une fonction de désabonnement.",
- "class BehaviorSubject {\n  // TODO\n}\n",
- [("Émet la valeur initiale à l'abonnement", "const s = new BehaviorSubject(1); const got = []; s.subscribe(v => got.push(v)); assert.deepEqual(got, [1])"),
-  ("Émet les next suivants", "const s = new BehaviorSubject(0); const got = []; s.subscribe(v => got.push(v)); s.next(1); s.next(2); assert.deepEqual(got, [0,1,2])"),
-  ("value reflète la dernière valeur", "const s = new BehaviorSubject('a'); s.next('b'); assert.equal(s.value, 'b')"),
-  ("Nouvel abonné reçoit la dernière valeur", "const s = new BehaviorSubject(0); s.next(9); const got = []; s.subscribe(v => got.push(v)); assert.deepEqual(got, [9])"),
-  ("Désabonnement", "const s = new BehaviorSubject(0); const got = []; const un = s.subscribe(v => got.push(v)); un(); s.next(1); assert.deepEqual(got, [0])")],
- ["Garde un Set d'observers.", "Dans subscribe : appelle observer(this.value) avant de retourner la fonction de désabonnement."],
- "class BehaviorSubject {\n  #value;\n  #observers = new Set();\n  constructor(initial) { this.#value = initial; }\n  get value() { return this.#value; }\n  next(v) {\n    this.#value = v;\n    this.#observers.forEach((o) => o(v));\n  }\n  subscribe(observer) {\n    this.#observers.add(observer);\n    observer(this.#value);\n    return () => this.#observers.delete(observer);\n  }\n}\n")
+@Component({
+  selector: 'app-counter',
+  template: `
+    <button data-test="dec" [disabled]="count() === 0" (click)="decrement()">−</button>
+    <span data-test="value">{{ count() }}</span>
+    <button data-test="inc" (click)="increment()">+</button>
+  `,
+})
+export class CounterComponent {
+  count = signal(0);
 
-ex("di-container", "Conteneur d'injection", H, "Angular / DI",
- "Implémente `Container` avec `register(token, factory)` et `resolve(token)`. Chaque service est un singleton (la factory n'est appelée qu'une fois). La factory reçoit le container pour résoudre ses dépendances. Résoudre un token inconnu lève une erreur, et une dépendance circulaire aussi.",
- "class Container {\n  // TODO\n}\n",
- [("Résolution simple", "const c = new Container(); c.register('a', () => 1); assert.equal(c.resolve('a'), 1)"),
-  ("Singleton", "const c = new Container(); let n = 0; c.register('a', () => ({ id: ++n })); assert.equal(c.resolve('a'), c.resolve('a')); assert.equal(n, 1)"),
-  ("Dépendances", "const c = new Container(); c.register('cfg', () => ({ url: 'x' })); c.register('http', (ct) => ({ base: ct.resolve('cfg').url })); assert.equal(c.resolve('http').base, 'x')"),
-  ("Token inconnu", "const c = new Container(); assert.throws(() => c.resolve('nope'))"),
-  ("Dépendance circulaire", "const c = new Container(); c.register('a', (ct) => ct.resolve('b')); c.register('b', (ct) => ct.resolve('a')); assert.throws(() => c.resolve('a'))")],
- ["Deux Map : factories et instances.", "Pour détecter la circularité, garde un Set des tokens en cours de résolution."],
- "class Container {\n  #factories = new Map();\n  #instances = new Map();\n  #resolving = new Set();\n  register(token, factory) {\n    this.#factories.set(token, factory);\n  }\n  resolve(token) {\n    if (this.#instances.has(token)) return this.#instances.get(token);\n    const factory = this.#factories.get(token);\n    if (!factory) throw new Error('Token inconnu : ' + String(token));\n    if (this.#resolving.has(token)) throw new Error('Dépendance circulaire : ' + String(token));\n    this.#resolving.add(token);\n    try {\n      const instance = factory(this);\n      this.#instances.set(token, instance);\n      return instance;\n    } finally {\n      this.#resolving.delete(token);\n    }\n  }\n}\n")
+  increment() {
+    this.count.update((n) => n + 1);
+  }
 
-ex("mini-observable", "Mini Observable + map", H, "RxJS",
- "Implémente la classe `Observable` : constructeur(subscribeFn) où subscribeFn(observer) peut retourner une fonction de nettoyage ; `subscribe(next)` retourne une fonction de désabonnement qui appelle ce nettoyage ; `pipe(...operators)` applique des opérateurs (fonctions Observable → Observable). Écris aussi l'opérateur `map(fn)`.",
- "class Observable {\n  // TODO\n}\n\nfunction map(fn) {\n  // TODO\n}\n",
- [("subscribe reçoit les valeurs", "const got = []; new Observable(o => { o.next(1); o.next(2); }).subscribe(v => got.push(v)); assert.deepEqual(got, [1,2])"),
-  ("map", "const got = []; new Observable(o => { o.next(1); o.next(2); }).pipe(map(x => x * 10)).subscribe(v => got.push(v)); assert.deepEqual(got, [10,20])"),
-  ("pipe enchaîne les opérateurs", "const got = []; new Observable(o => o.next(2)).pipe(map(x => x + 1), map(x => x * 2)).subscribe(v => got.push(v)); assert.deepEqual(got, [6])"),
-  ("Désabonnement appelle le nettoyage", "let cleaned = false; const un = new Observable(() => () => { cleaned = true; }).subscribe(() => {}); assert.equal(cleaned, false); un(); assert.equal(cleaned, true)"),
-  ("Cold : chaque abonnement relance la source", "let runs = 0; const o = new Observable(ob => { runs++; ob.next(1); }); o.subscribe(() => {}); o.subscribe(() => {}); assert.equal(runs, 2)")],
- ["L'observer passé à subscribeFn est { next }.", "pipe : operators.reduce((source, op) => op(source), this).", "map(fn) retourne source => new Observable(o => source.subscribe(v => o.next(fn(v))))."],
- "class Observable {\n  constructor(subscribeFn) { this._subscribe = subscribeFn; }\n  subscribe(next) {\n    const cleanup = this._subscribe({ next });\n    return () => { if (typeof cleanup === 'function') cleanup(); };\n  }\n  pipe(...operators) {\n    return operators.reduce((source, op) => op(source), this);\n  }\n}\n\nfunction map(fn) {\n  return (source) => new Observable((observer) => {\n    const unsubscribe = source.subscribe((v) => observer.next(fn(v)));\n    return unsubscribe;\n  });\n}\n")
+  decrement() {
+    this.count.update((n) => Math.max(0, n - 1));
+  }
+}
+''')
 
-ex("brackets", "Parenthèses équilibrées", M, "Algorithmique",
- "Écris `isBalanced(str)` qui retourne true si les (), [] et {} sont correctement fermés et imbriqués (les autres caractères sont ignorés). Utile pour valider un template !",
- "function isBalanced(str) {\n  // TODO\n}\n",
- [("Équilibré", "assert.equal(isBalanced('{[()]}'), true)"),
-  ("Mauvais ordre", "assert.equal(isBalanced('([)]'), false)"),
-  ("Fermeture manquante", "assert.equal(isBalanced('(('), false)"),
-  ("Fermeture en trop", "assert.equal(isBalanced('())'), false)"),
-  ("Texte ignoré", "assert.equal(isBalanced('a(b[c]{d})e'), true)"),
-  ("Chaîne vide", "assert.equal(isBalanced(''), true)")],
- ["Utilise une pile (tableau).", "À chaque fermant, le dernier ouvrant empilé doit correspondre."],
- "function isBalanced(str) {\n  const pairs = { ')': '(', ']': '[', '}': '{' };\n  const stack = [];\n  for (const ch of str) {\n    if ('([{'.includes(ch)) stack.push(ch);\n    else if (ch in pairs && stack.pop() !== pairs[ch]) return false;\n  }\n  return stack.length === 0;\n}\n")
+ex("component-todo-list", "Liste de tâches (control flow)", E, "Composant · @for / @if",
+ """Le composant `TodoListComponent` reçoit une liste de tâches via l'entrée `todos`. Complète son template :
+• une ligne `<li data-test="todo">` par tâche, avec son titre ;
+• la classe CSS `done` sur les tâches terminées ;
+• s'il n'y a aucune tâche : `<p data-test="empty">Aucune tâche</p>` ;
+• le nombre de tâches non terminées dans `data-test="remaining"` au format « 2 restante(s) ».""",
+ r'''
+import { Component, computed, input } from '@angular/core';
 
-ex("chunk", "Découper en lots", E, "JavaScript",
- "Écris `chunk(arr, size)` qui découpe un tableau en sous-tableaux de taille size (le dernier peut être plus court). chunk([1,2,3,4,5], 2) → [[1,2],[3,4],[5]]. Utile pour la pagination.",
- "function chunk(arr, size) {\n  // TODO\n}\n",
- [("Reste", "assert.deepEqual(chunk([1,2,3,4,5], 2), [[1,2],[3,4],[5]])"),
-  ("Taille multiple", "assert.deepEqual(chunk([1,2,3,4], 2), [[1,2],[3,4]])"),
-  ("Taille supérieure", "assert.deepEqual(chunk([1,2], 5), [[1,2]])"),
-  ("Vide", "assert.deepEqual(chunk([], 3), [])"),
-  ("Ne modifie pas l'entrée", "const a = [1,2,3]; chunk(a, 2); assert.deepEqual(a, [1,2,3])")],
- ["Boucle avec un pas de size et slice(i, i + size)."],
- "function chunk(arr, size) {\n  const result = [];\n  for (let i = 0; i < arr.length; i += size) result.push(arr.slice(i, i + size));\n  return result;\n}\n")
+interface Todo {
+  id: number;
+  title: string;
+  done: boolean;
+}
 
-ex("deep-equal-immutable", "Mise à jour immuable", M, "Angular / Signals & NgRx",
- "Avec OnPush et les signaux, on met l'état à jour de façon immuable. Écris `updateTodo(state, id, patch)` qui retourne un NOUVEL état { todos: [...] } où le todo d'identifiant id est fusionné avec patch, sans muter l'état d'origine ni les todos non concernés (ils gardent la même référence).",
- "function updateTodo(state, id, patch) {\n  // TODO\n}\n",
- [("Fusionne le patch", "const s = { todos: [{id:1,done:false},{id:2,done:false}] }; const n = updateTodo(s, 2, { done: true }); assert.deepEqual(n.todos[1], { id: 2, done: true })"),
-  ("Ne mute pas l'original", "const s = { todos: [{id:1,done:false}] }; updateTodo(s, 1, { done: true }); assert.equal(s.todos[0].done, false)"),
-  ("Nouvelle référence d'état", "const s = { todos: [{id:1}] }; assert.ok(updateTodo(s, 1, {}) !== s)"),
-  ("Todos inchangés conservent leur référence", "const s = { todos: [{id:1},{id:2}] }; const n = updateTodo(s, 2, { x: 1 }); assert.ok(n.todos[0] === s.todos[0])")],
- ["map sur state.todos : retourne {...todo, ...patch} seulement si todo.id === id."],
- "function updateTodo(state, id, patch) {\n  return { ...state, todos: state.todos.map((t) => (t.id === id ? { ...t, ...patch } : t)) };\n}\n")
+@Component({
+  selector: 'app-todo-list',
+  template: `
+    <ul>
+      <!-- TODO : @for / @empty -->
+    </ul>
+    <p data-test="remaining"></p>
+  `,
+})
+export class TodoListComponent {
+  todos = input<Todo[]>([]);
+  remaining = computed(() => 0); // TODO
+}
+''',
+ [("Une ligne par tâche", r'''const v = render(TodoListComponent, { inputs: { todos: [{ id: 1, title: "Lire", done: false }, { id: 2, title: "Écrire", done: true }, { id: 3, title: "Tester", done: false }] } }); assert.equal(v.queryAll("[data-test=todo]").length, 3); assert.equal(v.queryAll("[data-test=todo]")[0].textContent.trim(), "Lire");'''),
+  ("Classe done sur les tâches terminées", r'''const v = render(TodoListComponent, { inputs: { todos: [{ id: 1, title: "A", done: false }, { id: 2, title: "B", done: true }] } }); const items = v.queryAll("[data-test=todo]"); assert.equal(items[0].classList.contains("done"), false); assert.equal(items[1].classList.contains("done"), true);'''),
+  ("Message quand la liste est vide", r'''const v = render(TodoListComponent, { inputs: { todos: [] } }); assert.equal(v.text("[data-test=empty]"), "Aucune tâche"); assert.equal(v.queryAll("[data-test=todo]").length, 0);'''),
+  ("Pas de message quand il y a des tâches", r'''const v = render(TodoListComponent, { inputs: { todos: [{ id: 1, title: "A", done: false }] } }); assert.equal(v.query("[data-test=empty]"), null);'''),
+  ("Compteur de tâches restantes", r'''const v = render(TodoListComponent, { inputs: { todos: [{ id: 1, title: "A", done: false }, { id: 2, title: "B", done: true }, { id: 3, title: "C", done: false }] } }); assert.equal(v.text("[data-test=remaining]"), "2 restante(s)");'''),
+  ("Se met à jour quand l'entrée change", r'''const v = render(TodoListComponent, { inputs: { todos: [] } }); v.setInput("todos", [{ id: 1, title: "Nouveau", done: false }]); assert.equal(v.queryAll("[data-test=todo]").length, 1); assert.equal(v.text("[data-test=remaining]"), "1 restante(s)");''')],
+ ["`@for (todo of todos(); track todo.id) { ... } @empty { ... }` gère aussi le cas vide.", "`[class.done]=\"todo.done\"` ajoute la classe conditionnellement.", "`remaining = computed(() => this.todos().filter(t => !t.done).length)`."],
+ r'''
+import { Component, computed, input } from '@angular/core';
+
+interface Todo {
+  id: number;
+  title: string;
+  done: boolean;
+}
+
+@Component({
+  selector: 'app-todo-list',
+  template: `
+    <ul>
+      @for (todo of todos(); track todo.id) {
+        <li data-test="todo" [class.done]="todo.done">{{ todo.title }}</li>
+      } @empty {
+        <p data-test="empty">Aucune tâche</p>
+      }
+    </ul>
+    <p data-test="remaining">{{ remaining() }} restante(s)</p>
+  `,
+})
+export class TodoListComponent {
+  todos = input<Todo[]>([]);
+  remaining = computed(() => this.todos().filter((t) => !t.done).length);
+}
+''')
+
+ex("card-projection", "Carte avec projection de contenu", E, "Composant · ng-content",
+ """Un composant `CardComponent` doit afficher le contenu fourni par son parent à trois endroits :
+• `<header data-test="header">` : l'élément portant l'attribut `card-title` ;
+• `<div data-test="body">` : tout le reste du contenu ;
+• `<footer data-test="footer">` : l'élément portant l'attribut `card-footer`.
+Utilise `<ng-content>` avec `select`.""",
+ r'''
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-card',
+  template: `
+    <header data-test="header"></header>
+    <div data-test="body"></div>
+    <footer data-test="footer"></footer>
+  `,
+})
+export class CardComponent {}
+''',
+ [("Titre projeté dans le header", r'''const v = render('<app-card><h2 card-title>Mon titre</h2><p>Du texte</p></app-card>', { imports: [CardComponent] }); assert.equal(v.text("[data-test=header]"), "Mon titre");'''),
+  ("Contenu libre dans le body", r'''const v = render('<app-card><h2 card-title>T</h2><p>Du texte</p></app-card>', { imports: [CardComponent] }); assert.equal(v.text("[data-test=body]"), "Du texte");'''),
+  ("Pied de carte projeté", r'''const v = render('<app-card><p>x</p><button card-footer>Valider</button></app-card>', { imports: [CardComponent] }); assert.equal(v.text("[data-test=footer]"), "Valider");'''),
+  ("Chaque contenu reste à sa place", r'''const v = render('<app-card><h2 card-title>T</h2><p>Corps</p><button card-footer>OK</button></app-card>', { imports: [CardComponent] }); assert.equal(v.text("[data-test=header]").includes("Corps"), false); assert.equal(v.text("[data-test=body]").includes("OK"), false);''')],
+ ["`<ng-content select=\"[card-title]\"></ng-content>` projette les éléments portant cet attribut.", "Un `<ng-content></ng-content>` sans `select` récupère tout le contenu restant."],
+ r'''
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-card',
+  template: `
+    <header data-test="header"><ng-content select="[card-title]"></ng-content></header>
+    <div data-test="body"><ng-content></ng-content></div>
+    <footer data-test="footer"><ng-content select="[card-footer]"></ng-content></footer>
+  `,
+})
+export class CardComponent {}
+''')
+
+ex("component-rating", "Notation par étoiles (input / output)", M, "Composant · input / output",
+ """Complète `RatingComponent` :
+• affiche `max` boutons `data-test="star"` (5 par défaut) ;
+• les `value` premières étoiles portent la classe `filled` ;
+• un clic sur la n-ième étoile émet `n` via la sortie `rated`.""",
+ r'''
+import { Component, computed, input, output } from '@angular/core';
+
+@Component({
+  selector: 'app-rating',
+  template: `
+    <!-- TODO : une étoile cliquable par note -->
+  `,
+})
+export class RatingComponent {
+  value = input(0);
+  max = input(5);
+  rated = output<number>();
+
+  stars = computed(() => [] as number[]); // TODO : [1, 2, …, max]
+}
+''',
+ [("5 étoiles par défaut", r'''const v = render(RatingComponent); assert.equal(v.queryAll("[data-test=star]").length, 5);'''),
+  ("Nombre d'étoiles configurable", r'''const v = render(RatingComponent, { inputs: { max: 3 } }); assert.equal(v.queryAll("[data-test=star]").length, 3);'''),
+  ("Étoiles remplies selon value", r'''const v = render(RatingComponent, { inputs: { value: 2 } }); assert.equal(v.queryAll("[data-test=star].filled").length, 2);'''),
+  ("Mise à jour quand value change", r'''const v = render(RatingComponent, { inputs: { value: 1 } }); v.setInput("value", 4); assert.equal(v.queryAll("[data-test=star].filled").length, 4);'''),
+  ("Émet la note au clic", r'''const v = render('<app-rating [value]="v" (rated)="last = $event" />', { imports: [RatingComponent], props: { v: 1, last: null } }); v.queryAll("[data-test=star]")[2].click(); v.detectChanges(); assert.equal(v.component.last, 3);''')],
+ ["`stars = computed(() => Array.from({ length: this.max() }, (_, i) => i + 1))`.", "Dans le template : `(click)=\"rated.emit(star)\"` et `[class.filled]=\"star <= value()\"`."],
+ r'''
+import { Component, computed, input, output } from '@angular/core';
+
+@Component({
+  selector: 'app-rating',
+  template: `
+    @for (star of stars(); track star) {
+      <button data-test="star" type="button" [class.filled]="star <= value()" (click)="rated.emit(star)">★</button>
+    }
+  `,
+})
+export class RatingComponent {
+  value = input(0);
+  max = input(5);
+  rated = output<number>();
+
+  stars = computed(() => Array.from({ length: this.max() }, (_, i) => i + 1));
+}
+''')
+
+ex("component-product-filter", "Liste filtrable (signals)", M, "Composant · Signals",
+ """`ProductListComponent` affiche des produits et les filtre pendant la frappe :
+• un champ `data-test="search"` met à jour le signal `query` à chaque saisie ;
+• `filtered` (computed) garde les produits dont le nom contient `query`, sans tenir compte de la casse ;
+• une ligne `data-test="product"` par produit (« Nom – 12 € ») ;
+• `data-test="count"` affiche « 2 résultat(s) » ;
+• aucun résultat : `<p data-test="empty">Aucun résultat</p>`.""",
+ r'''
+import { Component, computed, input, signal } from '@angular/core';
+
+interface Product {
+  name: string;
+  price: number;
+}
+
+@Component({
+  selector: 'app-product-list',
+  template: `
+    <input data-test="search" placeholder="Rechercher" />
+    <p data-test="count"></p>
+    <ul>
+      <!-- TODO -->
+    </ul>
+  `,
+})
+export class ProductListComponent {
+  products = input<Product[]>([]);
+  query = signal('');
+  filtered = computed(() => this.products()); // TODO : filtrer avec query()
+}
+''',
+ [("Affiche tous les produits au départ", r'''const v = render(ProductListComponent, { inputs: { products: [{ name: "Laptop", price: 900 }, { name: "Phone", price: 500 }, { name: "Phone case", price: 15 }] } }); assert.equal(v.queryAll("[data-test=product]").length, 3); assert.equal(v.queryAll("[data-test=product]")[1].textContent.trim(), "Phone – 500 €");'''),
+  ("Filtre pendant la saisie", r'''const v = render(ProductListComponent, { inputs: { products: [{ name: "Laptop", price: 900 }, { name: "Phone", price: 500 }] } }); v.type("[data-test=search]", "pho"); assert.equal(v.queryAll("[data-test=product]").length, 1); assert.equal(v.component.query(), "pho");'''),
+  ("Insensible à la casse", r'''const v = render(ProductListComponent, { inputs: { products: [{ name: "Laptop", price: 900 }, { name: "Phone", price: 500 }] } }); v.type("[data-test=search]", "LAPTOP"); assert.equal(v.queryAll("[data-test=product]").length, 1);'''),
+  ("Compteur de résultats", r'''const v = render(ProductListComponent, { inputs: { products: [{ name: "Phone", price: 500 }, { name: "Phone case", price: 15 }, { name: "Laptop", price: 900 }] } }); v.type("[data-test=search]", "phone"); assert.equal(v.text("[data-test=count]"), "2 résultat(s)");'''),
+  ("Message quand rien ne correspond", r'''const v = render(ProductListComponent, { inputs: { products: [{ name: "Laptop", price: 900 }] } }); v.type("[data-test=search]", "zzz"); assert.equal(v.text("[data-test=empty]"), "Aucun résultat"); assert.equal(v.queryAll("[data-test=product]").length, 0);''')],
+ ["`(input)=\"query.set($any($event.target).value)\"` met le signal à jour.", "`filtered = computed(() => this.products().filter(p => p.name.toLowerCase().includes(this.query().toLowerCase())))`.", "Pense à `@empty` dans le `@for`."],
+ r'''
+import { Component, computed, input, signal } from '@angular/core';
+
+interface Product {
+  name: string;
+  price: number;
+}
+
+@Component({
+  selector: 'app-product-list',
+  template: `
+    <input data-test="search" placeholder="Rechercher" (input)="query.set($any($event.target).value)" />
+    <p data-test="count">{{ filtered().length }} résultat(s)</p>
+    <ul>
+      @for (p of filtered(); track p.name) {
+        <li data-test="product">{{ p.name }} – {{ p.price }} €</li>
+      } @empty {
+        <p data-test="empty">Aucun résultat</p>
+      }
+    </ul>
+  `,
+})
+export class ProductListComponent {
+  products = input<Product[]>([]);
+  query = signal('');
+  filtered = computed(() => {
+    const q = this.query().toLowerCase();
+    return this.products().filter((p) => p.name.toLowerCase().includes(q));
+  });
+}
+''')
+
+ex("form-login", "Formulaire de connexion réactif", M, "Formulaires réactifs",
+ """Complète `LoginComponent` (formulaire réactif) :
+• `email` : obligatoire et au format email ; `password` : obligatoire, 6 caractères minimum ;
+• le bouton `data-test="submit"` est désactivé tant que le formulaire est invalide ;
+• quand le champ email a été touché (blur) et qu'il est invalide, affiche `<p data-test="email-error">Email invalide</p>` ;
+• à la soumission, la sortie `submitted` émet `{ email, password }`.""",
+ r'''
+import { Component, output } from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+
+@Component({
+  selector: 'app-login',
+  imports: [ReactiveFormsModule],
+  template: `
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <input data-test="email" formControlName="email" type="email" />
+      <input data-test="password" formControlName="password" type="password" />
+      <button data-test="submit" type="submit">Se connecter</button>
+    </form>
+  `,
+})
+export class LoginComponent {
+  submitted = output<{ email: string; password: string }>();
+
+  form = new FormGroup({
+    email: new FormControl('', { nonNullable: true }),
+    password: new FormControl('', { nonNullable: true }),
+  });
+
+  submit() {
+    // TODO
+  }
+}
+''',
+ [("Bouton désactivé au départ", r'''const v = render(LoginComponent); assert.equal(v.query("[data-test=submit]").disabled, true);'''),
+  ("Email invalide : bouton désactivé", r'''const v = render(LoginComponent); v.type("[data-test=email]", "pas-un-email"); v.type("[data-test=password]", "123456"); assert.equal(v.query("[data-test=submit]").disabled, true);'''),
+  ("Mot de passe trop court : bouton désactivé", r'''const v = render(LoginComponent); v.type("[data-test=email]", "a@b.fr"); v.type("[data-test=password]", "123"); assert.equal(v.query("[data-test=submit]").disabled, true);'''),
+  ("Formulaire valide : bouton actif", r'''const v = render(LoginComponent); v.type("[data-test=email]", "a@b.fr"); v.type("[data-test=password]", "123456"); assert.equal(v.query("[data-test=submit]").disabled, false);'''),
+  ("Message d'erreur après blur", r'''const v = render(LoginComponent); assert.equal(v.query("[data-test=email-error]"), null); v.type("[data-test=email]", "nope"); v.trigger("[data-test=email]", "blur"); assert.equal(v.text("[data-test=email-error]"), "Email invalide");'''),
+  ("Pas d'erreur sur un email valide", r'''const v = render(LoginComponent); v.type("[data-test=email]", "a@b.fr"); v.trigger("[data-test=email]", "blur"); assert.equal(v.query("[data-test=email-error]"), null);'''),
+  ("Émet la valeur à la soumission", r'''const v = render('<app-login (submitted)="data = $event" />', { imports: [LoginComponent], props: { data: null } }); v.type("[data-test=email]", "a@b.fr"); v.type("[data-test=password]", "123456"); v.trigger("form", "submit"); assert.deepEqual(v.component.data, { email: "a@b.fr", password: "123456" });''')],
+ ["`Validators.required`, `Validators.email` et `Validators.minLength(6)` se passent dans l'option `validators` du FormControl.", "`[disabled]=\"form.invalid\"` sur le bouton.", "`form.controls.email.touched && form.controls.email.invalid` dans un `@if`.", "`this.submitted.emit(this.form.getRawValue())`."],
+ r'''
+import { Component, output } from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+
+@Component({
+  selector: 'app-login',
+  imports: [ReactiveFormsModule],
+  template: `
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <input data-test="email" formControlName="email" type="email" />
+      @if (form.controls.email.touched && form.controls.email.invalid) {
+        <p data-test="email-error">Email invalide</p>
+      }
+      <input data-test="password" formControlName="password" type="password" />
+      <button data-test="submit" type="submit" [disabled]="form.invalid">Se connecter</button>
+    </form>
+  `,
+})
+export class LoginComponent {
+  submitted = output<{ email: string; password: string }>();
+
+  form = new FormGroup({
+    email: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email] }),
+    password: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(6)] }),
+  });
+
+  submit() {
+    if (this.form.valid) this.submitted.emit(this.form.getRawValue());
+  }
+}
+''')
+
+# ───────────────────────── Directives ─────────────────────────
+ex("directive-highlight", "Directive highlight", E, "Directive",
+ """Complète `HighlightDirective` (attribut `appHighlight`) :
+• au survol (`mouseenter`), l'élément prend la couleur de fond `appHighlight` (« yellow » par défaut) ;
+• à la sortie (`mouseleave`), le fond est retiré.
+Exemple : `<p appHighlight="lightblue">…</p>`.""",
+ r'''
+import { Directive, ElementRef, HostListener, Input, inject } from '@angular/core';
+
+@Directive({ selector: '[appHighlight]' })
+export class HighlightDirective {
+  @Input() appHighlight = 'yellow';
+  private el = inject<ElementRef<HTMLElement>>(ElementRef);
+
+  // TODO : @HostListener('mouseenter') et @HostListener('mouseleave')
+}
+''',
+ [("Couleur par défaut au survol", r'''const v = render("<p appHighlight>Texte</p>", { imports: [HighlightDirective] }); v.trigger("p", "mouseenter"); assert.equal(v.query("p").style.backgroundColor, "yellow");'''),
+  ("Couleur personnalisée", r'''const v = render('<p appHighlight="lightblue">Texte</p>', { imports: [HighlightDirective] }); v.trigger("p", "mouseenter"); assert.equal(v.query("p").style.backgroundColor, "lightblue");'''),
+  ("Fond retiré à la sortie", r'''const v = render("<p appHighlight>Texte</p>", { imports: [HighlightDirective] }); v.trigger("p", "mouseenter"); v.trigger("p", "mouseleave"); assert.equal(v.query("p").style.backgroundColor, "");'''),
+  ("Pas de fond avant le survol", r'''const v = render("<p appHighlight>Texte</p>", { imports: [HighlightDirective] }); assert.equal(v.query("p").style.backgroundColor, "");''')],
+ ["`@HostListener('mouseenter') onEnter() { ... }` écoute un événement de l'élément hôte.", "`this.el.nativeElement.style.backgroundColor = this.appHighlight` applique la couleur."],
+ r'''
+import { Directive, ElementRef, HostListener, Input, inject } from '@angular/core';
+
+@Directive({ selector: '[appHighlight]' })
+export class HighlightDirective {
+  @Input() appHighlight = 'yellow';
+  private el = inject<ElementRef<HTMLElement>>(ElementRef);
+
+  @HostListener('mouseenter')
+  onEnter() {
+    this.el.nativeElement.style.backgroundColor = this.appHighlight || 'yellow';
+  }
+
+  @HostListener('mouseleave')
+  onLeave() {
+    this.el.nativeElement.style.backgroundColor = '';
+  }
+}
+''')
+
+ex("directive-click-outside", "Directive clic extérieur", M, "Directive · HostListener",
+ """Écris `ClickOutsideDirective` (sélecteur `[appClickOutside]`) : elle émet sa sortie `appClickOutside` quand l'utilisateur clique **en dehors** de l'élément qui la porte (utile pour fermer un menu ou une modale).
+• Écoute les clics sur le `document` avec `@HostListener('document:click', ['$event'])`.
+• Un clic à l'intérieur de l'élément (ou d'un de ses enfants) n'émet rien.""",
+ r'''
+import { Directive, ElementRef, HostListener, inject, output } from '@angular/core';
+
+@Directive({ selector: '[appClickOutside]' })
+export class ClickOutsideDirective {
+  appClickOutside = output<void>();
+  private el = inject<ElementRef<HTMLElement>>(ElementRef);
+
+  // TODO : écouter document:click et émettre si la cible est hors de l'élément
+}
+''',
+ [("Un clic à l'extérieur émet", r'''const v = render('<div><div appClickOutside (appClickOutside)="n = n + 1"><button id="in">dedans</button></div><button id="out">dehors</button></div>', { imports: [ClickOutsideDirective], props: { n: 0 } }); v.click("#out"); assert.equal(v.component.n, 1);'''),
+  ("Un clic à l'intérieur n'émet pas", r'''const v = render('<div><div appClickOutside (appClickOutside)="n = n + 1"><button id="in">dedans</button></div><button id="out">dehors</button></div>', { imports: [ClickOutsideDirective], props: { n: 0 } }); v.click("#in"); assert.equal(v.component.n, 0);'''),
+  ("Chaque clic extérieur émet", r'''const v = render('<div><div appClickOutside (appClickOutside)="n = n + 1">x</div><button id="out">dehors</button></div>', { imports: [ClickOutsideDirective], props: { n: 0 } }); v.click("#out"); v.click("#out"); assert.equal(v.component.n, 2);''')],
+ ["`event.target` est le noeud cliqué : `this.el.nativeElement.contains(event.target as Node)` dit s'il est à l'intérieur.", "`this.appClickOutside.emit()` pour notifier le parent."],
+ r'''
+import { Directive, ElementRef, HostListener, inject, output } from '@angular/core';
+
+@Directive({ selector: '[appClickOutside]' })
+export class ClickOutsideDirective {
+  appClickOutside = output<void>();
+  private el = inject<ElementRef<HTMLElement>>(ElementRef);
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    if (!this.el.nativeElement.contains(event.target as Node)) {
+      this.appClickOutside.emit();
+    }
+  }
+}
+''')
+
+ex("directive-unless", "Directive structurelle *appUnless", H, "Directive structurelle",
+ """Écris la directive structurelle `*appUnless` : l'inverse de `*ngIf`. Le contenu est affiché quand la condition est **fausse**.
+`<p *appUnless="hidden">Visible</p>` → affiché si `hidden` vaut `false`.
+• Utilise `TemplateRef` et `ViewContainerRef`.
+• Ne crée jamais deux fois la vue : change de condition = créer ou détruire, pas dupliquer.""",
+ r'''
+import { Directive, Input, TemplateRef, ViewContainerRef, inject } from '@angular/core';
+
+@Directive({ selector: '[appUnless]' })
+export class UnlessDirective {
+  private template = inject(TemplateRef<unknown>);
+  private container = inject(ViewContainerRef);
+
+  @Input() set appUnless(condition: boolean) {
+    // TODO : afficher le template quand `condition` est faux, le retirer sinon
+  }
+}
+''',
+ [("Affiché quand la condition est fausse", r'''const v = render("<p *appUnless=\"hidden\">Visible</p>", { imports: [UnlessDirective], props: { hidden: false } }); assert.equal(v.text("p"), "Visible");'''),
+  ("Masqué quand la condition est vraie", r'''const v = render("<p *appUnless=\"hidden\">Visible</p>", { imports: [UnlessDirective], props: { hidden: true } }); assert.equal(v.query("p"), null);'''),
+  ("Réagit aux changements", r'''const v = render("<p *appUnless=\"hidden\">Visible</p>", { imports: [UnlessDirective], props: { hidden: false } }); v.component.hidden = true; v.detectChanges(); assert.equal(v.query("p"), null); v.component.hidden = false; v.detectChanges(); assert.equal(v.queryAll("p").length, 1);'''),
+  ("Jamais de doublon", r'''const v = render("<p *appUnless=\"hidden\">Visible</p>", { imports: [UnlessDirective], props: { hidden: 0 } }); v.component.hidden = false; v.detectChanges(); v.component.hidden = null; v.detectChanges(); assert.equal(v.queryAll("p").length, 1);''')],
+ ["`this.container.createEmbeddedView(this.template)` crée la vue ; `this.container.clear()` la détruit.", "Mémorise dans un booléen si la vue est déjà affichée pour éviter les doublons."],
+ r'''
+import { Directive, Input, TemplateRef, ViewContainerRef, inject } from '@angular/core';
+
+@Directive({ selector: '[appUnless]' })
+export class UnlessDirective {
+  private template = inject(TemplateRef<unknown>);
+  private container = inject(ViewContainerRef);
+  private shown = false;
+
+  @Input() set appUnless(condition: boolean) {
+    if (!condition && !this.shown) {
+      this.container.createEmbeddedView(this.template);
+      this.shown = true;
+    } else if (condition && this.shown) {
+      this.container.clear();
+      this.shown = false;
+    }
+  }
+}
+''')
+
+# ───────────────────────── Services / HTTP ─────────────────────────
+ex("service-cart", "Service panier (signals)", E, "Service · Signals",
+ """Complète `CartService`, un service injectable qui gère un panier avec des signaux :
+• `add(product)` : ajoute un produit `{ id, name, price }` ; s'il est déjà dans le panier, incrémente sa quantité ;
+• `remove(id)` : retire la ligne correspondante ;
+• `count` (computed) : nombre total d'articles (somme des quantités) ;
+• `total` (computed) : somme des `price × quantité` ;
+• `clear()` : vide le panier.""",
+ r'''
+import { Injectable, computed, signal } from '@angular/core';
+
+export interface Product {
+  id: number;
+  name: string;
+  price: number;
+}
+
+export interface CartLine extends Product {
+  qty: number;
+}
+
+@Injectable({ providedIn: 'root' })
+export class CartService {
+  readonly lines = signal<CartLine[]>([]);
+
+  readonly count = computed(() => 0); // TODO
+  readonly total = computed(() => 0); // TODO
+
+  add(product: Product) {
+    // TODO
+  }
+
+  remove(id: number) {
+    // TODO
+  }
+
+  clear() {
+    // TODO
+  }
+}
+''',
+ [("Ajoute un produit", r'''const cart = createInjector([CartService]).get(CartService); cart.add({ id: 1, name: "Stylo", price: 2 }); assert.equal(cart.lines().length, 1); assert.equal(cart.lines()[0].qty, 1);'''),
+  ("Incrémente la quantité d'un produit existant", r'''const cart = createInjector([CartService]).get(CartService); cart.add({ id: 1, name: "Stylo", price: 2 }); cart.add({ id: 1, name: "Stylo", price: 2 }); assert.equal(cart.lines().length, 1); assert.equal(cart.lines()[0].qty, 2);'''),
+  ("count = total des quantités", r'''const cart = createInjector([CartService]).get(CartService); cart.add({ id: 1, name: "A", price: 2 }); cart.add({ id: 1, name: "A", price: 2 }); cart.add({ id: 2, name: "B", price: 5 }); assert.equal(cart.count(), 3);'''),
+  ("total = somme prix × quantité", r'''const cart = createInjector([CartService]).get(CartService); cart.add({ id: 1, name: "A", price: 2 }); cart.add({ id: 1, name: "A", price: 2 }); cart.add({ id: 2, name: "B", price: 5 }); assert.equal(cart.total(), 9);'''),
+  ("remove retire la ligne", r'''const cart = createInjector([CartService]).get(CartService); cart.add({ id: 1, name: "A", price: 2 }); cart.add({ id: 2, name: "B", price: 5 }); cart.remove(1); assert.deepEqual(cart.lines().map((l) => l.id), [2]);'''),
+  ("clear vide le panier", r'''const cart = createInjector([CartService]).get(CartService); cart.add({ id: 1, name: "A", price: 2 }); cart.clear(); assert.equal(cart.count(), 0); assert.equal(cart.total(), 0);'''),
+  ("Ne mute pas les lignes existantes (immutabilité)", r'''const cart = createInjector([CartService]).get(CartService); cart.add({ id: 1, name: "A", price: 2 }); const before = cart.lines(); cart.add({ id: 1, name: "A", price: 2 }); assert.ok(before !== cart.lines()); assert.equal(before[0].qty, 1);''')],
+ ["`this.lines.update(lines => ...)` : retourne toujours un nouveau tableau.", "Cherche la ligne avec `find`, puis `map` pour créer une copie `{ ...line, qty: line.qty + 1 }`.", "`reduce` calcule les deux totaux dans les `computed`."],
+ r'''
+import { Injectable, computed, signal } from '@angular/core';
+
+export interface Product {
+  id: number;
+  name: string;
+  price: number;
+}
+
+export interface CartLine extends Product {
+  qty: number;
+}
+
+@Injectable({ providedIn: 'root' })
+export class CartService {
+  readonly lines = signal<CartLine[]>([]);
+
+  readonly count = computed(() => this.lines().reduce((n, l) => n + l.qty, 0));
+  readonly total = computed(() => this.lines().reduce((sum, l) => sum + l.price * l.qty, 0));
+
+  add(product: Product) {
+    this.lines.update((lines) =>
+      lines.some((l) => l.id === product.id)
+        ? lines.map((l) => (l.id === product.id ? { ...l, qty: l.qty + 1 } : l))
+        : [...lines, { ...product, qty: 1 }],
+    );
+  }
+
+  remove(id: number) {
+    this.lines.update((lines) => lines.filter((l) => l.id !== id));
+  }
+
+  clear() {
+    this.lines.set([]);
+  }
+}
+''')
+
+ex("service-http-users", "Service HTTP (HttpClient)", M, "Service · HttpClient",
+ """Complète `UserService`, qui utilise `HttpClient` :
+• `getActiveUsers()` : GET `/api/users?active=true` (paramètre de requête via `params`) ; la réponse est un tableau `{ id, name }` ; retourne un Observable des **noms** seulement ;
+• en cas d'erreur HTTP, `getActiveUsers()` retourne un tableau vide (`catchError`) ;
+• `getUser(id)` : GET `/api/users/:id`, retourne l'utilisateur tel quel.""",
+ r'''
+import { HttpClient } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
+import { Observable, catchError, map, of } from 'rxjs';
+
+export interface User {
+  id: number;
+  name: string;
+}
+
+@Injectable({ providedIn: 'root' })
+export class UserService {
+  private http = inject(HttpClient);
+
+  getActiveUsers(): Observable<string[]> {
+    // TODO
+    return of([]);
+  }
+
+  getUser(id: number): Observable<User> {
+    // TODO
+    return of({ id, name: '' });
+  }
+}
+''',
+ [("getActiveUsers : bonne requête", r'''const { provideHttpClient } = require("@angular/common/http"); const { provideHttpClientTesting, HttpTestingController } = require("@angular/common/http/testing"); const injector = createInjector([UserService, provideHttpClient(), provideHttpClientTesting()]); const http = injector.get(HttpTestingController); injector.get(UserService).getActiveUsers().subscribe(); const req = http.expectOne("/api/users?active=true"); assert.equal(req.request.method, "GET");'''),
+  ("getActiveUsers : retourne les noms", r'''const { provideHttpClient } = require("@angular/common/http"); const { provideHttpClientTesting, HttpTestingController } = require("@angular/common/http/testing"); const injector = createInjector([UserService, provideHttpClient(), provideHttpClientTesting()]); const http = injector.get(HttpTestingController); let result; injector.get(UserService).getActiveUsers().subscribe((r) => (result = r)); http.expectOne("/api/users?active=true").flush([{ id: 1, name: "Ada" }, { id: 2, name: "Linus" }]); assert.deepEqual(result, ["Ada", "Linus"]);'''),
+  ("getActiveUsers : tableau vide en cas d'erreur", r'''const { provideHttpClient } = require("@angular/common/http"); const { provideHttpClientTesting, HttpTestingController } = require("@angular/common/http/testing"); const injector = createInjector([UserService, provideHttpClient(), provideHttpClientTesting()]); const http = injector.get(HttpTestingController); let result = "pas de valeur"; injector.get(UserService).getActiveUsers().subscribe((r) => (result = r)); http.expectOne("/api/users?active=true").flush("boom", { status: 500, statusText: "Server Error" }); assert.deepEqual(result, []);'''),
+  ("getUser : GET /api/users/:id", r'''const { provideHttpClient } = require("@angular/common/http"); const { provideHttpClientTesting, HttpTestingController } = require("@angular/common/http/testing"); const injector = createInjector([UserService, provideHttpClient(), provideHttpClientTesting()]); const http = injector.get(HttpTestingController); let result; injector.get(UserService).getUser(7).subscribe((r) => (result = r)); const req = http.expectOne("/api/users/7"); assert.equal(req.request.method, "GET"); req.flush({ id: 7, name: "Grace" }); assert.deepEqual(result, { id: 7, name: "Grace" });''')],
+ ["`this.http.get<User[]>('/api/users', { params: { active: true } })`.", "`.pipe(map(users => users.map(u => u.name)), catchError(() => of([])))`."],
+ r'''
+import { HttpClient } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
+import { Observable, catchError, map, of } from 'rxjs';
+
+export interface User {
+  id: number;
+  name: string;
+}
+
+@Injectable({ providedIn: 'root' })
+export class UserService {
+  private http = inject(HttpClient);
+
+  getActiveUsers(): Observable<string[]> {
+    return this.http.get<User[]>('/api/users', { params: { active: true } }).pipe(
+      map((users) => users.map((u) => u.name)),
+      catchError(() => of([] as string[])),
+    );
+  }
+
+  getUser(id: number): Observable<User> {
+    return this.http.get<User>(`/api/users/${id}`);
+  }
+}
+''')
+
+ex("interceptor-auth", "Intercepteur d'authentification", M, "HttpInterceptor",
+ """Écris `authInterceptor` (un `HttpInterceptorFn`) : il ajoute l'en-tête `Authorization: Bearer <token>` à chaque requête sortante.
+• Le token vient de `TokenService.token()` (signal, `null` si non connecté) — utilise `inject()` dans l'intercepteur ;
+• sans token, la requête part inchangée (pas d'en-tête) ;
+• les requêtes HttpRequest sont immuables : utilise `req.clone(...)`.""",
+ r'''
+import { HttpInterceptorFn } from '@angular/common/http';
+import { Injectable, inject, signal } from '@angular/core';
+
+@Injectable({ providedIn: 'root' })
+export class TokenService {
+  token = signal<string | null>(null);
+}
+
+export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  // TODO : ajouter l'en-tête Authorization si un token existe
+  return next(req);
+};
+''',
+ [("Ajoute l'en-tête Authorization", r'''const { HttpClient, provideHttpClient, withInterceptors } = require("@angular/common/http"); const { provideHttpClientTesting, HttpTestingController } = require("@angular/common/http/testing"); const injector = createInjector([TokenService, provideHttpClient(withInterceptors([authInterceptor])), provideHttpClientTesting()]); injector.get(TokenService).token.set("abc123"); injector.get(HttpClient).get("/api/me").subscribe(); const req = injector.get(HttpTestingController).expectOne("/api/me"); assert.equal(req.request.headers.get("Authorization"), "Bearer abc123");'''),
+  ("Sans token : requête inchangée", r'''const { HttpClient, provideHttpClient, withInterceptors } = require("@angular/common/http"); const { provideHttpClientTesting, HttpTestingController } = require("@angular/common/http/testing"); const injector = createInjector([TokenService, provideHttpClient(withInterceptors([authInterceptor])), provideHttpClientTesting()]); injector.get(HttpClient).get("/api/me").subscribe(); const req = injector.get(HttpTestingController).expectOne("/api/me"); assert.equal(req.request.headers.has("Authorization"), false);'''),
+  ("Utilise le token courant à chaque requête", r'''const { HttpClient, provideHttpClient, withInterceptors } = require("@angular/common/http"); const { provideHttpClientTesting, HttpTestingController } = require("@angular/common/http/testing"); const injector = createInjector([TokenService, provideHttpClient(withInterceptors([authInterceptor])), provideHttpClientTesting()]); const http = injector.get(HttpClient); const ctrl = injector.get(HttpTestingController); const tokens = injector.get(TokenService); tokens.token.set("first"); http.get("/a").subscribe(); assert.equal(ctrl.expectOne("/a").request.headers.get("Authorization"), "Bearer first"); tokens.token.set("second"); http.get("/b").subscribe(); assert.equal(ctrl.expectOne("/b").request.headers.get("Authorization"), "Bearer second");'''),
+  ("Conserve les autres en-têtes", r'''const { HttpClient, provideHttpClient, withInterceptors } = require("@angular/common/http"); const { provideHttpClientTesting, HttpTestingController } = require("@angular/common/http/testing"); const injector = createInjector([TokenService, provideHttpClient(withInterceptors([authInterceptor])), provideHttpClientTesting()]); injector.get(TokenService).token.set("t"); injector.get(HttpClient).get("/x", { headers: { "X-Custom": "1" } }).subscribe(); const req = injector.get(HttpTestingController).expectOne("/x"); assert.equal(req.request.headers.get("X-Custom"), "1"); assert.equal(req.request.headers.get("Authorization"), "Bearer t");''')],
+ ["`const token = inject(TokenService).token();` fonctionne dans un intercepteur fonctionnel.", "`req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })` retourne une nouvelle requête."],
+ r'''
+import { HttpInterceptorFn } from '@angular/common/http';
+import { Injectable, inject, signal } from '@angular/core';
+
+@Injectable({ providedIn: 'root' })
+export class TokenService {
+  token = signal<string | null>(null);
+}
+
+export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  const token = inject(TokenService).token();
+  if (!token) return next(req);
+  return next(req.clone({ setHeaders: { Authorization: `Bearer ${token}` } }));
+};
+''')
+
+# ───────────────────────── RxJS dans un composant ─────────────────────────
+ex("rxjs-search", "Recherche avec debounce (RxJS)", H, "RxJS · Composant",
+ """`SearchComponent` interroge `SearchService.search(q)` pendant la frappe. Branche le flux de `query.valueChanges` :
+• `debounceTime(300)` : attend 300 ms sans frappe ;
+• n'appelle le service que pour 2 caractères minimum ;
+• `distinctUntilChanged()` : pas de nouvel appel pour la même valeur ;
+• `switchMap` : une réponse tardive d'une ancienne recherche est ignorée ;
+• les résultats arrivent dans le signal `results`, affichés en `<li data-test="result">`.
+Désabonne proprement avec `takeUntilDestroyed()`.""",
+ r'''
+import { Component, inject, Injectable, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { Observable, of } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
+
+@Injectable({ providedIn: 'root' })
+export class SearchService {
+  search(query: string): Observable<string[]> {
+    return of([]); // remplacé par un faux service dans les tests
+  }
+}
+
+@Component({
+  selector: 'app-search',
+  imports: [ReactiveFormsModule],
+  template: `
+    <input data-test="search" [formControl]="query" />
+    <ul>
+      @for (r of results(); track r) {
+        <li data-test="result">{{ r }}</li>
+      }
+    </ul>
+  `,
+})
+export class SearchComponent {
+  private service = inject(SearchService);
+  query = new FormControl('', { nonNullable: true });
+  results = signal<string[]>([]);
+
+  constructor() {
+    // TODO : query.valueChanges.pipe(...).subscribe(r => this.results.set(r))
+  }
+}
+''',
+ [("Attend 300 ms avant de chercher", r'''const calls = []; const v = render(SearchComponent, { providers: [{ provide: SearchService, useValue: { search: (q) => { calls.push(q); return require("rxjs").of([q + "-1"]); } } }] }); v.type("[data-test=search]", "ng"); assert.equal(calls.length, 0); await wait(380); assert.deepEqual(calls, ["ng"]);'''),
+  ("Affiche les résultats", r'''const v = render(SearchComponent, { providers: [{ provide: SearchService, useValue: { search: (q) => require("rxjs").of([q + "-1", q + "-2"]) } }] }); v.type("[data-test=search]", "ng"); await wait(380); await v.stable(); assert.deepEqual(v.queryAll("[data-test=result]").map((e) => e.textContent.trim()), ["ng-1", "ng-2"]);'''),
+  ("Une seule recherche pour une rafale de frappes", r'''const calls = []; const v = render(SearchComponent, { providers: [{ provide: SearchService, useValue: { search: (q) => { calls.push(q); return require("rxjs").of([]); } } }] }); v.type("[data-test=search]", "ng"); await wait(100); v.type("[data-test=search]", "ngx"); await wait(100); v.type("[data-test=search]", "ngxs"); await wait(380); assert.deepEqual(calls, ["ngxs"]);'''),
+  ("Ignore moins de 2 caractères", r'''const calls = []; const v = render(SearchComponent, { providers: [{ provide: SearchService, useValue: { search: (q) => { calls.push(q); return require("rxjs").of([]); } } }] }); v.type("[data-test=search]", "a"); await wait(380); assert.equal(calls.length, 0);'''),
+  ("Pas de nouvel appel pour la même valeur", r'''const calls = []; const v = render(SearchComponent, { providers: [{ provide: SearchService, useValue: { search: (q) => { calls.push(q); return require("rxjs").of([]); } } }] }); v.type("[data-test=search]", "angular"); await wait(380); v.type("[data-test=search]", "angular"); await wait(380); assert.equal(calls.length, 1);'''),
+  ("Ignore la réponse d'une ancienne recherche (switchMap)", r'''const { timer } = require("rxjs"); const { map } = require("rxjs/operators"); const v = render(SearchComponent, { providers: [{ provide: SearchService, useValue: { search: (q) => timer(q === "ab" ? 400 : 20).pipe(map(() => [q])) } }] }); v.type("[data-test=search]", "ab"); await wait(340); v.type("[data-test=search]", "abc"); await wait(340); await wait(500); await v.stable(); assert.deepEqual(v.queryAll("[data-test=result]").map((e) => e.textContent.trim()), ["abc"]);''')],
+ ["`this.query.valueChanges.pipe(debounceTime(300), filter(q => q.length >= 2), distinctUntilChanged(), switchMap(q => this.service.search(q)), takeUntilDestroyed())`.", "Appelle `.subscribe(r => this.results.set(r))` à la fin du pipe.", "`takeUntilDestroyed()` sans argument ne marche que dans le constructeur (contexte d'injection)."],
+ r'''
+import { Component, inject, Injectable, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { Observable, of } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
+
+@Injectable({ providedIn: 'root' })
+export class SearchService {
+  search(query: string): Observable<string[]> {
+    return of([]); // remplacé par un faux service dans les tests
+  }
+}
+
+@Component({
+  selector: 'app-search',
+  imports: [ReactiveFormsModule],
+  template: `
+    <input data-test="search" [formControl]="query" />
+    <ul>
+      @for (r of results(); track r) {
+        <li data-test="result">{{ r }}</li>
+      }
+    </ul>
+  `,
+})
+export class SearchComponent {
+  private service = inject(SearchService);
+  query = new FormControl('', { nonNullable: true });
+  results = signal<string[]>([]);
+
+  constructor() {
+    this.query.valueChanges
+      .pipe(
+        debounceTime(300),
+        filter((q) => q.length >= 2),
+        distinctUntilChanged(),
+        switchMap((q) => this.service.search(q)),
+        takeUntilDestroyed(),
+      )
+      .subscribe((r) => this.results.set(r));
+  }
+}
+''')
 
 pathlib.Path(__file__).resolve().parent.parent.joinpath("public/data/exercises.json").write_text(
     json.dumps(X, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
