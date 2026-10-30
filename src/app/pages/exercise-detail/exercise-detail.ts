@@ -6,6 +6,7 @@ import {
   CodeEditor,
   CompileErrors,
   ConsolePanel,
+  ExerciseDescription,
   ExercisesService,
   RunnerAngularService,
   TestResults,
@@ -17,7 +18,7 @@ import { difficultyLabel } from '@shared/question';
 
 @Component({
   selector: 'app-exercise-detail',
-  imports: [RouterLink, CodeEditor, TestResults, ConsolePanel, CompileErrors],
+  imports: [RouterLink, CodeEditor, TestResults, ConsolePanel, CompileErrors, ExerciseDescription],
   templateUrl: './exercise-detail.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
