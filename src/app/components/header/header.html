@@ -1,0 +1,20 @@
+<header class="bg-primary-dark text-white">
+  <div class="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 px-4">
+    <a routerLink="/" class="flex items-center py-2 text-lg font-bold" aria-label="Interview Trainer, accueil">
+      🎯 Interview Trainer
+    </a>
+    <nav aria-label="Navigation principale">
+      <ul class="flex flex-wrap gap-1">
+        @for (link of links; track link.path) {
+          <li>
+            <a
+              [routerLink]="link.path"
+              routerLinkActive="bg-primary text-primary-dark"
+              class="flex items-center px-3 hover:bg-white/10"
+            >{{ link.label }}</a>
+          </li>
+        }
+      </ul>
+    </nav>
+  </div>
+</header>

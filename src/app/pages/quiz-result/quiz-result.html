@@ -1,0 +1,26 @@
+<section class="space-y-6">
+  <header class="space-y-1 bg-white p-6 text-center">
+    <h1 class="text-2xl font-bold text-primary-dark">Résultat</h1>
+    <p class="text-5xl font-bold" [class]="percent() >= 50 ? 'text-brand-green' : 'text-brand-red'">
+      {{ store.score() }} / {{ store.questions().length }}
+    </p>
+    <p>{{ percent() }}% — {{ verdict() }}</p>
+  </header>
+
+  <div class="flex flex-wrap justify-end gap-3">
+    <a routerLink="/quiz" class="flex items-center bg-primary px-6 font-semibold text-primary-dark">Nouveau QCM</a>
+  </div>
+
+  @if (mistakes().length > 0) {
+    <h2 class="text-xl font-semibold">À revoir ({{ mistakes().length }})</h2>
+    <ul class="space-y-6">
+      @for (r of mistakes(); track r.question.id) {
+        <li class="bg-white p-4">
+          <app-question-card [question]="r.question" [selected]="r.selected" [revealed]="true" />
+        </li>
+      }
+    </ul>
+  } @else {
+    <p class="text-center text-lg">Aucune erreur, bravo ! 🎉</p>
+  }
+</section>

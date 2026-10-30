@@ -1,0 +1,243 @@
+[
+  {
+    "id": "rx-001",
+    "category": "rxjs",
+    "difficulty": "medium",
+    "question": "Quelle différence entre `switchMap` et `mergeMap` ?",
+    "options": [
+      "Aucune",
+      "switchMap annule l'Observable interne précédent à chaque nouvelle valeur ; mergeMap les exécute en parallèle",
+      "mergeMap annule les précédents",
+      "switchMap est synchrone"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "`switchMap` convient aux recherches (annuler la requête obsolète) ; `mergeMap` aux traitements parallèles indépendants."
+  },
+  {
+    "id": "rx-002",
+    "category": "rxjs",
+    "difficulty": "medium",
+    "question": "Quel opérateur choisir pour exécuter des requêtes en série dans l'ordre ?",
+    "options": [
+      "switchMap",
+      "concatMap",
+      "exhaustMap",
+      "mergeMap"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "`concatMap` met en file : chaque interne attend la fin du précédent, l'ordre est conservé."
+  },
+  {
+    "id": "rx-003",
+    "category": "rxjs",
+    "difficulty": "medium",
+    "question": "Que fait `exhaustMap` ?",
+    "options": [
+      "Ignore les nouvelles valeurs tant que l'Observable interne courant n'est pas terminé",
+      "Annule l'interne courant",
+      "Fusionne tout",
+      "Épuise la mémoire"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Typique du clic « Se connecter » : on ignore les clics tant que la requête est en cours."
+  },
+  {
+    "id": "rx-004",
+    "category": "rxjs",
+    "difficulty": "easy",
+    "question": "Quelle différence entre `Subject` et `BehaviorSubject` ?",
+    "options": [
+      "Aucune",
+      "BehaviorSubject a une valeur initiale et émet immédiatement sa dernière valeur à tout nouvel abonné",
+      "Subject conserve la dernière valeur",
+      "BehaviorSubject n'émet qu'une fois"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "`BehaviorSubject` possède toujours une valeur courante (`.value`). `ReplaySubject(n)` rejoue les n dernières."
+  },
+  {
+    "id": "rx-005",
+    "category": "rxjs",
+    "difficulty": "medium",
+    "question": "Un Observable « cold » signifie que…",
+    "options": [
+      "Il n'émet jamais",
+      "Chaque abonnement déclenche sa propre exécution du producteur",
+      "Il partage une seule source",
+      "Il est terminé"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Un HTTP via HttpClient est cold : chaque `subscribe` refait la requête. `share`/`shareReplay` rendent « hot » en partageant."
+  },
+  {
+    "id": "rx-006",
+    "category": "rxjs",
+    "difficulty": "medium",
+    "question": "Quel est l'effet de `shareReplay(1)` ?",
+    "options": [
+      "Relance la source à chaque abonné",
+      "Partage une seule souscription à la source et rejoue la dernière valeur aux nouveaux abonnés",
+      "Supprime les doublons",
+      "Retarde l'émission"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Utile pour mettre en cache le résultat d'un appel HTTP partagé par plusieurs consommateurs."
+  },
+  {
+    "id": "rx-007",
+    "category": "rxjs",
+    "difficulty": "medium",
+    "question": "Quand `forkJoin` émet-il ?",
+    "options": [
+      "À chaque valeur de n'importe quelle source",
+      "Une seule fois, quand toutes les sources sont terminées, avec leur dernière valeur chacune",
+      "Dès la première source",
+      "Jamais"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "`forkJoin([a$, b$])` ≈ `Promise.all` ; `combineLatest` émet à chaque changement après que chaque source a émis une fois."
+  },
+  {
+    "id": "rx-008",
+    "category": "rxjs",
+    "difficulty": "easy",
+    "question": "Quel opérateur attend une pause dans les émissions avant de laisser passer la dernière valeur ?",
+    "options": [
+      "throttleTime",
+      "debounceTime",
+      "delay",
+      "sampleTime"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "`debounceTime(300)` est classique pour la saisie utilisateur dans un champ de recherche."
+  },
+  {
+    "id": "rx-009",
+    "category": "rxjs",
+    "difficulty": "easy",
+    "question": "À quoi sert `distinctUntilChanged` ?",
+    "options": [
+      "À trier",
+      "À ignorer une valeur identique à la précédente",
+      "À supprimer tous les doublons de la séquence",
+      "À terminer le flux"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Il ne compare qu'avec la valeur immédiatement précédente (comparateur personnalisable)."
+  },
+  {
+    "id": "rx-010",
+    "category": "rxjs",
+    "difficulty": "medium",
+    "question": "Comment gérer une erreur HTTP sans interrompre le flux principal d'un switchMap ?",
+    "code": "search$.pipe(\n  switchMap(q => http.get(url, { params: { q } }).pipe(\n    catchError(() => of([]))\n  ))\n)",
+    "options": [
+      "try/catch autour du subscribe",
+      "catchError à l'intérieur du Observable interne, retournant of(valeurDeRepli)",
+      "Ignorer l'erreur",
+      "Utiliser Subject"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Placer `catchError` dans l'Observable interne évite que l'erreur ne termine le flux externe."
+  },
+  {
+    "id": "rx-011",
+    "category": "rxjs",
+    "difficulty": "medium",
+    "question": "Que fait `takeUntil(destroy$)` ?",
+    "options": [
+      "Prend la première valeur",
+      "Termine l'abonnement quand destroy$ émet",
+      "Retarde jusqu'à destroy$",
+      "Filtre les valeurs"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Pattern historique de désabonnement ; aujourd'hui remplaçable par `takeUntilDestroyed()`."
+  },
+  {
+    "id": "rx-012",
+    "category": "rxjs",
+    "difficulty": "medium",
+    "question": "Quelle différence entre `combineLatest` et `withLatestFrom` ?",
+    "options": [
+      "Aucune",
+      "withLatestFrom n'émet que quand la source principale émet, en prenant la dernière valeur de l'autre",
+      "combineLatest n'émet qu'une fois",
+      "withLatestFrom est asynchrone"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "`a$.pipe(withLatestFrom(b$))` est déclenché par a$ seulement ; `combineLatest` par n'importe laquelle."
+  },
+  {
+    "id": "rx-013",
+    "category": "rxjs",
+    "difficulty": "easy",
+    "question": "Que fait l'opérateur `tap` ?",
+    "options": [
+      "Transforme les valeurs",
+      "Exécute un effet de bord (log…) sans modifier le flux",
+      "Filtre",
+      "Complète le flux"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "`tap` est transparent pour les valeurs émises."
+  },
+  {
+    "id": "rx-014",
+    "category": "rxjs",
+    "difficulty": "hard",
+    "question": "Quelle est la conséquence de ne pas se désabonner d'un `interval(1000)` dans un composant détruit ?",
+    "options": [
+      "Aucune",
+      "Le timer continue de tourner et le callback reste référencé : fuite mémoire et effets indésirables",
+      "Angular le stoppe seul",
+      "Une erreur de compilation"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Les Observables infinis exigent un désabonnement explicite (`takeUntilDestroyed`, `async` pipe, `unsubscribe`)."
+  },
+  {
+    "id": "rx-015",
+    "category": "rxjs",
+    "difficulty": "medium",
+    "question": "Quelle différence entre `of(1,2,3)` et `from([1,2,3])` ?",
+    "options": [
+      "`of` émet chaque argument ; `from` convertit une source itérable/Promise en Observable (ici émet aussi 1,2,3)",
+      "of est asynchrone",
+      "from ne gère que les Promises",
+      "Aucune pour un tableau passé sans spread"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "`of([1,2,3])` émettrait le tableau entier ; `from([1,2,3])` émet 1, 2, 3. Les deux émettent ici de façon synchrone."
+  }
+]

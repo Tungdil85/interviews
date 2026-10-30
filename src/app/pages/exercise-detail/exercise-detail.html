@@ -1,0 +1,48 @@
+@if (exercise(); as e) {
+  <section class="space-y-4">
+    <a routerLink="/exercises" class="inline-flex items-center underline">← Tous les exercices</a>
+
+    <header>
+      <h1 class="text-2xl font-bold text-primary-dark">
+        {{ e.title }}
+        @if (solved()) {
+          <span aria-label="Résolu">✅</span>
+        }
+      </h1>
+      <p class="text-sm text-gray-600">{{ e.topic }} · {{ label(e.difficulty) }}</p>
+    </header>
+
+    <p class="whitespace-pre-wrap bg-white p-4">{{ e.description }}</p>
+
+    <app-code-editor [code]="code()" (codeChange)="onCodeChange($event)" ariaLabel="Éditeur de code de l'exercice" />
+
+    <div class="flex flex-wrap justify-end gap-3">
+      <button type="button" class="px-4 underline" (click)="reset()">Réinitialiser</button>
+      <button type="button" class="px-4 underline disabled:opacity-50" [disabled]="shownHints() >= e.hints.length"
+        (click)="shownHints.set(shownHints() + 1)">Indice ({{ shownHints() }}/{{ e.hints.length }})</button>
+      <button type="button" class="bg-primary px-6 font-semibold text-primary-dark disabled:opacity-50"
+        [disabled]="running()" (click)="run()">▶ Lancer les tests</button>
+    </div>
+
+    @if (shownHints() > 0) {
+      <ol class="list-decimal space-y-1 bg-white p-4 pl-8">
+        @for (hint of e.hints.slice(0, shownHints()); track $index) {
+          <li>{{ hint }}</li>
+        }
+      </ol>
+    }
+
+    <app-test-results [results]="results()" [running]="running()" />
+
+    <div>
+      <button type="button" class="px-0 underline" (click)="showSolution.set(!showSolution())">
+        {{ showSolution() ? 'Masquer la solution' : 'Voir la solution' }}
+      </button>
+      @if (showSolution()) {
+        <pre class="mt-2 overflow-x-auto bg-gray-900 p-4 text-sm text-gray-100"><code>{{ e.solution }}</code></pre>
+      }
+    </div>
+  </section>
+} @else {
+  <p>Exercice introuvable ou en cours de chargement… <a routerLink="/exercises" class="underline">Retour</a></p>
+}

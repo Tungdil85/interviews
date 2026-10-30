@@ -1,0 +1,47 @@
+<section class="space-y-6">
+  <h1 class="text-2xl font-bold text-primary-dark">Progression</h1>
+
+  <dl class="grid grid-cols-2 gap-4 text-center sm:grid-cols-4">
+    <div class="bg-white p-4"><dt class="text-sm text-gray-600">Sessions</dt><dd class="text-2xl font-bold">{{ progress.totals().sessions }}</dd></div>
+    <div class="bg-white p-4"><dt class="text-sm text-gray-600">Questions</dt><dd class="text-2xl font-bold">{{ progress.totals().answered }}</dd></div>
+    <div class="bg-white p-4"><dt class="text-sm text-gray-600">Réussite</dt><dd class="text-2xl font-bold">{{ progress.totals().rate }}%</dd></div>
+    <div class="bg-white p-4"><dt class="text-sm text-gray-600">Exercices résolus</dt><dd class="text-2xl font-bold">{{ progress.solvedExercises().length }}</dd></div>
+  </dl>
+
+  <div class="space-y-3 bg-white p-4">
+    <h2 class="text-lg font-semibold">Par catégorie</h2>
+    @for (row of rows(); track row.id) {
+      <div>
+        <div class="flex justify-between text-sm"><span>{{ row.label }}</span><span>{{ row.correct }}/{{ row.total }} ({{ row.rate }}%)</span></div>
+        <div class="h-3 bg-gray-200" role="progressbar" [attr.aria-label]="row.label" [attr.aria-valuenow]="row.rate" aria-valuemin="0" aria-valuemax="100">
+          <div class="h-full" [class]="row.rate >= 50 ? 'bg-brand-green' : 'bg-brand-red'" [style.width.%]="row.rate"></div>
+        </div>
+      </div>
+    }
+  </div>
+
+  @if (progress.wrongIds().length > 0) {
+    <p class="bg-white p-4">
+      {{ progress.wrongIds().length }} question(s) à retravailler.
+      <a routerLink="/quiz" class="font-semibold underline">Lancer une révision</a>
+    </p>
+  }
+
+  @if (recent().length > 0) {
+    <div class="bg-white p-4">
+      <h2 class="mb-2 text-lg font-semibold">Dernières sessions</h2>
+      <ul class="divide-y">
+        @for (s of recent(); track s.date) {
+          <li class="flex justify-between py-2">
+            <span>{{ s.date | date: 'dd/MM/yyyy HH:mm' }} · {{ s.mode === 'exam' ? 'Examen' : 'Entraînement' }}</span>
+            <span class="font-semibold">{{ s.score }}/{{ s.total }}</span>
+          </li>
+        }
+      </ul>
+    </div>
+  }
+
+  <div class="flex justify-end">
+    <button type="button" class="px-4 text-brand-red underline" (click)="reset()">Réinitialiser la progression</button>
+  </div>
+</section>

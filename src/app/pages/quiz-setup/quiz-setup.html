@@ -1,0 +1,77 @@
+<section class="space-y-6">
+  <h1 class="text-2xl font-bold text-primary-dark">Configurer un QCM</h1>
+
+  <form class="space-y-6" (ngSubmit)="start()" #form="ngForm">
+    <fieldset class="space-y-2">
+      <legend class="mb-1 font-semibold">Catégories</legend>
+      <div class="flex flex-wrap gap-2">
+        @for (c of categories; track c.id) {
+          <label class="flex min-h-11 cursor-pointer items-center gap-2 border-2 px-3"
+            [class]="selectedCategories().includes(c.id) ? 'border-primary bg-purple-50' : 'border-gray-200 bg-white'">
+            <input type="checkbox" [id]="'cat-' + c.id" [checked]="selectedCategories().includes(c.id)"
+              (change)="toggle(selectedCategories, c.id)" />
+            {{ c.label }}
+          </label>
+        }
+      </div>
+    </fieldset>
+
+    <fieldset class="space-y-2">
+      <legend class="mb-1 font-semibold">Difficulté <span class="font-normal text-gray-600">(vide = toutes)</span></legend>
+      <div class="flex flex-wrap gap-2">
+        @for (d of difficulties; track d.id) {
+          <label class="flex min-h-11 cursor-pointer items-center gap-2 border-2 px-3"
+            [class]="selectedDifficulties().includes(d.id) ? 'border-primary bg-purple-50' : 'border-gray-200 bg-white'">
+            <input type="checkbox" [id]="'diff-' + d.id" [checked]="selectedDifficulties().includes(d.id)"
+              (change)="toggle(selectedDifficulties, d.id)" />
+            {{ d.label }}
+          </label>
+        }
+      </div>
+    </fieldset>
+
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div>
+        <label for="count" class="mb-1 block font-semibold">Nombre de questions</label>
+        <select id="count" class="h-11 w-full border-2 border-gray-200 bg-white px-2 focus:border-primary"
+          [ngModel]="count()" (ngModelChange)="count.set($event)" name="count">
+          @for (n of counts; track n) {
+            <option [value]="n">{{ n }}</option>
+          }
+        </select>
+      </div>
+      <fieldset>
+        <legend class="mb-1 font-semibold">Mode</legend>
+        <div class="flex gap-2">
+          <label class="flex min-h-11 flex-1 cursor-pointer items-center gap-2 border-2 px-3"
+            [class]="mode() === 'practice' ? 'border-primary bg-purple-50' : 'border-gray-200 bg-white'">
+            <input type="radio" name="mode" value="practice" [checked]="mode() === 'practice'" (change)="mode.set('practice')" />
+            Entraînement
+          </label>
+          <label class="flex min-h-11 flex-1 cursor-pointer items-center gap-2 border-2 px-3"
+            [class]="mode() === 'exam' ? 'border-primary bg-purple-50' : 'border-gray-200 bg-white'">
+            <input type="radio" name="mode" value="exam" [checked]="mode() === 'exam'" (change)="mode.set('exam')" />
+            Examen
+          </label>
+        </div>
+      </fieldset>
+    </div>
+
+    @if (error(); as message) {
+      <p role="alert" class="text-brand-red">{{ message }}</p>
+    }
+
+    <div class="flex flex-wrap justify-end gap-3">
+      @if (progress.wrongIds().length > 0) {
+        <button type="button" class="border-2 border-primary px-4 font-semibold text-primary-dark hover:bg-purple-50"
+          [disabled]="loading()" (click)="start(progress.wrongIds())">
+          Réviser mes erreurs ({{ progress.wrongIds().length }})
+        </button>
+      }
+      <button type="submit" class="bg-primary px-6 font-semibold text-primary-dark hover:opacity-90 disabled:opacity-50"
+        [disabled]="loading()">
+        {{ loading() ? 'Chargement…' : 'Commencer' }}
+      </button>
+    </div>
+  </form>
+</section>

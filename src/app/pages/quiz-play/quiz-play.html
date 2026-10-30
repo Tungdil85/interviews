@@ -1,0 +1,35 @@
+@if (store.current(); as question) {
+  <section class="space-y-5">
+    <div class="flex items-center justify-between text-sm">
+      <p>Question {{ store.index() + 1 }} / {{ store.questions().length }}</p>
+      <p aria-label="Temps écoulé">⏱ {{ elapsed() }}</p>
+    </div>
+    <div class="h-2 bg-gray-200" role="progressbar" [attr.aria-valuenow]="percent()" aria-valuemin="0" aria-valuemax="100" aria-label="Progression du QCM">
+      <div class="h-full bg-primary" [style.width.%]="percent()"></div>
+    </div>
+
+    <app-question-card
+      [question]="question"
+      [selected]="store.currentSelection()"
+      [revealed]="store.isCurrentRevealed()"
+      (optionToggled)="store.toggleOption($event)"
+    />
+
+    <div class="flex flex-wrap justify-between gap-3">
+      <button type="button" class="px-3 text-gray-700 underline" (click)="quit()">Terminer maintenant</button>
+      <div class="flex gap-3">
+        @if (isExam() && store.index() > 0) {
+          <button type="button" class="border-2 border-primary px-4 font-semibold" (click)="store.previous()">Précédent</button>
+        }
+        @if (!isExam() && !store.isCurrentRevealed()) {
+          <button type="button" class="bg-primary px-6 font-semibold text-primary-dark disabled:opacity-50"
+            [disabled]="store.currentSelection().length === 0" (click)="store.reveal()">Valider</button>
+        } @else {
+          <button type="button" class="bg-primary-dark px-6 font-semibold text-white" (click)="next()">
+            {{ store.isLast() ? 'Terminer' : 'Suivant' }}
+          </button>
+        }
+      </div>
+    </div>
+  </section>
+}
