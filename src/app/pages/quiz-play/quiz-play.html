@@ -18,7 +18,7 @@
     <div class="flex flex-wrap justify-between gap-3">
       <button type="button" class="px-3 text-gray-700 underline" (click)="quit()">Terminer maintenant</button>
       <div class="flex gap-3">
-        @if (isExam() && store.index() > 0) {
+        @if (store.index() > 0) {
           <button type="button" class="border-2 border-primary px-4 font-semibold" (click)="store.previous()">Précédent</button>
         }
         @if (!isExam() && !store.isCurrentRevealed()) {
