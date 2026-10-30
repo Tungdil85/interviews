@@ -6,12 +6,12 @@
     "question": "Comment lit-on la valeur d'un signal `count` dans le code TypeScript ?",
     "options": [
       "count",
-      "count()",
+      "count.get()",
       "count.value",
-      "count.get()"
+      "count()"
     ],
     "answer": [
-      1
+      3
     ],
     "explanation": "Un signal est une fonction : on l'appelle pour lire sa valeur (`count()`). Dans un template on écrit aussi `{{ count() }}`."
   },
@@ -21,13 +21,13 @@
     "difficulty": "easy",
     "question": "Quelle méthode modifie la valeur d'un signal inscriptible en fonction de sa valeur précédente ?",
     "options": [
-      "count.set(fn)",
       "count.update(fn)",
-      "count.mutate(fn)",
-      "count.next(fn)"
+      "count.next(fn)",
+      "count.set(fn)",
+      "count.mutate(fn)"
     ],
     "answer": [
-      1
+      0
     ],
     "explanation": "`set(valeur)` remplace la valeur, `update(fn)` calcule la nouvelle valeur à partir de l'ancienne. `mutate` a été retiré."
   },
@@ -37,13 +37,13 @@
     "difficulty": "medium",
     "question": "Que garantit un `computed()` ?",
     "options": [
-      "Il est recalculé à chaque détection de changement",
-      "Il est en lecture seule, évalué paresseusement et mémoïsé tant que ses dépendances ne changent pas",
-      "Il peut être modifié avec set()",
-      "Il s'exécute uniquement au démarrage de l'application"
+      "Il est inscriptible : on peut le modifier avec set() à tout moment",
+      "Il s'exécute une seule fois, au démarrage de l'application",
+      "Lecture seule, mémoïsé : recalculé seulement si une dépendance change",
+      "Il est recalculé à chaque cycle de détection, sans aucun cache"
     ],
     "answer": [
-      1
+      2
     ],
     "explanation": "`computed` dérive une valeur d'autres signaux : lecture seule, calcul paresseux (à la première lecture) et mise en cache jusqu'à changement d'une dépendance."
   },
@@ -53,10 +53,10 @@
     "difficulty": "medium",
     "question": "À quoi sert principalement `effect()` ?",
     "options": [
-      "À dériver une valeur d'autres signaux",
-      "À exécuter des effets de bord (log, stockage, synchro externe) quand des signaux lus changent",
-      "À remplacer le pipe async",
-      "À déclarer des routes"
+      "Dériver une valeur calculée à partir d'autres signaux en lecture seule",
+      "Exécuter un effet de bord quand les signaux lus changent (log, stockage…)",
+      "Déclarer les routes lazy-loadées de l'application",
+      "Remplacer le pipe async pour s'abonner aux Observables HTTP"
     ],
     "answer": [
       1
@@ -69,10 +69,10 @@
     "difficulty": "easy",
     "question": "Quelle syntaxe de template est la bonne pour une condition avec le nouveau control flow ?",
     "options": [
-      "*ngIf=\"cond\"",
+      "*ngIf=\"cond\" (ancienne syntaxe)",
       "@if (cond) { ... }",
-      "{% if cond %}",
-      "<ng-if cond>"
+      "<ng-if [cond]=\"cond\"> ... </ng-if>",
+      "{% if cond %} ... {% endif %}"
     ],
     "answer": [
       1
@@ -86,9 +86,9 @@
     "question": "Que doit obligatoirement contenir un bloc `@for` ?",
     "options": [
       "Une clause `track`",
+      "Un `trackBy` facultatif",
       "Un pipe async",
-      "Un `*ngFor`",
-      "Un `trackBy` facultatif"
+      "Un `*ngFor`"
     ],
     "answer": [
       0
@@ -101,13 +101,13 @@
     "difficulty": "easy",
     "question": "Depuis Angular 19, que faut-il écrire pour déclarer un composant standalone ?",
     "options": [
-      "standalone: true est obligatoire",
-      "Rien : les composants sont standalone par défaut",
-      "Il faut déclarer le composant dans un NgModule",
-      "Il faut utiliser @Standalone()"
+      "Déclarer le composant dans le tableau declarations d'un NgModule",
+      "Ajouter le décorateur @Standalone() sur la classe",
+      "Rien : les composants sont standalone par défaut depuis Angular 19",
+      "Écrire standalone: true, obligatoire dans chaque décorateur"
     ],
     "answer": [
-      1
+      2
     ],
     "explanation": "Depuis la v19, `standalone: true` est la valeur par défaut. Pour un composant lié à un NgModule il faudrait écrire `standalone: false`."
   },
@@ -117,10 +117,10 @@
     "difficulty": "easy",
     "question": "Comment déclare-t-on une entrée obligatoire avec l'API signal ?",
     "options": [
-      "@Input() name!: string",
+      "name = input<string>().required()",
       "name = input.required<string>()",
-      "name = input<string>()!",
-      "name = required('name')"
+      "@Input({ signal: true }) name!: string",
+      "name = required<string>(input())"
     ],
     "answer": [
       1
@@ -134,14 +134,14 @@
     "question": "Quels cas déclenchent la vérification d'un composant `OnPush` ?",
     "options": [
       "Changement de référence d'un @Input / input()",
-      "Événement DOM déclenché dans son template",
       "Changement d'un signal lu dans son template",
-      "Un setTimeout dans un autre composant sans rapport"
+      "Un setTimeout dans un autre composant sans rapport",
+      "Événement DOM déclenché dans son template"
     ],
     "answer": [
       0,
       1,
-      2
+      3
     ],
     "explanation": "OnPush vérifie le composant sur changement d'input (référence), événement de son template, signal lu qui change, `markForCheck` ou `async` pipe qui émet. Pas à cause d'un timer sans lien."
   },
@@ -151,13 +151,13 @@
     "difficulty": "easy",
     "question": "Quelle fonction permet de récupérer un service sans passer par le constructeur ?",
     "options": [
-      "get()",
       "inject()",
+      "require()",
       "resolve()",
-      "require()"
+      "get()"
     ],
     "answer": [
-      1
+      0
     ],
     "explanation": "`inject(MonService)` fonctionne dans un contexte d'injection (champ de classe, constructeur, factory) et facilite l'héritage et les fonctions réutilisables."
   },
@@ -167,13 +167,13 @@
     "difficulty": "easy",
     "question": "Que signifie `@Injectable({ providedIn: 'root' })` ?",
     "options": [
-      "Le service est instancié par composant",
-      "Le service est un singleton disponible dans toute l'application et tree-shakable",
-      "Le service n'est utilisable que dans AppComponent",
-      "Le service est chargé en lazy loading uniquement"
+      "Chargée seulement quand une route lazy-loadée l'utilise pour la première fois",
+      "Une nouvelle instance créée pour chaque composant qui l'injecte, détruite avec lui",
+      "Disponible uniquement dans AppComponent et ses enfants, pas ailleurs",
+      "Une instance unique pour toute l'application, supprimée du bundle si inutilisée"
     ],
     "answer": [
-      1
+      3
     ],
     "explanation": "`providedIn: 'root'` enregistre le service dans l'injecteur racine : une instance unique, supprimée du bundle si inutilisée."
   },
@@ -183,13 +183,13 @@
     "difficulty": "easy",
     "question": "Comment active-t-on HttpClient dans une application standalone ?",
     "options": [
-      "imports: [HttpClientModule] dans AppComponent",
-      "provideHttpClient() dans les providers de l'application",
-      "new HttpClient() dans le service",
-      "Il est actif par défaut"
+      "Instancier new HttpClient() dans chaque service qui en a besoin",
+      "Importer BrowserModule dans le composant racine",
+      "Ajouter provideHttpClient() aux providers de l'application",
+      "Rien à faire : HttpClient est fourni par défaut dans chaque composant"
     ],
     "answer": [
-      1
+      2
     ],
     "explanation": "On ajoute `provideHttpClient()` (avec éventuellement `withFetch()`, `withInterceptors([...])`) dans `ApplicationConfig`."
   },
@@ -199,10 +199,10 @@
     "difficulty": "medium",
     "question": "Quel est le bon format d'un guard de route moderne ?",
     "options": [
-      "Une classe implémentant CanActivate obligatoirement",
-      "Une fonction `CanActivateFn` pouvant utiliser inject()",
-      "Un décorateur @Guard",
-      "Un pipe"
+      "Un décorateur @Guard() posé sur le composant de la route",
+      "Une fonction CanActivateFn pouvant appeler inject() pour accéder aux services",
+      "Un pipe appliqué dans le template du composant routé",
+      "Une classe implémentant obligatoirement l'interface CanActivate, injectée dans la route"
     ],
     "answer": [
       1
@@ -215,13 +215,13 @@
     "difficulty": "easy",
     "question": "Comment charger paresseusement un composant standalone dans une route ?",
     "options": [
-      "component: lazy(MonComposant)",
-      "loadComponent: () => import('./mon').then(m => m.Mon)",
-      "lazy: true",
-      "loadModule: ..."
+      "lazy: true ajouté sur la route concernée",
+      "loadModule: () => Page avec un NgModule dédié",
+      "loadComponent: () => import('./page').then(m => m.Page)",
+      "component: lazy(Page) dans la définition de la route"
     ],
     "answer": [
-      1
+      2
     ],
     "explanation": "`loadComponent` avec un `import()` dynamique crée un chunk séparé chargé à la navigation."
   },
@@ -231,13 +231,13 @@
     "difficulty": "medium",
     "question": "Dans quel ordre s'exécutent ces hooks ?",
     "options": [
-      "ngOnInit, ngOnChanges, ngAfterViewInit",
-      "ngOnChanges, ngOnInit, ngAfterViewInit",
+      "ngOnInit, ngAfterViewInit, ngOnChanges",
       "ngAfterViewInit, ngOnInit, ngOnChanges",
-      "ngOnInit, ngAfterViewInit, ngOnChanges"
+      "ngOnChanges, ngOnInit, ngAfterViewInit",
+      "ngOnInit, ngOnChanges, ngAfterViewInit"
     ],
     "answer": [
-      1
+      2
     ],
     "explanation": "constructor → ngOnChanges → ngOnInit → ngDoCheck → ngAfterContentInit → ngAfterViewInit → … → ngOnDestroy."
   },
@@ -247,10 +247,10 @@
     "difficulty": "medium",
     "question": "À quoi sert un bloc `@defer` ?",
     "options": [
-      "À retarder le chargement d'une partie du template et de ses dépendances (viewport, idle, interaction…)",
-      "À différer l'envoi d'une requête HTTP",
-      "À mettre un composant en cache",
-      "À désactiver la détection de changement"
+      "Retarder le chargement d'une partie du template selon un déclencheur",
+      "Désactiver la détection de changement sur un sous-arbre du template",
+      "Mettre en cache un composant déjà rendu pour le réutiliser plus tard",
+      "Différer l'envoi d'une requête HTTP jusqu'à la fin du cycle de détection"
     ],
     "answer": [
       0
@@ -263,13 +263,13 @@
     "difficulty": "medium",
     "question": "Quelle différence entre un pipe pur et un pipe impur ?",
     "options": [
-      "Aucune",
-      "Un pipe pur n'est recalculé que si ses entrées changent (référence) ; un impur l'est à chaque cycle de détection",
-      "Le pur est asynchrone",
-      "L'impur est mis en cache"
+      "Le pur ne se réévalue que si ses entrées changent ; l'impur à chaque cycle",
+      "Le pur s'exécute à chaque cycle ; l'impur seulement au démarrage de l'app",
+      "Le pur est asynchrone par défaut ; l'impur est toujours synchrone",
+      "L'impur met son résultat en cache, contrairement au pur, qui est recalculé"
     ],
     "answer": [
-      1
+      0
     ],
     "explanation": "Par défaut `pure: true`. Un pipe impur (`pure: false`) s'exécute à chaque cycle : à réserver aux cas particuliers (ex. `async`)."
   },
@@ -279,13 +279,13 @@
     "difficulty": "easy",
     "question": "Que fait le pipe `async` ?",
     "options": [
-      "Il convertit une valeur en Promise",
-      "Il s'abonne à un Observable/Promise, expose la dernière valeur et se désabonne automatiquement",
-      "Il rend la requête HTTP synchrone",
-      "Il retarde le rendu de 1 seconde"
+      "S'abonne à un Observable ou une Promise et se désabonne automatiquement",
+      "Retarde le rendu du template d'une seconde après chaque émission",
+      "Rend synchrone une requête HTTP pour bloquer le rendu du template",
+      "Convertit n'importe quelle valeur en Promise pour pouvoir l'attendre"
     ],
     "answer": [
-      1
+      0
     ],
     "explanation": "`async` gère l'abonnement/désabonnement et déclenche la détection de changement : idéal avec OnPush."
   },
@@ -295,13 +295,13 @@
     "difficulty": "medium",
     "question": "Comment réaliser un binding bidirectionnel avec les signaux ?",
     "options": [
-      "input() + output() sont suffisants sans rien d'autre",
-      "model() permet d'écrire `[(value)]` côté parent",
-      "@TwoWay()",
-      "ngModel uniquement"
+      "model() crée une entrée/sortie combinée, utilisable en [(value)]",
+      "Le décorateur @TwoWay() posé sur une propriété de la classe",
+      "Un pipe two-way à placer dans le template du composant parent",
+      "La directive ngModel est la seule solution, avec FormsModule importé"
     ],
     "answer": [
-      1
+      0
     ],
     "explanation": "`model<T>()` crée une entrée/sortie signal combinée ; le parent peut lier `[(value)]=\"state\"`."
   },
@@ -311,13 +311,13 @@
     "difficulty": "hard",
     "question": "À quoi sert `linkedSignal` ?",
     "options": [
-      "Lier deux composants",
-      "Créer un signal inscriptible dont la valeur est réinitialisée par un calcul dépendant d'autres signaux",
-      "Convertir un Observable en signal",
-      "Partager un signal entre onglets"
+      "Convertir un Observable en signal en lecture seule uniquement",
+      "Synchroniser la valeur d'un signal entre plusieurs onglets du navigateur",
+      "Créer un signal inscriptible qui se réinitialise quand sa source change",
+      "Lier deux composants frères pour qu'ils partagent le même état"
     ],
     "answer": [
-      1
+      2
     ],
     "explanation": "`linkedSignal` est un signal modifiable via `set` mais qui repart d'une valeur dérivée quand sa source change (ex. sélection réinitialisée quand la liste change)."
   },
@@ -327,13 +327,13 @@
     "difficulty": "medium",
     "question": "Comment éviter les fuites mémoire d'un abonnement dans un composant, sans `ngOnDestroy` ?",
     "options": [
-      "takeUntilDestroyed()",
-      "Ne jamais s'abonner",
       "unsubscribe() dans le constructeur",
-      "setTimeout"
+      "takeUntilDestroyed()",
+      "setTimeout",
+      "Ne jamais s'abonner"
     ],
     "answer": [
-      0
+      1
     ],
     "explanation": "`takeUntilDestroyed()` (de `@angular/core/rxjs-interop`) complète l'Observable à la destruction du contexte d'injection."
   },
@@ -343,13 +343,13 @@
     "difficulty": "medium",
     "question": "Quelle est la différence entre `@ViewChild` et `@ContentChild` ?",
     "options": [
-      "Aucune",
-      "ViewChild interroge le template du composant ; ContentChild interroge le contenu projeté via <ng-content>",
-      "ContentChild n'existe plus",
-      "ViewChild ne fonctionne qu'avec des directives"
+      "ViewChild ne fonctionne qu'avec des directives, jamais des composants",
+      "ViewChild lit le contenu projeté ; ContentChild lit le template du composant",
+      "ContentChild est déprécié : ViewChild le remplace dans tous les cas",
+      "ViewChild lit le template du composant ; ContentChild le contenu projeté"
     ],
     "answer": [
-      1
+      3
     ],
     "explanation": "View = ce que le composant déclare dans son propre template ; Content = ce que le parent projette entre ses balises. Les versions signal sont `viewChild()` et `contentChild()`."
   },
@@ -359,13 +359,13 @@
     "difficulty": "easy",
     "question": "Comment projeter le contenu fourni par le parent dans un composant ?",
     "options": [
+      "<router-outlet></router-outlet>",
       "<ng-content></ng-content>",
-      "<router-outlet>",
-      "<ng-template-outlet>",
-      "@Content()"
+      "<ng-template-outlet></ng-template-outlet>",
+      "<ng-container></ng-container>"
     ],
     "answer": [
-      0
+      1
     ],
     "explanation": "`<ng-content>` (éventuellement avec `select`) définit où le contenu projeté apparaît."
   },
@@ -375,10 +375,10 @@
     "difficulty": "hard",
     "question": "Quelle est la cause classique de l'erreur NG0100 ExpressionChangedAfterItHasBeenChecked ?",
     "options": [
-      "Un template trop long",
-      "Une valeur liée change pendant la vérification (ex. un enfant modifie un état lu par le parent après son rendu)",
-      "Un import manquant",
-      "Un guard asynchrone"
+      "Un template trop long qui dépasse la limite de lignes autorisée",
+      "Une valeur liée change pendant la vérification, après avoir été évaluée",
+      "Un guard de route asynchrone qui ne renvoie jamais de valeur au routeur",
+      "Un import manquant dans le tableau imports du composant concerné"
     ],
     "answer": [
       1
@@ -392,9 +392,9 @@
     "question": "Comment enregistre-t-on un interceptor HTTP fonctionnel ?",
     "options": [
       "provideHttpClient(withInterceptors([monInterceptor]))",
-      "providers: [{provide: HTTP_INTERCEPTORS ...}] uniquement",
-      "app.use(interceptor)",
-      "@Interceptor()"
+      "Décorer la fonction avec @Interceptor() puis l'importer",
+      "app.use(monInterceptor) dans le fichier de bootstrap",
+      "providers: [{ provide: HTTP_INTERCEPTORS, useValue: monInterceptor }]"
     ],
     "answer": [
       0
@@ -408,8 +408,8 @@
     "question": "Quel mécanisme permet à un enfant de notifier son parent avec l'API moderne ?",
     "options": [
       "output()",
-      "input()",
       "inject(Parent)",
+      "input()",
       "signal()"
     ],
     "answer": [
@@ -423,13 +423,13 @@
     "difficulty": "medium",
     "question": "Quel est l'intérêt de `ChangeDetectionStrategy.OnPush` ?",
     "options": [
-      "Il désactive Angular",
-      "Il limite les vérifications aux cas où le composant peut avoir changé, améliorant les performances",
-      "Il rend le composant immuable",
-      "Il force un rendu serveur"
+      "Il rend le composant et son état immuables à l'exécution",
+      "Il désactive complètement la détection de changement d'Angular",
+      "Il limite les vérifications aux cas où le composant a pu changer",
+      "Il force le rendu côté serveur de ce composant"
     ],
     "answer": [
-      1
+      2
     ],
     "explanation": "OnPush réduit le travail de détection de changement ; il est recommandé par défaut, surtout combiné aux signaux."
   },
@@ -439,13 +439,13 @@
     "difficulty": "medium",
     "question": "Quel est l'avantage des formulaires réactifs sur les formulaires pilotés par le template ?",
     "options": [
-      "Aucun",
-      "Le modèle est défini dans le code (FormGroup/FormControl), plus testable et adapté aux validations complexes",
-      "Ils n'ont pas de validation",
-      "Ils ne fonctionnent qu'avec ngModel"
+      "Modèle explicite dans le code : testable, adapté aux validations complexes",
+      "Ils exigent un NgModule dédié pour chaque formulaire déclaré",
+      "Ils n'offrent aucune validation native, contrairement au template-driven",
+      "Ils ne fonctionnent qu'avec la directive ngModel dans le template"
     ],
     "answer": [
-      1
+      0
     ],
     "explanation": "Les Reactive Forms exposent un modèle explicite et synchrone, composable et facile à tester."
   },
@@ -455,10 +455,10 @@
     "difficulty": "hard",
     "question": "Comment écrire un test de composant avec attente des tâches asynchrones stables ?",
     "options": [
-      "await fixture.whenStable()",
-      "sleep(1000)",
-      "fixture.destroy()",
-      "TestBed.flush()"
+      "await fixture.whenStable() avant les assertions",
+      "TestBed.resetTestingModule() puis relire le DOM",
+      "fixture.destroy() avant de lancer les assertions",
+      "await new Promise(r => setTimeout(r, 1000)) avant les assertions"
     ],
     "answer": [
       0
@@ -471,10 +471,10 @@
     "difficulty": "hard",
     "question": "Que permet `host: { '[class.active]': 'isActive()' }` dans @Component ?",
     "options": [
-      "Définir des liaisons et listeners sur l'élément hôte sans @HostBinding/@HostListener",
-      "Changer le sélecteur",
-      "Déclarer un host Docker",
-      "Créer un composant enfant"
+      "Déclarer liaisons et écouteurs de l'hôte, sans @HostBinding",
+      "Configurer l'hôte du serveur de développement Angular local",
+      "Changer le sélecteur CSS du composant depuis son décorateur",
+      "Créer dynamiquement un composant enfant dans le template parent"
     ],
     "answer": [
       0
@@ -487,13 +487,13 @@
     "difficulty": "medium",
     "question": "Comment les providers déclarés dans la liste `providers` d'un composant se comportent-ils ?",
     "options": [
-      "Singleton global",
-      "Une nouvelle instance est créée pour chaque instance du composant (et ses enfants)",
-      "Ils sont ignorés",
-      "Ils sont partagés entre routes"
+      "Elles sont ignorées : seul providedIn: 'root' est pris en compte",
+      "Elles sont partagées entre toutes les routes de l'application",
+      "Un singleton global partagé par toute l'application et ses routes",
+      "Une instance par composant créé, accessible à ses enfants"
     ],
     "answer": [
-      1
+      3
     ],
     "explanation": "Les providers de composant créent un injecteur d'élément : utile pour un état local isolé par instance."
   }

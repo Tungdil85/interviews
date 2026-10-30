@@ -5,10 +5,10 @@
     "difficulty": "medium",
     "question": "Quelle différence entre `switchMap` et `mergeMap` ?",
     "options": [
-      "Aucune",
-      "switchMap annule l'Observable interne précédent à chaque nouvelle valeur ; mergeMap les exécute en parallèle",
-      "mergeMap annule les précédents",
-      "switchMap est synchrone"
+      "switchMap est synchrone ; mergeMap toujours asynchrone",
+      "switchMap annule l'interne précédent ; mergeMap les exécute en parallèle",
+      "mergeMap annule l'interne précédent ; switchMap les exécute en parallèle",
+      "Les deux exécutent les internes l'un après l'autre en file"
     ],
     "answer": [
       1
@@ -21,13 +21,13 @@
     "difficulty": "medium",
     "question": "Quel opérateur choisir pour exécuter des requêtes en série dans l'ordre ?",
     "options": [
+      "mergeMap",
       "switchMap",
-      "concatMap",
       "exhaustMap",
-      "mergeMap"
+      "concatMap"
     ],
     "answer": [
-      1
+      3
     ],
     "explanation": "`concatMap` met en file : chaque interne attend la fin du précédent, l'ordre est conservé."
   },
@@ -37,13 +37,13 @@
     "difficulty": "medium",
     "question": "Que fait `exhaustMap` ?",
     "options": [
-      "Ignore les nouvelles valeurs tant que l'Observable interne courant n'est pas terminé",
-      "Annule l'interne courant",
-      "Fusionne tout",
-      "Épuise la mémoire"
+      "Annule l'interne en cours dès qu'une nouvelle valeur arrive de la source",
+      "Exécute tous les internes en parallèle, sans aucune limite de nombre",
+      "Ignore les nouvelles valeurs tant que l'interne courant n'est pas fini",
+      "Met les nouvelles valeurs en file et les traite dans l'ordre d'arrivée"
     ],
     "answer": [
-      0
+      2
     ],
     "explanation": "Typique du clic « Se connecter » : on ignore les clics tant que la requête est en cours."
   },
@@ -53,13 +53,13 @@
     "difficulty": "easy",
     "question": "Quelle différence entre `Subject` et `BehaviorSubject` ?",
     "options": [
-      "Aucune",
-      "BehaviorSubject a une valeur initiale et émet immédiatement sa dernière valeur à tout nouvel abonné",
-      "Subject conserve la dernière valeur",
-      "BehaviorSubject n'émet qu'une fois"
+      "BehaviorSubject a une valeur initiale, rejouée à chaque nouvel abonné",
+      "Subject conserve la dernière valeur et la rejoue à chaque nouvel abonné",
+      "BehaviorSubject n'émet qu'une seule fois puis se complète seul",
+      "Les deux sont identiques : seul leur nom de classe change"
     ],
     "answer": [
-      1
+      0
     ],
     "explanation": "`BehaviorSubject` possède toujours une valeur courante (`.value`). `ReplaySubject(n)` rejoue les n dernières."
   },
@@ -69,13 +69,13 @@
     "difficulty": "medium",
     "question": "Un Observable « cold » signifie que…",
     "options": [
-      "Il n'émet jamais",
-      "Chaque abonnement déclenche sa propre exécution du producteur",
-      "Il partage une seule source",
-      "Il est terminé"
+      "Chaque abonnement déclenche sa propre exécution de la source",
+      "Il partage une seule exécution entre tous les abonnés",
+      "Il est déjà terminé avant le premier abonnement",
+      "Il n'émet jamais de valeur tant qu'il n'est pas complété"
     ],
     "answer": [
-      1
+      0
     ],
     "explanation": "Un HTTP via HttpClient est cold : chaque `subscribe` refait la requête. `share`/`shareReplay` rendent « hot » en partageant."
   },
@@ -85,13 +85,13 @@
     "difficulty": "medium",
     "question": "Quel est l'effet de `shareReplay(1)` ?",
     "options": [
-      "Relance la source à chaque abonné",
-      "Partage une seule souscription à la source et rejoue la dernière valeur aux nouveaux abonnés",
-      "Supprime les doublons",
-      "Retarde l'émission"
+      "Partage une seule souscription et rejoue la dernière valeur aux nouveaux",
+      "Supprime les valeurs en doublon consécutives émises par le flux",
+      "Retarde chaque émission du flux d'une unité de temps donnée",
+      "Relance la source à chaque nouvel abonné, sans aucun partage ni cache"
     ],
     "answer": [
-      1
+      0
     ],
     "explanation": "Utile pour mettre en cache le résultat d'un appel HTTP partagé par plusieurs consommateurs."
   },
@@ -101,10 +101,10 @@
     "difficulty": "medium",
     "question": "Quand `forkJoin` émet-il ?",
     "options": [
-      "À chaque valeur de n'importe quelle source",
-      "Une seule fois, quand toutes les sources sont terminées, avec leur dernière valeur chacune",
-      "Dès la première source",
-      "Jamais"
+      "À chaque valeur émise par n'importe laquelle des sources du tableau",
+      "Une fois, quand toutes les sources se terminent : dernière valeur de chacune",
+      "Dès que la première source émet, puis il se complète aussitôt après",
+      "Jamais, tant qu'une des sources n'a pas émis au moins deux valeurs distinctes"
     ],
     "answer": [
       1
@@ -117,13 +117,13 @@
     "difficulty": "easy",
     "question": "Quel opérateur attend une pause dans les émissions avant de laisser passer la dernière valeur ?",
     "options": [
-      "throttleTime",
-      "debounceTime",
       "delay",
-      "sampleTime"
+      "sampleTime",
+      "throttleTime",
+      "debounceTime"
     ],
     "answer": [
-      1
+      3
     ],
     "explanation": "`debounceTime(300)` est classique pour la saisie utilisateur dans un champ de recherche."
   },
@@ -133,13 +133,13 @@
     "difficulty": "easy",
     "question": "À quoi sert `distinctUntilChanged` ?",
     "options": [
-      "À trier",
-      "À ignorer une valeur identique à la précédente",
-      "À supprimer tous les doublons de la séquence",
-      "À terminer le flux"
+      "Trie les valeurs émises dans l'ordre croissant",
+      "Supprime tous les doublons de l'ensemble de la séquence",
+      "Termine le flux dès qu'une valeur est répétée",
+      "Ignore une valeur identique à la précédente émission"
     ],
     "answer": [
-      1
+      3
     ],
     "explanation": "Il ne compare qu'avec la valeur immédiatement précédente (comparateur personnalisable)."
   },
@@ -150,13 +150,13 @@
     "question": "Comment gérer une erreur HTTP sans interrompre le flux principal d'un switchMap ?",
     "code": "search$.pipe(\n  switchMap(q => http.get(url, { params: { q } }).pipe(\n    catchError(() => of([]))\n  ))\n)",
     "options": [
-      "try/catch autour du subscribe",
-      "catchError à l'intérieur du Observable interne, retournant of(valeurDeRepli)",
-      "Ignorer l'erreur",
-      "Utiliser Subject"
+      "Un try/catch autour de l'appel à subscribe() du flux externe",
+      "Ignorer l'erreur : le flux externe continue de lui-même",
+      "Remplacer l'Observable HTTP par un Subject pour absorber l'erreur",
+      "catchError dans l'Observable interne, qui retourne of(valeurDeRepli)"
     ],
     "answer": [
-      1
+      3
     ],
     "explanation": "Placer `catchError` dans l'Observable interne évite que l'erreur ne termine le flux externe."
   },
@@ -166,13 +166,13 @@
     "difficulty": "medium",
     "question": "Que fait `takeUntil(destroy$)` ?",
     "options": [
-      "Prend la première valeur",
-      "Termine l'abonnement quand destroy$ émet",
-      "Retarde jusqu'à destroy$",
-      "Filtre les valeurs"
+      "Termine l'abonnement dès que destroy$ émet une valeur",
+      "Filtre les valeurs jusqu'à ce que destroy$ se complète",
+      "Ne prend que la première valeur de la source puis se complète",
+      "Retarde les émissions jusqu'à ce que destroy$ émette"
     ],
     "answer": [
-      1
+      0
     ],
     "explanation": "Pattern historique de désabonnement ; aujourd'hui remplaçable par `takeUntilDestroyed()`."
   },
@@ -182,13 +182,13 @@
     "difficulty": "medium",
     "question": "Quelle différence entre `combineLatest` et `withLatestFrom` ?",
     "options": [
-      "Aucune",
-      "withLatestFrom n'émet que quand la source principale émet, en prenant la dernière valeur de l'autre",
-      "combineLatest n'émet qu'une fois",
-      "withLatestFrom est asynchrone"
+      "withLatestFrom est toujours asynchrone, contrairement à combineLatest",
+      "combineLatest n'émet qu'une seule fois puis se complète",
+      "withLatestFrom émet à chaque émission de n'importe quelle source",
+      "withLatestFrom n'émet que quand la source principale émet"
     ],
     "answer": [
-      1
+      3
     ],
     "explanation": "`a$.pipe(withLatestFrom(b$))` est déclenché par a$ seulement ; `combineLatest` par n'importe laquelle."
   },
@@ -198,13 +198,13 @@
     "difficulty": "easy",
     "question": "Que fait l'opérateur `tap` ?",
     "options": [
-      "Transforme les valeurs",
-      "Exécute un effet de bord (log…) sans modifier le flux",
-      "Filtre",
-      "Complète le flux"
+      "Filtre les valeurs qui ne respectent pas un prédicat donné",
+      "Transforme chaque valeur émise du flux en une autre valeur",
+      "Exécute un effet de bord sans modifier les valeurs du flux",
+      "Complète le flux après la première valeur qui est émise"
     ],
     "answer": [
-      1
+      2
     ],
     "explanation": "`tap` est transparent pour les valeurs émises."
   },
@@ -214,10 +214,10 @@
     "difficulty": "hard",
     "question": "Quelle est la conséquence de ne pas se désabonner d'un `interval(1000)` dans un composant détruit ?",
     "options": [
-      "Aucune",
-      "Le timer continue de tourner et le callback reste référencé : fuite mémoire et effets indésirables",
-      "Angular le stoppe seul",
-      "Une erreur de compilation"
+      "Aucune conséquence : Angular stoppe seul les timers du composant",
+      "Le timer continue : fuite mémoire et callbacks exécutés après la destruction",
+      "Une erreur de compilation signale l'abonnement non géré",
+      "L'abonnement est annulé automatiquement au prochain changement de route"
     ],
     "answer": [
       1
@@ -230,13 +230,13 @@
     "difficulty": "medium",
     "question": "Quelle différence entre `of(1,2,3)` et `from([1,2,3])` ?",
     "options": [
-      "`of` émet chaque argument ; `from` convertit une source itérable/Promise en Observable (ici émet aussi 1,2,3)",
-      "of est asynchrone",
-      "from ne gère que les Promises",
-      "Aucune pour un tableau passé sans spread"
+      "from ne peut convertir qu'un Observable en un autre Observable",
+      "of est asynchrone, tandis que from est toujours synchrone",
+      "from ne gère que les Promises, jamais les tableaux ni les itérables",
+      "of émet chaque argument ; from convertit un itérable ou une Promise"
     ],
     "answer": [
-      0
+      3
     ],
     "explanation": "`of([1,2,3])` émettrait le tableau entier ; `from([1,2,3])` émet 1, 2, 3. Les deux émettent ici de façon synchrone."
   }

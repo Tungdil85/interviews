@@ -1,5 +1,6 @@
 """Génère public/data/qcm-angular.json (questions originales)."""
 import json, pathlib
+from qcm_options import finalize
 
 E, M, H = "easy", "medium", "hard"
 Q = [
@@ -72,7 +73,7 @@ for i, (d, q, opts, ans, expl, code) in enumerate(Q, 1):
     item = {"id": f"ng-{i:03d}", "category": "angular", "difficulty": d, "question": q}
     if code: item["code"] = code
     item.update({"options": opts, "answer": ans, "explanation": expl})
-    out.append(item)
+    out.append(finalize(item))
 pathlib.Path(__file__).resolve().parent.parent.joinpath("public/data/qcm-angular.json").write_text(
     json.dumps(out, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 print(len(out), "questions angular")
