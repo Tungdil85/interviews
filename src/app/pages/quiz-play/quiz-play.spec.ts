@@ -40,4 +40,27 @@ describe('QuizPlay', () => {
     expect(navigate).toHaveBeenCalledWith('/quiz/result');
     expect(TestBed.inject(QuizStore).score()).toBe(1);
   });
+
+  it('en entraînement : permet de revenir à la question précédente en gardant sa correction', () => {
+    const second: Question = { ...question, id: 'q2', text: 'Autre question' };
+    TestBed.inject(QuizStore).start([question, second], 'practice');
+    const fixture = TestBed.createComponent(QuizPlay);
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    const button = (label: string) => Array.from(el.querySelectorAll('button')).find((b) => b.textContent?.includes(label))!;
+
+    expect(Array.from(el.querySelectorAll('button')).some((b) => b.textContent?.includes('Précédent'))).toBe(false);
+    el.querySelector<HTMLButtonElement>('fieldset button')!.click();
+    fixture.detectChanges();
+    button('Valider').click();
+    fixture.detectChanges();
+    button('Suivant').click();
+    fixture.detectChanges();
+    expect(el.textContent).toContain('Autre question');
+
+    button('Précédent').click();
+    fixture.detectChanges();
+    expect(el.textContent).toContain('Une question');
+    expect(el.textContent).toContain('Explication');
+  });
 });
