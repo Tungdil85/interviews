@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { ExercisesService } from '@features/exercises';
+import { ExercisesService, type ExerciseKind } from '@features/exercises';
 import { ProgressService } from '@features/progress';
 import { difficultyLabel } from '@shared/question';
 
@@ -12,7 +12,14 @@ import { difficultyLabel } from '@shared/question';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ExercisesList {
-  protected readonly exercises = toSignal(inject(ExercisesService).list(), { initialValue: null });
+  /** Donnée de route (`data: { kind }`) liée via withComponentInputBinding. */
+  readonly kind = input<ExerciseKind>('angular');
+
+  private readonly all = toSignal(inject(ExercisesService).list(), { initialValue: null });
   protected readonly progress = inject(ProgressService);
   protected readonly label = difficultyLabel;
+
+  protected readonly exercises = computed(() => this.all()?.filter((e) => e.kind === this.kind()) ?? null);
+  protected readonly isAlgo = computed(() => this.kind() === 'algo');
+  protected readonly basePath = computed(() => (this.isAlgo() ? '/algo' : '/exercises'));
 }

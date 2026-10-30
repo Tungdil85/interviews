@@ -6,6 +6,7 @@ Chaque test est le corps d'une fonction async qui voit le code de l'utilisateur 
 exercises.data.spec.ts vérifie que chaque solution passe tous les tests et que le départ en échoue.
 """
 import json, pathlib
+from algo_exercises import ALGOS
 
 E, M, H = "easy", "medium", "hard"
 X = []
@@ -1078,7 +1079,9 @@ console.log("Authorization :", req.request.headers.get("Authorization"));""",
 render(SearchComponent, { providers: [{ provide: SearchService, useValue: { search: (q) => { console.log("Recherche :", q); return of([q + " – résultat 1", q + " – résultat 2"]); } } }] });""",
 }
 for item in X:
+    item["kind"] = "angular"
     item["preview"] = PREVIEWS.get(item["id"], "")
+X.extend(ALGOS)
 
 pathlib.Path(__file__).resolve().parent.parent.joinpath("public/data/exercises.json").write_text(
     json.dumps(X, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

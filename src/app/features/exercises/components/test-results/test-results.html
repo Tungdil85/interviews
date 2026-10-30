@@ -18,6 +18,9 @@
           <span>
             <span class="font-medium">{{ r.name }}</span>
             <span class="sr-only">{{ r.passed ? ' : réussi' : ' : échoué' }}</span>
+            @if (r.durationMs !== undefined) {
+              <span class="ml-2 text-xs text-gray-500">{{ r.durationMs }} ms</span>
+            }
             @if (r.message) {
               <span class="block font-mono text-sm text-brand-red">{{ r.message }}</span>
             }

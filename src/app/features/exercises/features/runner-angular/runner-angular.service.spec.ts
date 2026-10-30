@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { loadNodeTypescript } from '../../../../../testing/node-typescript';
 import { RunnerAngularService } from './runner-angular.service';
-import { TS_LOADER } from './typescript-loader';
+import { TS_LOADER } from '../../typescript';
 
 describe('RunnerAngularService', () => {
   let runner: RunnerAngularService;

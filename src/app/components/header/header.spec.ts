@@ -9,6 +9,6 @@ describe('Header', () => {
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
     expect(el.querySelector('nav[aria-label="Navigation principale"]')).toBeTruthy();
-    expect(el.querySelectorAll('nav a')).toHaveLength(4);
+    expect(el.querySelectorAll('nav a')).toHaveLength(5);
   });
 });

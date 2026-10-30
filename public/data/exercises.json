@@ -29,6 +29,7 @@
       "Compare `value.length` à `max` avant de couper."
     ],
     "solution": "import { Pipe, PipeTransform } from '@angular/core';\n\n@Pipe({ name: 'truncate' })\nexport class TruncatePipe implements PipeTransform {\n  transform(value: string, max = 20): string {\n    return value.length > max ? value.slice(0, max) + '…' : value;\n  }\n}\n",
+    "kind": "angular",
     "preview": "render('<p>{{ \"Bonjour tout le monde\" | truncate:7 }}</p><p>{{ \"Court\" | truncate }}</p>', { imports: [TruncatePipe] });"
   },
   {
@@ -69,6 +70,7 @@
       "`Math.round(v * 10) / 10` donne une décimale et supprime le « .0 »."
     ],
     "solution": "import { Pipe, PipeTransform } from '@angular/core';\n\n@Pipe({ name: 'filesize' })\nexport class FileSizePipe implements PipeTransform {\n  transform(bytes: number | null | undefined): string {\n    if (bytes == null) return '';\n    const units = ['o', 'Ko', 'Mo', 'Go'];\n    let value = bytes;\n    let unit = 0;\n    while (value >= 1024 && unit < units.length - 1) {\n      value /= 1024;\n      unit++;\n    }\n    return `${Math.round(value * 10) / 10} ${units[unit]}`;\n  }\n}\n",
+    "kind": "angular",
     "preview": "render('<ul><li>{{ 512 | filesize }}</li><li>{{ 1536 | filesize }}</li><li>{{ 1048576 | filesize }}</li><li>{{ 5368709120 | filesize }}</li></ul>', { imports: [FileSizePipe] });"
   },
   {
@@ -106,6 +108,7 @@
       "`Math.max(0, n - 1)` évite de passer sous zéro."
     ],
     "solution": "import { Component, signal } from '@angular/core';\n\n@Component({\n  selector: 'app-counter',\n  template: `\n    <button data-test=\"dec\" [disabled]=\"count() === 0\" (click)=\"decrement()\">−</button>\n    <span data-test=\"value\">{{ count() }}</span>\n    <button data-test=\"inc\" (click)=\"increment()\">+</button>\n  `,\n})\nexport class CounterComponent {\n  count = signal(0);\n\n  increment() {\n    this.count.update((n) => n + 1);\n  }\n\n  decrement() {\n    this.count.update((n) => Math.max(0, n - 1));\n  }\n}\n",
+    "kind": "angular",
     "preview": "render(CounterComponent);"
   },
   {
@@ -147,6 +150,7 @@
       "`remaining = computed(() => this.todos().filter(t => !t.done).length)`."
     ],
     "solution": "import { Component, computed, input } from '@angular/core';\n\ninterface Todo {\n  id: number;\n  title: string;\n  done: boolean;\n}\n\n@Component({\n  selector: 'app-todo-list',\n  template: `\n    <ul>\n      @for (todo of todos(); track todo.id) {\n        <li data-test=\"todo\" [class.done]=\"todo.done\">{{ todo.title }}</li>\n      } @empty {\n        <p data-test=\"empty\">Aucune tâche</p>\n      }\n    </ul>\n    <p data-test=\"remaining\">{{ remaining() }} restante(s)</p>\n  `,\n})\nexport class TodoListComponent {\n  todos = input<Todo[]>([]);\n  remaining = computed(() => this.todos().filter((t) => !t.done).length);\n}\n",
+    "kind": "angular",
     "preview": "render(TodoListComponent, { inputs: { todos: [{ id: 1, title: \"Lire la doc Angular\", done: true }, { id: 2, title: \"Écrire un pipe\", done: false }, { id: 3, title: \"Passer l'entretien\", done: false }] } });"
   },
   {
@@ -179,6 +183,7 @@
       "Un `<ng-content></ng-content>` sans `select` récupère tout le contenu restant."
     ],
     "solution": "import { Component } from '@angular/core';\n\n@Component({\n  selector: 'app-card',\n  template: `\n    <header data-test=\"header\"><ng-content select=\"[card-title]\"></ng-content></header>\n    <div data-test=\"body\"><ng-content></ng-content></div>\n    <footer data-test=\"footer\"><ng-content select=\"[card-footer]\"></ng-content></footer>\n  `,\n})\nexport class CardComponent {}\n",
+    "kind": "angular",
     "preview": "render('<app-card><h2 card-title>Ma carte</h2><p>Un contenu projeté.</p><button card-footer>Valider</button></app-card>', { imports: [CardComponent] });"
   },
   {
@@ -215,6 +220,7 @@
       "Dans le template : `(click)=\"rated.emit(star)\"` et `[class.filled]=\"star <= value()\"`."
     ],
     "solution": "import { Component, computed, input, output } from '@angular/core';\n\n@Component({\n  selector: 'app-rating',\n  template: `\n    @for (star of stars(); track star) {\n      <button data-test=\"star\" type=\"button\" [class.filled]=\"star <= value()\" (click)=\"rated.emit(star)\">★</button>\n    }\n  `,\n})\nexport class RatingComponent {\n  value = input(0);\n  max = input(5);\n  rated = output<number>();\n\n  stars = computed(() => Array.from({ length: this.max() }, (_, i) => i + 1));\n}\n",
+    "kind": "angular",
     "preview": "render('<app-rating [value]=\"3\" (rated)=\"log($event)\" />', { imports: [RatingComponent], props: { log: (n) => console.log(\"Note choisie :\", n) } });"
   },
   {
@@ -252,6 +258,7 @@
       "Pense à `@empty` dans le `@for`."
     ],
     "solution": "import { Component, computed, input, signal } from '@angular/core';\n\ninterface Product {\n  name: string;\n  price: number;\n}\n\n@Component({\n  selector: 'app-product-list',\n  template: `\n    <input data-test=\"search\" placeholder=\"Rechercher\" (input)=\"query.set($any($event.target).value)\" />\n    <p data-test=\"count\">{{ filtered().length }} résultat(s)</p>\n    <ul>\n      @for (p of filtered(); track p.name) {\n        <li data-test=\"product\">{{ p.name }} – {{ p.price }} €</li>\n      } @empty {\n        <p data-test=\"empty\">Aucun résultat</p>\n      }\n    </ul>\n  `,\n})\nexport class ProductListComponent {\n  products = input<Product[]>([]);\n  query = signal('');\n  filtered = computed(() => {\n    const q = this.query().toLowerCase();\n    return this.products().filter((p) => p.name.toLowerCase().includes(q));\n  });\n}\n",
+    "kind": "angular",
     "preview": "render(ProductListComponent, { inputs: { products: [{ name: \"Laptop\", price: 900 }, { name: \"Phone\", price: 500 }, { name: \"Phone case\", price: 15 }, { name: \"Écran\", price: 250 }] } });"
   },
   {
@@ -298,6 +305,7 @@
       "`this.submitted.emit(this.form.getRawValue())`."
     ],
     "solution": "import { Component, output } from '@angular/core';\nimport { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';\n\n@Component({\n  selector: 'app-login',\n  imports: [ReactiveFormsModule],\n  template: `\n    <form [formGroup]=\"form\" (ngSubmit)=\"submit()\">\n      <input data-test=\"email\" formControlName=\"email\" type=\"email\" />\n      @if (form.controls.email.touched && form.controls.email.invalid) {\n        <p data-test=\"email-error\">Email invalide</p>\n      }\n      <input data-test=\"password\" formControlName=\"password\" type=\"password\" />\n      <button data-test=\"submit\" type=\"submit\" [disabled]=\"form.invalid\">Se connecter</button>\n    </form>\n  `,\n})\nexport class LoginComponent {\n  submitted = output<{ email: string; password: string }>();\n\n  form = new FormGroup({\n    email: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email] }),\n    password: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(6)] }),\n  });\n\n  submit() {\n    if (this.form.valid) this.submitted.emit(this.form.getRawValue());\n  }\n}\n",
+    "kind": "angular",
     "preview": "render('<app-login (submitted)=\"log($event)\" />', { imports: [LoginComponent], props: { log: (v) => console.log(\"Formulaire soumis :\", v) } });"
   },
   {
@@ -330,6 +338,7 @@
       "`this.el.nativeElement.style.backgroundColor = this.appHighlight` applique la couleur."
     ],
     "solution": "import { Directive, ElementRef, HostListener, Input, inject } from '@angular/core';\n\n@Directive({ selector: '[appHighlight]' })\nexport class HighlightDirective {\n  @Input() appHighlight = 'yellow';\n  private el = inject<ElementRef<HTMLElement>>(ElementRef);\n\n  @HostListener('mouseenter')\n  onEnter() {\n    this.el.nativeElement.style.backgroundColor = this.appHighlight || 'yellow';\n  }\n\n  @HostListener('mouseleave')\n  onLeave() {\n    this.el.nativeElement.style.backgroundColor = '';\n  }\n}\n",
+    "kind": "angular",
     "preview": "render('<p appHighlight=\"lightblue\">Survole-moi (bleu)</p><p appHighlight>Survole-moi (jaune)</p>', { imports: [HighlightDirective] });"
   },
   {
@@ -358,6 +367,7 @@
       "`this.appClickOutside.emit()` pour notifier le parent."
     ],
     "solution": "import { Directive, ElementRef, HostListener, inject, output } from '@angular/core';\n\n@Directive({ selector: '[appClickOutside]' })\nexport class ClickOutsideDirective {\n  appClickOutside = output<void>();\n  private el = inject<ElementRef<HTMLElement>>(ElementRef);\n\n  @HostListener('document:click', ['$event'])\n  onDocumentClick(event: MouseEvent) {\n    if (!this.el.nativeElement.contains(event.target as Node)) {\n      this.appClickOutside.emit();\n    }\n  }\n}\n",
+    "kind": "angular",
     "preview": "render('<div appClickOutside (appClickOutside)=\"log()\" style=\"padding:16px;border:2px dashed #ab79ff\">Clique ici, puis en dehors de ce cadre</div>', { imports: [ClickOutsideDirective], props: { log: () => console.log(\"Clic à l'extérieur !\") } });"
   },
   {
@@ -390,6 +400,7 @@
       "Mémorise dans un booléen si la vue est déjà affichée pour éviter les doublons."
     ],
     "solution": "import { Directive, Input, TemplateRef, ViewContainerRef, inject } from '@angular/core';\n\n@Directive({ selector: '[appUnless]' })\nexport class UnlessDirective {\n  private template = inject(TemplateRef<unknown>);\n  private container = inject(ViewContainerRef);\n  private shown = false;\n\n  @Input() set appUnless(condition: boolean) {\n    if (!condition && !this.shown) {\n      this.container.createEmbeddedView(this.template);\n      this.shown = true;\n    } else if (condition && this.shown) {\n      this.container.clear();\n      this.shown = false;\n    }\n  }\n}\n",
+    "kind": "angular",
     "preview": "render('<button (click)=\"hidden = !hidden\">Basculer hidden ({{ hidden }})</button><p *appUnless=\"hidden\">Visible quand hidden vaut false</p>', { imports: [UnlessDirective], props: { hidden: false } });"
   },
   {
@@ -435,6 +446,7 @@
       "`reduce` calcule les deux totaux dans les `computed`."
     ],
     "solution": "import { Injectable, computed, signal } from '@angular/core';\n\nexport interface Product {\n  id: number;\n  name: string;\n  price: number;\n}\n\nexport interface CartLine extends Product {\n  qty: number;\n}\n\n@Injectable({ providedIn: 'root' })\nexport class CartService {\n  readonly lines = signal<CartLine[]>([]);\n\n  readonly count = computed(() => this.lines().reduce((n, l) => n + l.qty, 0));\n  readonly total = computed(() => this.lines().reduce((sum, l) => sum + l.price * l.qty, 0));\n\n  add(product: Product) {\n    this.lines.update((lines) =>\n      lines.some((l) => l.id === product.id)\n        ? lines.map((l) => (l.id === product.id ? { ...l, qty: l.qty + 1 } : l))\n        : [...lines, { ...product, qty: 1 }],\n    );\n  }\n\n  remove(id: number) {\n    this.lines.update((lines) => lines.filter((l) => l.id !== id));\n  }\n\n  clear() {\n    this.lines.set([]);\n  }\n}\n",
+    "kind": "angular",
     "preview": "class Demo { cart = __ng.inject(CartService); products = [{ id: 1, name: \"Stylo\", price: 2 }, { id: 2, name: \"Cahier\", price: 5 }]; }\n__ng.Component({ selector: \"app-demo\", template: `@for (p of products; track p.id) { <button (click)=\"cart.add(p)\">Ajouter {{ p.name }}</button> } <button (click)=\"cart.clear()\">Vider</button><p>{{ cart.count() }} article(s) — {{ cart.total() }} €</p>` })(Demo);\nrender(Demo, { providers: [CartService] });"
   },
   {
@@ -467,6 +479,7 @@
       "`.pipe(map(users => users.map(u => u.name)), catchError(() => of([])))`."
     ],
     "solution": "import { HttpClient } from '@angular/common/http';\nimport { Injectable, inject } from '@angular/core';\nimport { Observable, catchError, map, of } from 'rxjs';\n\nexport interface User {\n  id: number;\n  name: string;\n}\n\n@Injectable({ providedIn: 'root' })\nexport class UserService {\n  private http = inject(HttpClient);\n\n  getActiveUsers(): Observable<string[]> {\n    return this.http.get<User[]>('/api/users', { params: { active: true } }).pipe(\n      map((users) => users.map((u) => u.name)),\n      catchError(() => of([] as string[])),\n    );\n  }\n\n  getUser(id: number): Observable<User> {\n    return this.http.get<User>(`/api/users/${id}`);\n  }\n}\n",
+    "kind": "angular",
     "preview": "const { provideHttpClient } = require(\"@angular/common/http\");\nconst { provideHttpClientTesting, HttpTestingController } = require(\"@angular/common/http/testing\");\nconst injector = createInjector([UserService, provideHttpClient(), provideHttpClientTesting()]);\ninjector.get(UserService).getActiveUsers().subscribe((names) => console.log(\"Utilisateurs actifs :\", names));\ninjector.get(HttpTestingController).expectOne(\"/api/users?active=true\").flush([{ id: 1, name: \"Ada\" }, { id: 2, name: \"Linus\" }]);"
   },
   {
@@ -499,6 +512,7 @@
       "`req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })` retourne une nouvelle requête."
     ],
     "solution": "import { HttpInterceptorFn } from '@angular/common/http';\nimport { Injectable, inject, signal } from '@angular/core';\n\n@Injectable({ providedIn: 'root' })\nexport class TokenService {\n  token = signal<string | null>(null);\n}\n\nexport const authInterceptor: HttpInterceptorFn = (req, next) => {\n  const token = inject(TokenService).token();\n  if (!token) return next(req);\n  return next(req.clone({ setHeaders: { Authorization: `Bearer ${token}` } }));\n};\n",
+    "kind": "angular",
     "preview": "const { HttpClient, provideHttpClient, withInterceptors } = require(\"@angular/common/http\");\nconst { provideHttpClientTesting, HttpTestingController } = require(\"@angular/common/http/testing\");\nconst injector = createInjector([TokenService, provideHttpClient(withInterceptors([authInterceptor])), provideHttpClientTesting()]);\ninjector.get(TokenService).token.set(\"abc123\");\ninjector.get(HttpClient).get(\"/api/me\").subscribe();\nconst req = injector.get(HttpTestingController).expectOne(\"/api/me\");\nconsole.log(\"Authorization :\", req.request.headers.get(\"Authorization\"));"
   },
   {
@@ -540,6 +554,536 @@
       "`takeUntilDestroyed()` sans argument ne marche que dans le constructeur (contexte d'injection)."
     ],
     "solution": "import { Component, inject, Injectable, signal } from '@angular/core';\nimport { takeUntilDestroyed } from '@angular/core/rxjs-interop';\nimport { FormControl, ReactiveFormsModule } from '@angular/forms';\nimport { Observable, of } from 'rxjs';\nimport { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';\n\n@Injectable({ providedIn: 'root' })\nexport class SearchService {\n  search(query: string): Observable<string[]> {\n    return of([]); // remplacé par un faux service dans les tests\n  }\n}\n\n@Component({\n  selector: 'app-search',\n  imports: [ReactiveFormsModule],\n  template: `\n    <input data-test=\"search\" [formControl]=\"query\" />\n    <ul>\n      @for (r of results(); track r) {\n        <li data-test=\"result\">{{ r }}</li>\n      }\n    </ul>\n  `,\n})\nexport class SearchComponent {\n  private service = inject(SearchService);\n  query = new FormControl('', { nonNullable: true });\n  results = signal<string[]>([]);\n\n  constructor() {\n    this.query.valueChanges\n      .pipe(\n        debounceTime(300),\n        filter((q) => q.length >= 2),\n        distinctUntilChanged(),\n        switchMap((q) => this.service.search(q)),\n        takeUntilDestroyed(),\n      )\n      .subscribe((r) => this.results.set(r));\n  }\n}\n",
+    "kind": "angular",
     "preview": "const { of } = require(\"rxjs\");\nrender(SearchComponent, { providers: [{ provide: SearchService, useValue: { search: (q) => { console.log(\"Recherche :\", q); return of([q + \" – résultat 1\", q + \" – résultat 2\"]); } } }] });"
+  },
+  {
+    "id": "algo-two-sum",
+    "kind": "algo",
+    "title": "Two Sum",
+    "difficulty": "easy",
+    "topic": "Tableaux · Table de hachage",
+    "durationMin": 20,
+    "description": "**Objectif** : trouver deux nombres d'un tableau dont la somme vaut une cible.\n\n**Exemples**\n```ts\ntwoSum([2, 7, 11, 15], 9)   // [0, 1]  car 2 + 7 = 9\ntwoSum([3, 2, 4], 6)        // [1, 2]\ntwoSum([1, 2, 3], 10)       // null    (aucune paire)\n```\n\n**Contraintes**\n• renvoie les indices `[i, j]` avec `i < j` ; un même élément ne peut pas être utilisé deux fois ;\n• s'il n'existe aucune paire, renvoie `null` ; il y a au plus une paire valide ;\n• le tableau peut contenir 100 000 éléments : une double boucle (O(n²)) sera trop lente.\n\n**À faire** : implémente `twoSum`. Vise une complexité **O(n)**.",
+    "starterCode": "/**\n * Retourne les indices [i, j] (i < j) de deux éléments dont la somme vaut `target`,\n * ou null s'il n'existe aucune paire.\n */\nexport function twoSum(nums: number[], target: number): [number, number] | null {\n  // TODO\n  return null;\n}\n",
+    "tests": [
+      {
+        "name": "Exemple de base",
+        "code": "assert.deepEqual(twoSum([2, 7, 11, 15], 9), [0, 1]);"
+      },
+      {
+        "name": "Indices dans l'ordre croissant",
+        "code": "assert.deepEqual(twoSum([3, 2, 4], 6), [1, 2]);"
+      },
+      {
+        "name": "Doublons",
+        "code": "assert.deepEqual(twoSum([3, 3], 6), [0, 1]);"
+      },
+      {
+        "name": "Nombres négatifs",
+        "code": "assert.deepEqual(twoSum([-1, -2, -3, -4, -5], -8), [2, 4]);"
+      },
+      {
+        "name": "Aucune paire",
+        "code": "assert.equal(twoSum([1, 2, 3], 10), null);"
+      },
+      {
+        "name": "Un élément ne compte pas deux fois",
+        "code": "assert.equal(twoSum([5, 1], 10), null); assert.equal(twoSum([5], 10), null);"
+      },
+      {
+        "name": "100 000 éléments (O(n) attendu)",
+        "code": "const nums = Array.from({ length: 100000 }, (_, i) => i * 2); assert.deepEqual(twoSum(nums, 399994), [99998, 99999]);"
+      }
+    ],
+    "hints": [
+      "Pour chaque nombre `x`, tu cherches `target - x` : comment le retrouver sans reparcourir le tableau ?",
+      "Une `Map<valeur, indice>` remplie au fil du parcours donne la réponse en O(1) par élément.",
+      "Vérifie le complément AVANT d'insérer l'élément courant, pour ne pas l'utiliser deux fois."
+    ],
+    "solution": "export function twoSum(nums: number[], target: number): [number, number] | null {\n  const seen = new Map<number, number>(); // valeur -> indice\n  for (let j = 0; j < nums.length; j++) {\n    const i = seen.get(target - nums[j]);\n    if (i !== undefined) return [i, j];\n    seen.set(nums[j], j);\n  }\n  return null;\n}\n// Complexité : O(n) en temps, O(n) en mémoire.\n",
+    "preview": ""
+  },
+  {
+    "id": "algo-valid-brackets",
+    "kind": "algo",
+    "title": "Parenthèses équilibrées",
+    "difficulty": "easy",
+    "topic": "Pile",
+    "durationMin": 20,
+    "description": "**Objectif** : vérifier qu'un texte contient des parenthèses, crochets et accolades correctement ouverts, fermés et imbriqués.\n\n**Exemples**\n```ts\nisBalanced('{[()]}')     // true\nisBalanced('([)]')       // false  (mauvais ordre de fermeture)\nisBalanced('((')         // false  (fermetures manquantes)\nisBalanced('a(b[c]d)e')  // true   (les autres caractères sont ignorés)\n```\n\n**Contraintes**\n• seuls `()`, `[]` et `{}` comptent, tous les autres caractères sont ignorés ;\n• une chaîne vide est équilibrée ;\n• le texte peut faire 100 000 caractères.\n\n**À faire** : implémente `isBalanced`.",
+    "starterCode": "export function isBalanced(s: string): boolean {\n  // TODO\n  return false;\n}\n",
+    "tests": [
+      {
+        "name": "Cas équilibrés",
+        "code": "assert.equal(isBalanced('()[]{}'), true); assert.equal(isBalanced('{[()]}'), true);"
+      },
+      {
+        "name": "Mauvais type de fermeture",
+        "code": "assert.equal(isBalanced('(]'), false);"
+      },
+      {
+        "name": "Mauvais ordre",
+        "code": "assert.equal(isBalanced('([)]'), false);"
+      },
+      {
+        "name": "Ouvertures sans fermeture",
+        "code": "assert.equal(isBalanced('(('), false);"
+      },
+      {
+        "name": "Fermeture en trop",
+        "code": "assert.equal(isBalanced('())'), false); assert.equal(isBalanced(')'), false);"
+      },
+      {
+        "name": "Chaîne vide",
+        "code": "assert.equal(isBalanced(''), true);"
+      },
+      {
+        "name": "Autres caractères ignorés",
+        "code": "assert.equal(isBalanced('a(b[c]d)e'), true); assert.equal(isBalanced('abc'), true);"
+      },
+      {
+        "name": "100 000 caractères",
+        "code": "assert.equal(isBalanced('('.repeat(50000) + ')'.repeat(50000)), true); assert.equal(isBalanced('('.repeat(50000) + ']'), false);"
+      }
+    ],
+    "hints": [
+      "Le dernier symbole ouvert doit être le premier fermé : quelle structure de données fonctionne ainsi ?",
+      "Empile chaque ouvrant ; sur un fermant, dépile et compare avec l'ouvrant attendu.",
+      "À la fin, la pile doit être vide."
+    ],
+    "solution": "export function isBalanced(s: string): boolean {\n  const pairs: Record<string, string> = { ')': '(', ']': '[', '}': '{' };\n  const stack: string[] = [];\n  for (const ch of s) {\n    if (ch === '(' || ch === '[' || ch === '{') {\n      stack.push(ch);\n    } else if (ch in pairs && stack.pop() !== pairs[ch]) {\n      return false;\n    }\n  }\n  return stack.length === 0;\n}\n// Complexité : O(n).\n",
+    "preview": ""
+  },
+  {
+    "id": "algo-group-anagrams",
+    "kind": "algo",
+    "title": "Grouper les anagrammes",
+    "difficulty": "medium",
+    "topic": "Table de hachage · Chaînes",
+    "durationMin": 25,
+    "description": "**Objectif** : regrouper les mots qui sont des anagrammes les uns des autres (mêmes lettres, ordre différent).\n\n**Exemple**\n```ts\ngroupAnagrams(['eat', 'tea', 'tan', 'ate', 'nat', 'bat'])\n// [['eat', 'tea', 'ate'], ['tan', 'nat'], ['bat']]\n```\n\n**Contraintes**\n• les groupes sont dans l'ordre de première apparition de leur premier mot ;\n• dans un groupe, les mots gardent leur ordre d'origine ;\n• jusqu'à 50 000 mots : comparer chaque mot à tous les groupes (O(n²)) sera trop lent.\n\n**À faire** : implémente `groupAnagrams`. Trouve une « clé » commune à tous les anagrammes d'un mot.",
+    "starterCode": "export function groupAnagrams(words: string[]): string[][] {\n  // TODO\n  return [];\n}\n",
+    "tests": [
+      {
+        "name": "Exemple de base",
+        "code": "assert.deepEqual(groupAnagrams(['eat', 'tea', 'tan', 'ate', 'nat', 'bat']), [['eat', 'tea', 'ate'], ['tan', 'nat'], ['bat']]);"
+      },
+      {
+        "name": "Mot vide et mot d'une lettre",
+        "code": "assert.deepEqual(groupAnagrams(['']), [['']]); assert.deepEqual(groupAnagrams(['a']), [['a']]);"
+      },
+      {
+        "name": "Liste vide",
+        "code": "assert.deepEqual(groupAnagrams([]), []);"
+      },
+      {
+        "name": "Pas de regroupement abusif",
+        "code": "assert.deepEqual(groupAnagrams(['ab', 'abc', 'ba']), [['ab', 'ba'], ['abc']]);"
+      },
+      {
+        "name": "Mots identiques",
+        "code": "assert.deepEqual(groupAnagrams(['aa', 'aa']), [['aa', 'aa']]);"
+      },
+      {
+        "name": "50 000 mots",
+        "code": "const words = []; for (let i = 0; i < 25000; i++) { const w = i.toString(36).padStart(6, 'a'); words.push(w, w.split('').reverse().join('')); }\nconst groups = groupAnagrams(words);\nassert.equal(groups.flat().length, 50000);\nconst key = (w) => w.split('').sort().join('');\nassert.ok(groups.every((g) => g.every((w) => key(w) === key(g[0]))), 'chaque groupe doit contenir des anagrammes');\nassert.equal(new Set(groups.map((g) => key(g[0]))).size, groups.length, 'une même famille ne doit pas être coupée en deux groupes');"
+      }
+    ],
+    "hints": [
+      "Deux mots sont des anagrammes si leurs lettres triées sont identiques.",
+      "Utilise cette version triée comme clé d'une `Map<string, string[]>`.",
+      "Une `Map` conserve l'ordre d'insertion : les groupes sortent déjà dans le bon ordre."
+    ],
+    "solution": "export function groupAnagrams(words: string[]): string[][] {\n  const groups = new Map<string, string[]>();\n  for (const word of words) {\n    const key = word.split('').sort().join('');\n    const group = groups.get(key);\n    if (group) group.push(word);\n    else groups.set(key, [word]);\n  }\n  return [...groups.values()];\n}\n// Complexité : O(n · k log k) avec k la longueur moyenne d'un mot.\n",
+    "preview": ""
+  },
+  {
+    "id": "algo-longest-unique-substring",
+    "kind": "algo",
+    "title": "Plus longue sous-chaîne sans répétition",
+    "difficulty": "medium",
+    "topic": "Fenêtre glissante",
+    "durationMin": 30,
+    "description": "**Objectif** : trouver la longueur de la plus longue sous-chaîne **contiguë** dont tous les caractères sont différents.\n\n**Exemples**\n```ts\nlengthOfLongestSubstring('abcabcbb')   // 3  (\"abc\")\nlengthOfLongestSubstring('bbbbb')      // 1  (\"b\")\nlengthOfLongestSubstring('pwwkew')     // 3  (\"wke\")\nlengthOfLongestSubstring('abba')       // 2  (\"ab\" ou \"ba\")\n```\n\n**Contraintes**\n• la chaîne peut faire 200 000 caractères : pas de recalcul depuis zéro à chaque position (O(n²)) ;\n• une chaîne vide donne 0.\n\n**À faire** : implémente `lengthOfLongestSubstring` en un seul parcours, avec une fenêtre glissante.",
+    "starterCode": "export function lengthOfLongestSubstring(s: string): number {\n  // TODO\n  return 0;\n}\n",
+    "tests": [
+      {
+        "name": "Exemple abcabcbb",
+        "code": "assert.equal(lengthOfLongestSubstring('abcabcbb'), 3);"
+      },
+      {
+        "name": "Un seul caractère répété",
+        "code": "assert.equal(lengthOfLongestSubstring('bbbbb'), 1);"
+      },
+      {
+        "name": "pwwkew",
+        "code": "assert.equal(lengthOfLongestSubstring('pwwkew'), 3);"
+      },
+      {
+        "name": "Chaîne vide",
+        "code": "assert.equal(lengthOfLongestSubstring(''), 0);"
+      },
+      {
+        "name": "Piège : abba",
+        "code": "assert.equal(lengthOfLongestSubstring('abba'), 2);"
+      },
+      {
+        "name": "dvdf",
+        "code": "assert.equal(lengthOfLongestSubstring('dvdf'), 3);"
+      },
+      {
+        "name": "Espace et un caractère",
+        "code": "assert.equal(lengthOfLongestSubstring(' '), 1); assert.equal(lengthOfLongestSubstring('a'), 1);"
+      },
+      {
+        "name": "200 000 caractères (O(n) attendu)",
+        "code": "assert.equal(lengthOfLongestSubstring('abcdefghij'.repeat(20000)), 10);"
+      }
+    ],
+    "hints": [
+      "Garde une fenêtre [gauche, droite] qui ne contient jamais de doublon.",
+      "Quand le caractère courant a déjà été vu DANS la fenêtre, avance `gauche` juste après sa dernière position.",
+      "Attention au cas `abba` : ne recule jamais `gauche` (prends le maximum)."
+    ],
+    "solution": "export function lengthOfLongestSubstring(s: string): number {\n  const lastSeen = new Map<string, number>();\n  let left = 0;\n  let best = 0;\n  for (let right = 0; right < s.length; right++) {\n    const previous = lastSeen.get(s[right]);\n    if (previous !== undefined && previous >= left) left = previous + 1;\n    lastSeen.set(s[right], right);\n    best = Math.max(best, right - left + 1);\n  }\n  return best;\n}\n// Complexité : O(n).\n",
+    "preview": ""
+  },
+  {
+    "id": "algo-merge-intervals",
+    "kind": "algo",
+    "title": "Fusionner des intervalles",
+    "difficulty": "medium",
+    "topic": "Tri · Intervalles",
+    "durationMin": 30,
+    "description": "**Objectif** : fusionner tous les intervalles qui se chevauchent ou se touchent.\n\n**Exemples**\n```ts\nmergeIntervals([[1, 3], [2, 6], [8, 10], [15, 18]])   // [[1, 6], [8, 10], [15, 18]]\nmergeIntervals([[1, 4], [4, 5]])                      // [[1, 5]]   (ils se touchent)\nmergeIntervals([[8, 10], [1, 3], [2, 6]])             // [[1, 6], [8, 10]]   (entrée non triée)\n```\n\n**Contraintes**\n• chaque intervalle est `[début, fin]` avec `début <= fin` ;\n• la liste n'est pas forcément triée ;\n• ne modifie pas le tableau reçu ;\n• jusqu'à 100 000 intervalles.\n\n**À faire** : implémente `mergeIntervals`. Réfléchis à ce qui devient simple une fois les intervalles triés.",
+    "starterCode": "export function mergeIntervals(intervals: [number, number][]): [number, number][] {\n  // TODO\n  return [];\n}\n",
+    "tests": [
+      {
+        "name": "Exemple de base",
+        "code": "assert.deepEqual(mergeIntervals([[1, 3], [2, 6], [8, 10], [15, 18]]), [[1, 6], [8, 10], [15, 18]]);"
+      },
+      {
+        "name": "Intervalles qui se touchent",
+        "code": "assert.deepEqual(mergeIntervals([[1, 4], [4, 5]]), [[1, 5]]);"
+      },
+      {
+        "name": "Entrée non triée",
+        "code": "assert.deepEqual(mergeIntervals([[8, 10], [1, 3], [2, 6]]), [[1, 6], [8, 10]]);"
+      },
+      {
+        "name": "Intervalle contenu dans un autre",
+        "code": "assert.deepEqual(mergeIntervals([[1, 10], [2, 3]]), [[1, 10]]);"
+      },
+      {
+        "name": "Fusion en chaîne",
+        "code": "assert.deepEqual(mergeIntervals([[1, 4], [0, 2], [3, 5]]), [[0, 5]]);"
+      },
+      {
+        "name": "Vide et un seul intervalle",
+        "code": "assert.deepEqual(mergeIntervals([]), []); assert.deepEqual(mergeIntervals([[2, 3]]), [[2, 3]]);"
+      },
+      {
+        "name": "Ne modifie pas l'entrée",
+        "code": "const input = [[5, 6], [1, 3], [2, 4]]; const copy = JSON.parse(JSON.stringify(input)); mergeIntervals(input); assert.deepEqual(input, copy);"
+      },
+      {
+        "name": "100 000 intervalles",
+        "code": "const input = Array.from({ length: 100000 }, (_, i) => [i * 3, i * 3 + 2]).reverse(); const out = mergeIntervals(input); assert.equal(out.length, 100000); assert.deepEqual(out[0], [0, 2]);"
+      }
+    ],
+    "hints": [
+      "Trie une copie des intervalles par début.",
+      "Parcours-les dans l'ordre : l'intervalle courant chevauche le dernier fusionné si `début <= fin du dernier`.",
+      "Dans ce cas, étends la fin du dernier avec `Math.max` ; sinon, ouvre un nouvel intervalle."
+    ],
+    "solution": "export function mergeIntervals(intervals: [number, number][]): [number, number][] {\n  const sorted = [...intervals].sort((a, b) => a[0] - b[0]);\n  const merged: [number, number][] = [];\n  for (const [start, end] of sorted) {\n    const last = merged[merged.length - 1];\n    if (last && start <= last[1]) last[1] = Math.max(last[1], end);\n    else merged.push([start, end]);\n  }\n  return merged;\n}\n// Complexité : O(n log n) à cause du tri.\n",
+    "preview": ""
+  },
+  {
+    "id": "algo-spiral-matrix",
+    "kind": "algo",
+    "title": "Parcours en spirale",
+    "difficulty": "medium",
+    "topic": "Matrices",
+    "durationMin": 25,
+    "description": "**Objectif** : parcourir une matrice en spirale (vers la droite, puis le bas, puis la gauche, puis le haut, en se rapprochant du centre).\n\n**Exemple**\n```ts\nspiralOrder([\n  [1, 2, 3],\n  [4, 5, 6],\n  [7, 8, 9],\n])\n// [1, 2, 3, 6, 9, 8, 7, 4, 5]\n```\n\n**Contraintes**\n• la matrice n'est pas forcément carrée (ex. 3 lignes × 4 colonnes) ;\n• elle peut avoir une seule ligne, une seule colonne, ou être vide (`[]` donne `[]`) ;\n• chaque case doit apparaître exactement une fois.\n\n**À faire** : implémente `spiralOrder`. Pense à 4 bornes (haut, bas, gauche, droite) qui se resserrent.",
+    "starterCode": "export function spiralOrder(matrix: number[][]): number[] {\n  // TODO\n  return [];\n}\n",
+    "tests": [
+      {
+        "name": "Matrice 3×3",
+        "code": "assert.deepEqual(spiralOrder([[1, 2, 3], [4, 5, 6], [7, 8, 9]]), [1, 2, 3, 6, 9, 8, 7, 4, 5]);"
+      },
+      {
+        "name": "Matrice 3×4",
+        "code": "assert.deepEqual(spiralOrder([[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]]), [1, 2, 3, 4, 8, 12, 11, 10, 9, 5, 6, 7]);"
+      },
+      {
+        "name": "Une seule ligne",
+        "code": "assert.deepEqual(spiralOrder([[1, 2, 3]]), [1, 2, 3]);"
+      },
+      {
+        "name": "Une seule colonne",
+        "code": "assert.deepEqual(spiralOrder([[1], [2], [3]]), [1, 2, 3]);"
+      },
+      {
+        "name": "Une case et matrice vide",
+        "code": "assert.deepEqual(spiralOrder([[7]]), [7]); assert.deepEqual(spiralOrder([]), []);"
+      },
+      {
+        "name": "Plus de lignes que de colonnes",
+        "code": "assert.deepEqual(spiralOrder([[1, 2], [3, 4], [5, 6], [7, 8]]), [1, 2, 4, 6, 8, 7, 5, 3]);"
+      },
+      {
+        "name": "300×300 : chaque case une fois",
+        "code": "const n = 300; const m = Array.from({ length: n }, (_, r) => Array.from({ length: n }, (_, c) => r * n + c)); const out = spiralOrder(m); assert.equal(out.length, n * n); assert.equal(new Set(out).size, n * n); assert.deepEqual(out.slice(0, n), m[0]);"
+      }
+    ],
+    "hints": [
+      "Garde 4 bornes : `top`, `bottom`, `left`, `right`.",
+      "À chaque tour : ligne du haut (gauche→droite), colonne de droite (haut→bas), ligne du bas (droite→gauche), colonne de gauche (bas→haut), puis resserre les bornes.",
+      "Après avoir resserré, revérifie `top <= bottom` et `left <= right` avant la ligne du bas et la colonne de gauche (cas d'une seule ligne ou colonne)."
+    ],
+    "solution": "export function spiralOrder(matrix: number[][]): number[] {\n  const result: number[] = [];\n  if (matrix.length === 0) return result;\n  let top = 0, bottom = matrix.length - 1, left = 0, right = matrix[0].length - 1;\n  while (top <= bottom && left <= right) {\n    for (let c = left; c <= right; c++) result.push(matrix[top][c]);\n    top++;\n    for (let r = top; r <= bottom; r++) result.push(matrix[r][right]);\n    right--;\n    if (top <= bottom) {\n      for (let c = right; c >= left; c--) result.push(matrix[bottom][c]);\n      bottom--;\n    }\n    if (left <= right) {\n      for (let r = bottom; r >= top; r--) result.push(matrix[r][left]);\n      left++;\n    }\n  }\n  return result;\n}\n// Complexité : O(lignes × colonnes).\n",
+    "preview": ""
+  },
+  {
+    "id": "algo-top-k-words",
+    "kind": "algo",
+    "title": "Les k mots les plus fréquents",
+    "difficulty": "medium",
+    "topic": "Table de hachage · Tri",
+    "durationMin": 30,
+    "description": "**Objectif** : renvoyer les `k` mots qui apparaissent le plus souvent.\n\n**Exemples**\n```ts\ntopKFrequent(['i', 'love', 'leetcode', 'i', 'love', 'coding'], 2)   // ['i', 'love']\ntopKFrequent(['the', 'day', 'is', 'sunny', 'the', 'the', 'the', 'sunny', 'is', 'is'], 4)\n// ['the', 'is', 'sunny', 'day']   (fréquences 4, 3, 2, 1)\n```\n\n**Contraintes**\n• tri par fréquence **décroissante** ;\n• à fréquence égale, par ordre **alphabétique** croissant ;\n• si `k` dépasse le nombre de mots distincts, renvoie tous les mots ; `k = 0` donne `[]` ;\n• jusqu'à 200 000 mots.\n\n**À faire** : implémente `topKFrequent`.",
+    "starterCode": "export function topKFrequent(words: string[], k: number): string[] {\n  // TODO\n  return [];\n}\n",
+    "tests": [
+      {
+        "name": "Exemple de base",
+        "code": "assert.deepEqual(topKFrequent(['i', 'love', 'leetcode', 'i', 'love', 'coding'], 2), ['i', 'love']);"
+      },
+      {
+        "name": "Ordre par fréquence décroissante",
+        "code": "assert.deepEqual(topKFrequent(['the', 'day', 'is', 'sunny', 'the', 'the', 'the', 'sunny', 'is', 'is'], 4), ['the', 'is', 'sunny', 'day']);"
+      },
+      {
+        "name": "Égalité : ordre alphabétique",
+        "code": "assert.deepEqual(topKFrequent(['b', 'a', 'c'], 2), ['a', 'b']);"
+      },
+      {
+        "name": "k plus grand que le nombre de mots distincts",
+        "code": "assert.deepEqual(topKFrequent(['a', 'a', 'b'], 5), ['a', 'b']);"
+      },
+      {
+        "name": "k = 0",
+        "code": "assert.deepEqual(topKFrequent(['a', 'b'], 0), []);"
+      },
+      {
+        "name": "200 000 mots",
+        "code": "const words = Array.from({ length: 200000 }, (_, i) => 'w' + (i % 1000)); assert.deepEqual(topKFrequent(words, 3), ['w0', 'w1', 'w10']);"
+      }
+    ],
+    "hints": [
+      "Compte d'abord les occurrences avec une `Map<mot, nombre>`.",
+      "Trie ensuite les mots distincts avec un comparateur à deux critères : fréquence décroissante, puis ordre alphabétique.",
+      "Compare les chaînes avec `<` / `>` pour un ordre alphabétique simple."
+    ],
+    "solution": "export function topKFrequent(words: string[], k: number): string[] {\n  const counts = new Map<string, number>();\n  for (const word of words) counts.set(word, (counts.get(word) ?? 0) + 1);\n  return [...counts.keys()]\n    .sort((a, b) => counts.get(b)! - counts.get(a)! || (a < b ? -1 : a > b ? 1 : 0))\n    .slice(0, k);\n}\n// Complexité : O(n + d log d) avec d le nombre de mots distincts.\n",
+    "preview": ""
+  },
+  {
+    "id": "algo-islands",
+    "kind": "algo",
+    "title": "Nombre d'îles",
+    "difficulty": "medium",
+    "topic": "Graphes · Parcours de grille",
+    "durationMin": 30,
+    "description": "**Objectif** : compter les îles d'une carte. Une île est un groupe de cases de terre (`'1'`) reliées horizontalement ou verticalement, entourées d'eau (`'0'`).\n\n**Exemple**\n```ts\ncountIslands([\n  '11000',\n  '11000',\n  '00100',\n  '00011',\n])\n// 3\n```\n\n**Contraintes**\n• deux cases en diagonale ne sont **pas** reliées ;\n• une carte vide ou sans terre donne 0 ;\n• la carte peut faire 600 × 600 : une récursion profonde provoquera un dépassement de pile.\n\n**À faire** : implémente `countIslands`. Parcours chaque île une seule fois, sans récursion.",
+    "starterCode": "export function countIslands(grid: string[]): number {\n  // TODO\n  return 0;\n}\n",
+    "tests": [
+      {
+        "name": "Une grande île",
+        "code": "assert.equal(countIslands(['11110', '11010', '11000', '00000']), 1);"
+      },
+      {
+        "name": "Trois îles",
+        "code": "assert.equal(countIslands(['11000', '11000', '00100', '00011']), 3);"
+      },
+      {
+        "name": "Que de l'eau, ou carte vide",
+        "code": "assert.equal(countIslands(['000', '000']), 0); assert.equal(countIslands([]), 0);"
+      },
+      {
+        "name": "Les diagonales ne comptent pas",
+        "code": "assert.equal(countIslands(['10', '01']), 2);"
+      },
+      {
+        "name": "Une seule case",
+        "code": "assert.equal(countIslands(['1']), 1);"
+      },
+      {
+        "name": "Île en forme de U",
+        "code": "assert.equal(countIslands(['101', '101', '111']), 1);"
+      },
+      {
+        "name": "Île géante 600×600 (pas de récursion)",
+        "code": "const grid = Array.from({ length: 600 }, () => '1'.repeat(600)); assert.equal(countIslands(grid), 1);"
+      },
+      {
+        "name": "Damier 400×400 : 80 000 îles",
+        "code": "const grid = Array.from({ length: 400 }, (_, r) => Array.from({ length: 400 }, (_, c) => ((r + c) % 2 === 0 ? '1' : '0')).join('')); assert.equal(countIslands(grid), 80000);"
+      }
+    ],
+    "hints": [
+      "Parcours toutes les cases ; quand tu trouves une terre non visitée, c'est une nouvelle île : incrémente le compteur.",
+      "Puis « noie » toute l'île (marque ses cases visitées) avec un parcours en largeur ou en profondeur.",
+      "Utilise une pile ou une file explicite plutôt que la récursion, pour les très grandes îles."
+    ],
+    "solution": "export function countIslands(grid: string[]): number {\n  const rows = grid.length;\n  if (rows === 0) return 0;\n  const cols = grid[0].length;\n  const visited = new Uint8Array(rows * cols);\n  let islands = 0;\n  for (let r = 0; r < rows; r++) {\n    for (let c = 0; c < cols; c++) {\n      if (grid[r][c] !== '1' || visited[r * cols + c]) continue;\n      islands++;\n      const stack = [r * cols + c];\n      visited[r * cols + c] = 1;\n      while (stack.length > 0) {\n        const cell = stack.pop()!;\n        const cr = Math.floor(cell / cols);\n        const cc = cell % cols;\n        for (const [dr, dc] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {\n          const nr = cr + dr;\n          const nc = cc + dc;\n          if (nr < 0 || nc < 0 || nr >= rows || nc >= cols) continue;\n          const next = nr * cols + nc;\n          if (grid[nr][nc] === '1' && !visited[next]) {\n            visited[next] = 1;\n            stack.push(next);\n          }\n        }\n      }\n    }\n  }\n  return islands;\n}\n// Complexité : O(lignes × colonnes).\n",
+    "preview": ""
+  },
+  {
+    "id": "algo-maze",
+    "kind": "algo",
+    "title": "Labyrinthe : plus court chemin",
+    "difficulty": "medium",
+    "topic": "Graphes · BFS",
+    "durationMin": 35,
+    "description": "**Objectif** (façon CodinGame) : trouver le plus court chemin entre l'entrée `S` et la sortie `E` d'un labyrinthe.\n\n**Exemple**\n```ts\nshortestPath([\n  'S#E',\n  '...',\n])\n// 4  (bas, droite, droite, haut)\n```\n\n**Légende** : `S` départ · `E` arrivée · `.` case libre · `#` mur.\n\n**Contraintes**\n• déplacements dans les 4 directions (haut, bas, gauche, droite), un pas = 1 ;\n• renvoie le nombre minimal de pas, ou `-1` si la sortie est inaccessible ;\n• la grille peut faire 500 × 500 : attention à la complexité et à la récursion.\n\n**À faire** : implémente `shortestPath`. Quel parcours garantit de trouver le chemin le plus court dans un graphe non pondéré ?",
+    "starterCode": "export function shortestPath(grid: string[]): number {\n  // TODO\n  return -1;\n}\n",
+    "tests": [
+      {
+        "name": "Ligne droite",
+        "code": "assert.equal(shortestPath(['S.E']), 2);"
+      },
+      {
+        "name": "Départ à côté de la sortie",
+        "code": "assert.equal(shortestPath(['SE']), 1);"
+      },
+      {
+        "name": "Contournement d'un mur",
+        "code": "assert.equal(shortestPath(['S#E', '...']), 4);"
+      },
+      {
+        "name": "Sortie inaccessible",
+        "code": "assert.equal(shortestPath(['S#E']), -1);"
+      },
+      {
+        "name": "Serpent : le chemin le plus court",
+        "code": "assert.equal(shortestPath(['S.....', '#####.', '......', '.#####', '....E.']), 18);"
+      },
+      {
+        "name": "Chemin direct malgré des impasses",
+        "code": "assert.equal(shortestPath(['S.E', '.#.', '...']), 2);"
+      },
+      {
+        "name": "Grille 500×500 (BFS attendu)",
+        "code": "const n = 500; const grid = Array.from({ length: n }, (_, r) => Array.from({ length: n }, (_, c) => (r === 0 && c === 0 ? 'S' : r === n - 1 && c === n - 1 ? 'E' : '.')).join('')); assert.equal(shortestPath(grid), 998);"
+      }
+    ],
+    "hints": [
+      "Un parcours en profondeur (DFS) ne garantit PAS le plus court chemin. Pense au parcours en largeur (BFS).",
+      "Utilise une file de cases à explorer et un tableau `visited` : chaque case est visitée au plus une fois.",
+      "`array.shift()` est lent sur de grands tableaux : avance un indice de tête au lieu de retirer les éléments."
+    ],
+    "solution": "export function shortestPath(grid: string[]): number {\n  const rows = grid.length;\n  const cols = grid[0]?.length ?? 0;\n  let start = -1;\n  for (let r = 0; r < rows; r++) {\n    const c = grid[r].indexOf('S');\n    if (c !== -1) start = r * cols + c;\n  }\n  if (start === -1) return -1;\n\n  const distance = new Int32Array(rows * cols).fill(-1);\n  const queue: number[] = [start];\n  distance[start] = 0;\n  for (let head = 0; head < queue.length; head++) {\n    const cell = queue[head];\n    const r = Math.floor(cell / cols);\n    const c = cell % cols;\n    if (grid[r][c] === 'E') return distance[cell];\n    for (const [dr, dc] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {\n      const nr = r + dr;\n      const nc = c + dc;\n      if (nr < 0 || nc < 0 || nr >= rows || nc >= cols || grid[nr][nc] === '#') continue;\n      const next = nr * cols + nc;\n      if (distance[next] === -1) {\n        distance[next] = distance[cell] + 1;\n        queue.push(next);\n      }\n    }\n  }\n  return -1;\n}\n// Complexité : O(lignes × colonnes).\n",
+    "preview": ""
+  },
+  {
+    "id": "algo-lru-cache",
+    "kind": "algo",
+    "title": "Cache LRU",
+    "difficulty": "hard",
+    "topic": "Structures de données",
+    "durationMin": 35,
+    "description": "**Objectif** : implémenter un cache à capacité limitée qui, une fois plein, évince l'élément **le moins récemment utilisé** (LRU = Least Recently Used). Question classique d'entretien.\n\n**Exemple**\n```ts\nconst cache = new LRUCache<number, string>(2);\ncache.put(1, 'a');\ncache.put(2, 'b');\ncache.get(1);        // 'a'  → la clé 1 devient la plus récente\ncache.put(3, 'c');   // plein : évince la clé 2 (la moins récente)\ncache.get(2);        // undefined\n```\n\n**Contraintes**\n• `get(key)` renvoie la valeur, ou `undefined` si absente ; lire une clé la rend « récente » ;\n• `put(key, value)` ajoute ou met à jour (et rend la clé récente) ; au-delà de la capacité, évince la plus ancienne ;\n• les valeurs falsy (`0`, `''`, `false`) sont des valeurs valides ;\n• les deux opérations doivent être en **O(1)** : les tests utilisent une capacité de 30 000.\n\n**À faire** : implémente la classe `LRUCache`. Une `Map` JavaScript garde l'ordre d'insertion : comment l'exploiter ?",
+    "starterCode": "export class LRUCache<K, V> {\n  constructor(private readonly capacity: number) {}\n\n  get(key: K): V | undefined {\n    // TODO\n    return undefined;\n  }\n\n  put(key: K, value: V): void {\n    // TODO\n  }\n}\n",
+    "tests": [
+      {
+        "name": "Clé absente",
+        "code": "const c = new LRUCache(2); assert.equal(c.get(1), undefined);"
+      },
+      {
+        "name": "put puis get",
+        "code": "const c = new LRUCache(2); c.put(1, 'a'); assert.equal(c.get(1), 'a');"
+      },
+      {
+        "name": "Évince la moins récemment utilisée",
+        "code": "const c = new LRUCache(2); c.put(1, 1); c.put(2, 2); c.put(3, 3); assert.equal(c.get(1), undefined); assert.equal(c.get(2), 2); assert.equal(c.get(3), 3);"
+      },
+      {
+        "name": "get rend la clé récente",
+        "code": "const c = new LRUCache(2); c.put(1, 1); c.put(2, 2); assert.equal(c.get(1), 1); c.put(3, 3); assert.equal(c.get(2), undefined); c.put(4, 4); assert.equal(c.get(1), undefined); assert.equal(c.get(3), 3); assert.equal(c.get(4), 4);"
+      },
+      {
+        "name": "put sur une clé existante : met à jour et rafraîchit",
+        "code": "const c = new LRUCache(2); c.put(1, 1); c.put(2, 2); c.put(1, 10); c.put(3, 3); assert.equal(c.get(2), undefined); assert.equal(c.get(1), 10);"
+      },
+      {
+        "name": "Capacité 1",
+        "code": "const c = new LRUCache(1); c.put(1, 1); c.put(2, 2); assert.equal(c.get(1), undefined); assert.equal(c.get(2), 2);"
+      },
+      {
+        "name": "Valeurs falsy conservées",
+        "code": "const c = new LRUCache(2); c.put('a', 0); c.put('b', ''); assert.equal(c.get('a'), 0); assert.equal(c.get('b'), '');"
+      },
+      {
+        "name": "90 000 opérations, capacité 30 000 (O(1) attendu)",
+        "code": "const c = new LRUCache(30000); for (let i = 0; i < 90000; i++) c.put(i, i); assert.equal(c.get(89999), 89999); assert.equal(c.get(60000), 60000); assert.equal(c.get(59999), undefined); assert.equal(c.get(0), undefined);"
+      }
+    ],
+    "hints": [
+      "Une `Map` itère ses clés dans l'ordre d'insertion : la première clé est la plus ancienne.",
+      "Pour « rafraîchir » une clé : supprime-la puis réinsère-la (elle passe en dernier).",
+      "Pour évincer : `this.entries.keys().next().value` donne la clé la plus ancienne, en O(1)."
+    ],
+    "solution": "export class LRUCache<K, V> {\n  private readonly entries = new Map<K, V>(); // ordre d'insertion = du moins au plus récent\n\n  constructor(private readonly capacity: number) {}\n\n  get(key: K): V | undefined {\n    if (!this.entries.has(key)) return undefined;\n    const value = this.entries.get(key) as V;\n    this.entries.delete(key);\n    this.entries.set(key, value); // redevient le plus récent\n    return value;\n  }\n\n  put(key: K, value: V): void {\n    this.entries.delete(key);\n    this.entries.set(key, value);\n    if (this.entries.size > this.capacity) {\n      this.entries.delete(this.entries.keys().next().value as K); // évince le plus ancien\n    }\n  }\n}\n// get et put : O(1).\n",
+    "preview": ""
+  },
+  {
+    "id": "algo-promise-pool",
+    "kind": "algo",
+    "title": "Pool de promesses (concurrence limitée)",
+    "difficulty": "hard",
+    "topic": "Asynchrone · Promesses",
+    "durationMin": 35,
+    "description": "**Objectif** : exécuter une liste de tâches asynchrones en **limitant le nombre de tâches en cours** (par exemple pour ne pas envoyer 1000 requêtes HTTP d'un coup). Question fréquente en entretien front.\n\n**Exemple**\n```ts\nconst tasks = urls.map((url) => () => fetch(url).then((r) => r.json()));\nconst results = await promisePool(tasks, 3);\n// jamais plus de 3 requêtes simultanées ; results est dans le même ordre que tasks\n```\n\n**Contraintes**\n• `tasks` est un tableau de fonctions qui **retournent une promesse** (la tâche démarre quand on appelle la fonction) ;\n• au plus `limit` tâches s'exécutent en même temps ;\n• dès qu'une tâche se termine, la suivante démarre (pas par lots) ;\n• les résultats sont renvoyés dans l'ordre des tâches, quel que soit leur ordre de fin ;\n• si une tâche échoue, `promisePool` est rejetée avec cette erreur ;\n• une liste vide donne `[]`.\n\n**À faire** : implémente `promisePool`.",
+    "starterCode": "export async function promisePool<T>(tasks: Array<() => Promise<T>>, limit: number): Promise<T[]> {\n  // TODO\n  return [];\n}\n",
+    "tests": [
+      {
+        "name": "Résultats dans l'ordre des tâches",
+        "code": "const delays = [30, 10, 20]; const tasks = delays.map((d, i) => () => new Promise((r) => setTimeout(() => r(i), d))); assert.deepEqual(await promisePool(tasks, 2), [0, 1, 2]);"
+      },
+      {
+        "name": "Liste vide",
+        "code": "assert.deepEqual(await promisePool([], 3), []);"
+      },
+      {
+        "name": "Ne dépasse jamais la limite",
+        "code": "let running = 0, max = 0; const tasks = Array.from({ length: 10 }, (_, i) => async () => { running++; max = Math.max(max, running); await new Promise((r) => setTimeout(r, 10)); running--; return i; }); const out = await promisePool(tasks, 3); assert.equal(max, 3); assert.deepEqual(out, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);"
+      },
+      {
+        "name": "Limite supérieure au nombre de tâches",
+        "code": "let running = 0, max = 0; const tasks = Array.from({ length: 2 }, (_, i) => async () => { running++; max = Math.max(max, running); await new Promise((r) => setTimeout(r, 10)); running--; return i; }); await promisePool(tasks, 5); assert.equal(max, 2);"
+      },
+      {
+        "name": "Limite 1 : exécution séquentielle",
+        "code": "const events = []; const task = (i) => async () => { events.push('start' + i); await new Promise((r) => setTimeout(r, 5)); events.push('end' + i); return i; }; await promisePool([task(0), task(1), task(2)], 1); assert.deepEqual(events, ['start0', 'end0', 'start1', 'end1', 'start2', 'end2']);"
+      },
+      {
+        "name": "La tâche suivante démarre dès qu'une place se libère",
+        "code": "const events = []; const task = (i, d) => async () => { events.push('start' + i); await new Promise((r) => setTimeout(r, d)); events.push('end' + i); return i; }; await promisePool([task(0, 80), task(1, 10), task(2, 10), task(3, 10)], 2); assert.ok(events.indexOf('start2') < events.indexOf('end0'), 'la tâche 2 doit démarrer avant la fin de la tâche 0 (pas de traitement par lots)');"
+      },
+      {
+        "name": "Une tâche en échec rejette le pool",
+        "code": "const tasks = [async () => 1, async () => { throw new Error('boom'); }, async () => 3]; let message = ''; try { await promisePool(tasks, 2); } catch (e) { message = e.message; } assert.equal(message, 'boom');"
+      }
+    ],
+    "hints": [
+      "Lance `limit` « workers » en parallèle ; chacun répète : prendre la prochaine tâche, l'attendre, ranger son résultat.",
+      "Un compteur partagé `next` indique la prochaine tâche à prendre ; range le résultat à l'index de la tâche pour garder l'ordre.",
+      "`await Promise.all(workers)` attend la fin de tous les workers et propage la première erreur."
+    ],
+    "solution": "export async function promisePool<T>(tasks: Array<() => Promise<T>>, limit: number): Promise<T[]> {\n  const results: T[] = new Array(tasks.length);\n  let next = 0;\n\n  async function worker(): Promise<void> {\n    while (next < tasks.length) {\n      const index = next++;\n      results[index] = await tasks[index]();\n    }\n  }\n\n  const workers = Array.from({ length: Math.min(limit, tasks.length) }, worker);\n  await Promise.all(workers);\n  return results;\n}\n",
+    "preview": ""
   }
 ]

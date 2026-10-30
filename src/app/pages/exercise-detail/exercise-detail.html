@@ -1,6 +1,6 @@
 @if (exercise(); as e) {
   <section class="space-y-4">
-    <a routerLink="/exercises" class="inline-flex items-center underline">← Tous les exercices</a>
+    <a [routerLink]="e.kind === 'algo' ? '/algo' : '/exercises'" class="inline-flex items-center underline">← Tous les exercices</a>
 
     <header>
       <h1 class="text-2xl font-bold text-primary-dark">
@@ -9,8 +9,17 @@
           <span aria-label="Résolu">✅</span>
         }
       </h1>
-      <p class="text-sm text-gray-600">{{ e.topic }} · {{ label(e.difficulty) }}</p>
+      <p class="text-sm text-gray-600">
+        {{ e.topic }} · {{ label(e.difficulty) }}
+        @if (e.durationMin) {
+          · ⏱ {{ e.durationMin }} min conseillées
+        }
+      </p>
     </header>
+
+    @if (e.kind === 'algo' && e.durationMin) {
+      <app-chrono class="block" [minutes]="e.durationMin" />
+    }
 
     <app-exercise-description class="block" [text]="e.description" />
 
@@ -34,19 +43,21 @@
 
     <app-compile-errors class="block" [errors]="compileErrors()" />
 
-    <section aria-label="Aperçu du composant" class="space-y-1">
-      <h2 class="text-sm font-semibold text-gray-700">Aperçu interactif <span class="font-normal">(clique dedans !)</span></h2>
-      <div class="overflow-hidden border border-gray-300 bg-white shadow-sm">
-        <div class="flex items-center gap-1.5 border-b border-gray-200 bg-gray-100 px-3 py-1.5" aria-hidden="true">
-          <span class="size-2.5 rounded-full bg-red-400"></span>
-          <span class="size-2.5 rounded-full bg-yellow-400"></span>
-          <span class="size-2.5 rounded-full bg-green-400"></span>
+    @if (e.kind === 'angular') {
+      <section aria-label="Aperçu du composant" class="space-y-1">
+        <h2 class="text-sm font-semibold text-gray-700">Aperçu interactif <span class="font-normal">(clique dedans !)</span></h2>
+        <div class="overflow-hidden border border-gray-300 bg-white shadow-sm">
+          <div class="flex items-center gap-1.5 border-b border-gray-200 bg-gray-100 px-3 py-1.5" aria-hidden="true">
+            <span class="size-2.5 rounded-full bg-red-400"></span>
+            <span class="size-2.5 rounded-full bg-yellow-400"></span>
+            <span class="size-2.5 rounded-full bg-green-400"></span>
+          </div>
+          <div #preview class="preview min-h-24 p-4"></div>
         </div>
-        <div #preview class="preview min-h-24 p-4"></div>
-      </div>
-    </section>
+      </section>
+    }
 
-    <app-console-panel class="block" [logs]="logs()" (cleared)="runner.clearLogs()" />
+    <app-console-panel class="block" [logs]="logs()" (cleared)="clearLogs()" />
 
     @if (compileErrors().length > 0 && results() === null) {
       <p class="bg-white p-3">Corrige les erreurs de compilation ci-dessus, puis relance les tests.</p>
@@ -64,5 +75,5 @@
     </div>
   </section>
 } @else {
-  <p>Exercice introuvable ou en cours de chargement… <a routerLink="/exercises" class="underline">Retour</a></p>
+  <p>Exercice introuvable ou en cours de chargement… <a routerLink="/" class="underline">Retour</a></p>
 }
