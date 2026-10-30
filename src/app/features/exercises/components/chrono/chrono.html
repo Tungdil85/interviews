@@ -1,0 +1,15 @@
+<div class="flex flex-wrap items-center gap-3 border border-gray-300 bg-white px-3 py-2" role="group" aria-label="Chronomètre d'entretien">
+  <span aria-hidden="true">⏱</span>
+  <span class="font-mono text-lg font-semibold" [class]="overtime() ? 'text-brand-red' : 'text-primary-dark'" role="timer">
+    {{ display() }}
+  </span>
+  @if (overtime()) {
+    <span class="text-sm font-semibold text-brand-red">Temps dépassé</span>
+  }
+  <span class="ml-auto flex gap-2">
+    <button type="button" class="border border-primary px-3 text-primary-dark hover:bg-purple-50" (click)="toggle()">
+      {{ running() ? 'Pause' : elapsed() > 0 ? 'Reprendre' : 'Démarrer' }}
+    </button>
+    <button type="button" class="px-3 underline disabled:opacity-40" [disabled]="elapsed() === 0" (click)="reset()">Remettre à zéro</button>
+  </span>
+</div>

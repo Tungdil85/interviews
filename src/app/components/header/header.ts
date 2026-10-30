@@ -10,7 +10,8 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 export class Header {
   protected readonly links = [
     { path: '/quiz', label: 'QCM' },
-    { path: '/exercises', label: 'Exercices' },
+    { path: '/exercises', label: 'Angular' },
+    { path: '/algo', label: 'Algo' },
     { path: '/progress', label: 'Progression' },
     { path: '/credits', label: 'Crédits' },
   ];

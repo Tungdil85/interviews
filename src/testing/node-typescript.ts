@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import type { TsApi } from '../app/features/exercises/features/runner-angular';
+import type { TsApi } from '../app/features/exercises/typescript';
 
 let cached: TsApi | undefined;
 

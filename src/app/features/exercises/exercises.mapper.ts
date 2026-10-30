@@ -8,6 +8,8 @@ export class ExercisesMapper {
   toExercise(dto: ExerciseDto): Exercise {
     return {
       id: dto.id,
+      kind: dto.kind === 'algo' ? 'algo' : 'angular',
+      durationMin: dto.durationMin,
       title: dto.title,
       difficulty: dto.difficulty as Difficulty,
       topic: dto.topic,

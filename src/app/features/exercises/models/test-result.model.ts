@@ -8,6 +8,8 @@ export interface TestResult {
   name: string;
   passed: boolean;
   message?: string;
+  /** Durée d'exécution du test (algos : permet de repérer une complexité trop élevée). */
+  durationMs?: number;
 }
 
 export type LogLevel = 'log' | 'info' | 'warn' | 'error';

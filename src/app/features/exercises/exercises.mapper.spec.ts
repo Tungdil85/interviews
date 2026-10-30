@@ -31,4 +31,12 @@ describe('ExercisesMapper', () => {
     expect(mapper.toExercise({ ...dto, preview: 'render(X)' }).preview).toBe('render(X)');
     expect(mapper.toExercise(dto).preview).toBe('');
   });
+
+  it('type et durée : angular par défaut, algo avec durée conseillée', () => {
+    const mapper = new ExercisesMapper();
+    expect(mapper.toExercise(dto).kind).toBe('angular');
+    const algo = mapper.toExercise({ ...dto, kind: 'algo', durationMin: 30 });
+    expect(algo.kind).toBe('algo');
+    expect(algo.durationMin).toBe(30);
+  });
 });

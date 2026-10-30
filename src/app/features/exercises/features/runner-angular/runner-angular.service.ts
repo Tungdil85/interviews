@@ -1,10 +1,11 @@
 import { EnvironmentInjector, Injectable, inject, signal } from '@angular/core';
+import type { ExerciseRunner } from '../../models/exercise-runner.model';
 import type { CompileError, LogEntry, LogLevel, RunReport, TestCase, TestResult } from '../../models/test-result.model';
 import { assert } from './assert';
 import { addInitializerApiDecorators } from './initializer-apis';
 import { loadModules } from './module-registry';
 import { Harness, createHarness } from './test-harness';
-import { TS_LOADER, TsApi } from './typescript-loader';
+import { CompileFailure, TS_LOADER, TsApi, transpileTypescript } from '../../typescript';
 
 const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor as new (
   ...args: string[]
@@ -30,7 +31,7 @@ function formatValue(value: unknown): string {
  * composants dans l'aperçu et exécute les tests contre le DOM obtenu.
  */
 @Injectable({ providedIn: 'root' })
-export class RunnerAngularService {
+export class RunnerAngularService implements ExerciseRunner {
   private readonly injector = inject(EnvironmentInjector);
   private readonly loadTs = inject(TS_LOADER);
   private harness?: Harness;
@@ -151,38 +152,11 @@ export class RunnerAngularService {
   }
 
   private transpile(ts: TsApi, code: string): string {
-    const { outputText, diagnostics = [] } = ts.transpileModule(addInitializerApiDecorators(code), {
-      compilerOptions: {
-        target: ts.ScriptTarget.ES2022,
-        module: ts.ModuleKind.CommonJS,
-        experimentalDecorators: true,
-        useDefineForClassFields: false,
-      },
-      reportDiagnostics: true,
-    });
-    // transpileModule ne signale que des erreurs de syntaxe (celles rattachées à un fichier).
-    const syntax = diagnostics.filter((d) => d.file && d.category === 1);
-    if (syntax.length > 0) {
-      const failure = new Error('Erreur de syntaxe') as CompileFailure;
-      failure.errors = syntax.map((d) => {
-        const position = d.file && d.start !== undefined ? d.file.getLineAndCharacterOfPosition(d.start) : undefined;
-        return {
-          message: ts.flattenDiagnosticMessageText(d.messageText, '\n'),
-          line: position ? position.line + 1 : undefined,
-          column: position ? position.character + 1 : undefined,
-        };
-      });
-      throw failure;
-    }
-    return outputText;
+    return transpileTypescript(ts, addInitializerApiDecorators(code));
   }
 
   private describe(error: unknown): string {
     const message = error instanceof Error ? error.message : String(error);
     return message.length > 400 ? `${message.slice(0, 400)}…` : message;
   }
-}
-
-interface CompileFailure extends Error {
-  errors?: CompileError[];
 }

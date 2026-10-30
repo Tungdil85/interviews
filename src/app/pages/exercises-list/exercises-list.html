@@ -1,12 +1,20 @@
 <section class="space-y-4">
-  <h1 class="text-2xl font-bold text-primary-dark">Exercices de code</h1>
-  <p>Complète la fonction, lance les tests, valide tous les cas.</p>
+  @if (isAlgo()) {
+    <h1 class="text-2xl font-bold text-primary-dark">Algorithmique en TypeScript</h1>
+    <p>
+      Des exercices au format entretien technique (30 à 35 minutes) : écris la fonction, lance les tests.
+      Les tests incluent de grosses entrées : une solution trop lente échoue après 5 secondes.
+    </p>
+  } @else {
+    <h1 class="text-2xl font-bold text-primary-dark">Exercices Angular</h1>
+    <p>Écris du vrai code Angular (pipe, composant, directive, service…), vois le résultat et lance les tests.</p>
+  }
 
   @if (exercises(); as list) {
     <ul class="grid gap-3 sm:grid-cols-2">
       @for (e of list; track e.id) {
         <li>
-          <a [routerLink]="['/exercises', e.id]" class="flex h-full flex-col gap-1 border-2 bg-white p-4 hover:bg-purple-50"
+          <a [routerLink]="[basePath(), e.id]" class="flex h-full flex-col gap-1 border-2 bg-white p-4 hover:bg-purple-50"
             [class]="progress.solvedExercises().includes(e.id) ? 'border-brand-green' : 'border-gray-200'">
             <span class="flex items-center justify-between">
               <span class="font-semibold">{{ e.title }}</span>
@@ -14,7 +22,12 @@
                 <span aria-label="Résolu">✅</span>
               }
             </span>
-            <span class="text-sm text-gray-600">{{ e.topic }} · {{ label(e.difficulty) }}</span>
+            <span class="text-sm text-gray-600">
+              {{ e.topic }} · {{ label(e.difficulty) }}
+              @if (e.durationMin) {
+                · ⏱ {{ e.durationMin }} min
+              }
+            </span>
           </a>
         </li>
       }

@@ -1,9 +1,13 @@
 export { ExercisesService } from './exercises.service';
-export type { Exercise, ExerciseTest } from './models/exercise.model';
+export type { Exercise, ExerciseKind, ExerciseTest } from './models/exercise.model';
+export type { ExerciseRunner } from './models/exercise-runner.model';
+export { RunnerAlgoService } from './features/runner-algo';
 export { RunnerAngularService } from './features/runner-angular';
+export { TS_LOADER, type TsApi } from './typescript';
 export type { CompileError, LogEntry, LogLevel, RunReport, TestCase, TestResult } from './models/test-result.model';
 export { CodeEditor } from './components/code-editor/code-editor';
 export { TestResults } from './components/test-results/test-results';
+export { Chrono } from './components/chrono/chrono';
 export { ExerciseDescription } from './components/exercise-description/exercise-description';
 export { ConsolePanel } from './components/console-panel/console-panel';
 export { CompileErrors } from './components/compile-errors/compile-errors';

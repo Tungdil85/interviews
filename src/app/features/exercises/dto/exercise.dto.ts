@@ -1,5 +1,7 @@
 export interface ExerciseDto {
   id: string;
+  kind?: string;
+  durationMin?: number;
   title: string;
   difficulty: string;
   topic: string;

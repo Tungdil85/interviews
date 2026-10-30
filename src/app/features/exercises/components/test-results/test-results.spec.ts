@@ -32,4 +32,9 @@ describe('TestResults', () => {
   it('indique l’exécution en cours', () => {
     expect(render({ running: true })).toContain('Exécution');
   });
+
+  it('affiche la durée des tests quand elle est connue', () => {
+    expect(render({ results: [{ name: 'a', passed: true, durationMs: 12 }] })).toContain('12 ms');
+    expect(render({ results: [{ name: 'a', passed: true }] })).not.toContain(' ms');
+  });
 });

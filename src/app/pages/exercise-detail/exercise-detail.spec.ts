@@ -2,8 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { RunnerAngularService } from '@features/exercises';
-import { TS_LOADER } from '../../features/exercises/features/runner-angular';
+import { RunnerAlgoService, RunnerAngularService, TS_LOADER } from '@features/exercises';
 import { ProgressService } from '@features/progress';
 import { loadNodeTypescript } from '../../../testing/node-typescript';
 import { ExerciseDetail } from './exercise-detail';
@@ -20,15 +19,15 @@ const dto = {
 };
 
 describe('ExerciseDetail', () => {
-  function setup() {
+  function setup(exercise: Record<string, unknown> = dto) {
     localStorage.clear();
     TestBed.configureTestingModule({
       providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting(), { provide: TS_LOADER, useValue: loadNodeTypescript }],
     });
     const fixture = TestBed.createComponent(ExerciseDetail);
-    fixture.componentRef.setInput('id', 'e1');
+    fixture.componentRef.setInput('id', exercise['id'] as string);
     fixture.detectChanges();
-    TestBed.inject(HttpTestingController).expectOne('data/exercises.json').flush([dto]);
+    TestBed.inject(HttpTestingController).expectOne('data/exercises.json').flush([exercise]);
     fixture.detectChanges();
     return fixture;
   }
@@ -86,5 +85,38 @@ describe('ExerciseDetail', () => {
     (fixture.componentInstance as unknown as { code: { set(v: string): void } }).code.set(`console.log('trace utilisateur');`);
     button(el, 'Lancer').click();
     await vi.waitFor(() => expect(el.querySelector('app-console-panel')?.textContent).toContain('trace utilisateur'));
+  });
+
+  describe('exercice algo', () => {
+    const algo = {
+      id: 'a1', kind: 'algo', durationMin: 30, title: 'Somme', difficulty: 'easy', topic: 'Tableaux', description: '**Objectif** : additionner.',
+      starterCode: 'export function add(a: number, b: number): number { return 0; }',
+      tests: [{ name: 'addition', code: 'assert.equal(add(1, 2), 3);' }],
+      hints: [], solution: 'export function add(a: number, b: number): number { return a + b; }',
+    };
+
+    it('affiche le chrono et la durée conseillée, sans aperçu ni lien vers les exercices Angular', () => {
+      const el = setup(algo).nativeElement as HTMLElement;
+      expect(el.querySelector('app-chrono')).toBeTruthy();
+      expect(el.textContent).toContain('30 min conseillées');
+      expect(el.querySelector('[aria-label="Aperçu du composant"]')).toBeNull();
+      expect(el.querySelector('a[href="/algo"]')).toBeTruthy();
+    });
+
+    it('exécute les tests avec le moteur algo et marque l’exercice résolu', async () => {
+      const fixture = setup(algo);
+      const el = fixture.nativeElement as HTMLElement;
+      const runner = TestBed.inject(RunnerAlgoService);
+      // jsdom n'a pas de Web Worker : on exécute dans le thread courant.
+      vi.spyOn(runner, 'run').mockImplementation((code, tests) => runner.execute(code, tests));
+
+      button(el, 'Lancer').click();
+      await vi.waitFor(() => expect(el.textContent).toContain('0 / 1 tests réussis'));
+
+      (fixture.componentInstance as unknown as { code: { set(v: string): void } }).code.set(algo.solution);
+      button(el, 'Lancer').click();
+      await vi.waitFor(() => expect(el.textContent).toContain('1 / 1 tests réussis'));
+      expect(TestBed.inject(ProgressService).solvedExercises()).toEqual(['a1']);
+    });
   });
 });

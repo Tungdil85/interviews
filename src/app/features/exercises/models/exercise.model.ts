@@ -6,8 +6,13 @@ export interface ExerciseTest {
   code: string;
 }
 
+export type ExerciseKind = 'angular' | 'algo';
+
 export interface Exercise {
   id: string;
+  kind: ExerciseKind;
+  /** Durée conseillée en entretien (minutes). */
+  durationMin?: number;
   title: string;
   difficulty: Difficulty;
   topic: string;
