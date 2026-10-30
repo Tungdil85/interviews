@@ -9,17 +9,282 @@ import json, pathlib
 
 E, M, H = "easy", "medium", "hard"
 X = []
-def ex(id, title, diff, topic, desc, starter, tests, hints, solution):
-    X.append({"id": id, "title": title, "difficulty": diff, "topic": topic, "description": desc.strip(),
+# ───────────────────────── Consignes ─────────────────────────
+# Mini-format affiché par la page : **gras**, `code`, blocs ```…```, listes « • ».
+# Chaque consigne suit le même plan : objectif · exemple d'utilisation · résultat attendu · à faire.
+DESCRIPTIONS = {
+"pipe-truncate": r"""**Objectif** : écrire un pipe `truncate` qui raccourcit un texte trop long.
+
+**Exemple d'utilisation** (dans un template) :
+```html
+{{ 'Bonjour tout le monde' | truncate:7 }}   <!-- affiche : Bonjour… -->
+{{ 'Salut' | truncate:10 }}                  <!-- affiche : Salut (déjà assez court) -->
+{{ unTexte | truncate }}                     <!-- sans paramètre : limite de 20 caractères -->
+```
+
+**À faire** dans la méthode `transform(value, max)` :
+• si le texte fait plus de `max` caractères, garder les `max` premiers et ajouter « … » (un seul caractère) ;
+• sinon, renvoyer le texte tel quel (un texte d'exactement `max` caractères n'est pas coupé).""",
+
+"pipe-filesize": r"""**Objectif** : écrire un pipe `filesize` qui transforme un nombre d'octets en taille lisible.
+
+**Exemple d'utilisation** :
+```html
+{{ 512 | filesize }}          <!-- 512 o   -->
+{{ 1024 | filesize }}         <!-- 1 Ko    -->
+{{ 1536 | filesize }}         <!-- 1.5 Ko  -->
+{{ 1048576 | filesize }}      <!-- 1 Mo    -->
+{{ 5368709120 | filesize }}   <!-- 5 Go    -->
+{{ null | filesize }}         <!-- (rien)  -->
+```
+
+**À faire** dans `transform(bytes)` :
+• 1 Ko = 1024 octets, 1 Mo = 1024 Ko, 1 Go = 1024 Mo ;
+• garder au maximum une décimale, sans « .0 » inutile (« 1 Ko », pas « 1.0 Ko ») ;
+• `null` ou `undefined` donnent une chaîne vide.""",
+
+"component-counter": r"""**Objectif** : un compteur avec deux boutons, qui s'affiche ainsi :
+```html
+[ − ]  3  [ + ]
+```
+
+**À faire** dans `CounterComponent` (le template contient déjà les 3 éléments, repérés par `data-test`) :
+• le bouton « + » ajoute 1 au signal `count`, le bouton « − » enlève 1 : écris les méthodes `increment()` et `decrement()` ;
+• relie-les aux boutons avec `(click)` ;
+• affiche la valeur du signal dans le `<span data-test="value">` avec `{{ count() }}` ;
+• la valeur ne descend jamais sous 0, et le bouton « − » est désactivé (`[disabled]`) quand elle vaut 0.""",
+
+"component-todo-list": r"""**Objectif** : afficher une liste de tâches reçue du parent.
+
+**Exemple d'utilisation** (côté parent) :
+```html
+<app-todo-list [todos]="[
+  { id: 1, title: 'Lire', done: false },
+  { id: 2, title: 'Écrire', done: true }
+]" />
+```
+
+**Résultat attendu** (HTML produit par `TodoListComponent`) :
+```html
+<ul>
+  <li data-test="todo">Lire</li>
+  <li data-test="todo" class="done">Écrire</li>
+</ul>
+<p data-test="remaining">1 restante(s)</p>
+```
+
+**À faire** dans le template :
+• une ligne `<li data-test="todo">` par tâche, avec son `title` (boucle `@for`) ;
+• la classe `done` seulement sur les tâches terminées ;
+• si la liste est vide, afficher `<p data-test="empty">Aucune tâche</p>` à la place (bloc `@empty`) ;
+• compléter le `computed` `remaining` (nombre de tâches non terminées) et l'afficher dans `data-test="remaining"` au format « 2 restante(s) ».""",
+
+"card-projection": r"""**Objectif** : un composant « carte » qui affiche le contenu placé par le parent **entre ses balises**, chaque morceau au bon endroit. C'est la projection de contenu avec `<ng-content>`.
+
+**Exemple d'utilisation** (côté parent) :
+```html
+<app-card>
+  <h2 card-title>Ma carte</h2>
+  <p>Un texte libre</p>
+  <button card-footer>Valider</button>
+</app-card>
+```
+
+**Résultat attendu** (HTML produit par `CardComponent`) :
+```html
+<header data-test="header"><h2 card-title>Ma carte</h2></header>
+<div data-test="body"><p>Un texte libre</p></div>
+<footer data-test="footer"><button card-footer>Valider</button></footer>
+```
+
+**À faire** : le template de `CardComponent` a déjà ses 3 zones, mais elles sont vides. Mets un `<ng-content>` dans chacune :
+• dans `<header>` : seulement l'élément qui porte l'attribut `card-title` ;
+• dans `<footer>` : seulement l'élément qui porte l'attribut `card-footer` ;
+• dans `<div data-test="body">` : tout le reste du contenu.
+Indice : `<ng-content select="[attribut]">` choisit les éléments portant cet attribut.""",
+
+"component-rating": r"""**Objectif** : une notation par étoiles, cliquable.
+
+**Exemple d'utilisation** (côté parent) :
+```html
+<app-rating [value]="3" [max]="5" (rated)="onRated($event)" />
+```
+
+**Résultat attendu** : 5 boutons étoiles, les 3 premiers remplis. Un clic sur la 4e étoile appelle `onRated(4)`.
+```html
+<button data-test="star" class="filled">★</button>  ×3
+<button data-test="star">★</button>                 ×2
+```
+
+**À faire** dans `RatingComponent` :
+• `stars` (computed) doit contenir `[1, 2, …, max]` ;
+• dans le template, une boucle `@for` affiche un `<button data-test="star">` par étoile ;
+• les `value` premières étoiles portent la classe `filled` (`[class.filled]`) ;
+• un clic sur l'étoile n° `n` émet `n` avec la sortie `rated`.""",
+
+"component-product-filter": r"""**Objectif** : une liste de produits que l'on filtre en tapant dans un champ de recherche.
+
+**Exemple d'utilisation** (côté parent) :
+```html
+<app-product-list [products]="[
+  { name: 'Laptop', price: 900 },
+  { name: 'Phone', price: 500 },
+  { name: 'Phone case', price: 15 }
+]" />
+```
+
+**Résultat attendu** : en tapant « pho », il ne reste que 2 lignes.
+```html
+<p data-test="count">2 résultat(s)</p>
+<li data-test="product">Phone – 500 €</li>
+<li data-test="product">Phone case – 15 €</li>
+```
+
+**À faire** dans `ProductListComponent` :
+• à chaque saisie dans le champ, mettre à jour le signal `query` (événement `(input)`) ;
+• `filtered` (computed) garde les produits dont le nom contient `query`, sans tenir compte des majuscules ;
+• afficher une ligne `data-test="product"` par produit filtré, au format « Nom – 500 € » ;
+• afficher « N résultat(s) » dans `data-test="count"` ;
+• s'il n'y a aucun résultat : `<p data-test="empty">Aucun résultat</p>`.""",
+
+"form-login": r"""**Objectif** : un formulaire de connexion avec validation.
+
+**Exemple d'utilisation** (côté parent) :
+```html
+<app-login (submitted)="onLogin($event)" />
+<!-- onLogin reçoit : { email: 'a@b.fr', password: '123456' } -->
+```
+
+**Comportement attendu** :
+• le bouton « Se connecter » est grisé tant que le formulaire est invalide ;
+• si l'email est mal formé, **après avoir quitté le champ**, le message « Email invalide » apparaît ;
+• quand tout est valide, la soumission émet `{ email, password }`.
+
+**À faire** dans `LoginComponent` :
+• ajouter les validateurs : `email` obligatoire et au format email ; `password` obligatoire, 6 caractères minimum (`Validators`) ;
+• sur le bouton : `[disabled]="form.invalid"` ;
+• afficher `<p data-test="email-error">Email invalide</p>` quand le champ email est invalide **et** touché (`touched`) ;
+• dans `submit()`, émettre la valeur du formulaire avec la sortie `submitted`.""",
+
+"directive-highlight": r"""**Objectif** : une directive d'attribut qui surligne un élément quand la souris le survole.
+
+**Exemple d'utilisation** :
+```html
+<p appHighlight>Surlignage jaune (par défaut)</p>
+<p appHighlight="lightblue">Surlignage bleu clair</p>
+```
+
+**Comportement attendu** :
+• la souris entre sur l'élément : sa couleur de fond devient celle donnée à `appHighlight` (« yellow » si aucune) ;
+• la souris sort : la couleur de fond est retirée.
+
+**À faire** dans `HighlightDirective` :
+• écouter `mouseenter` et `mouseleave` sur l'élément avec `@HostListener` ;
+• modifier `this.el.nativeElement.style.backgroundColor` (l'élément est déjà injecté dans `el`).""",
+
+"directive-click-outside": r"""**Objectif** : une directive qui prévient quand l'utilisateur clique **en dehors** d'un élément (pratique pour fermer un menu ou une modale).
+
+**Exemple d'utilisation** :
+```html
+<div appClickOutside (appClickOutside)="fermerLeMenu()">
+  <button>Un clic ici ne fait rien</button>
+</div>
+<!-- un clic n'importe où ailleurs sur la page appelle fermerLeMenu() -->
+```
+
+**À faire** dans `ClickOutsideDirective` :
+• écouter les clics sur **tout le document** : `@HostListener('document:click', ['$event'])` ;
+• si l'élément cliqué (`event.target`) n'est ni l'élément de la directive ni l'un de ses enfants (`this.el.nativeElement.contains(...)`), émettre la sortie `appClickOutside` ;
+• un clic à l'intérieur n'émet rien.""",
+
+"directive-unless": r"""**Objectif** : une directive structurelle `*appUnless`, l'inverse de `*ngIf` : elle affiche son contenu quand la condition est **fausse**.
+
+**Exemple d'utilisation** :
+```html
+<p *appUnless="connecte">Connecte-toi pour continuer</p>
+<!-- affiché quand connecte vaut false, retiré du DOM quand il vaut true -->
+```
+
+**À faire** dans `UnlessDirective` : l'entrée `appUnless` est un setter, appelé à chaque changement de la condition.
+• condition fausse : créer la vue avec `this.container.createEmbeddedView(this.template)` ;
+• condition vraie : la détruire avec `this.container.clear()` ;
+• ne jamais créer la vue deux fois : mémorise si elle est déjà affichée.""",
+
+"service-cart": r"""**Objectif** : un service de panier d'achat, avec des signaux.
+
+**Exemple d'utilisation** :
+```ts
+const cart = inject(CartService);
+cart.add({ id: 1, name: 'Stylo', price: 2 });
+cart.add({ id: 1, name: 'Stylo', price: 2 });   // même produit : quantité 2, pas de 2e ligne
+cart.add({ id: 2, name: 'Cahier', price: 5 });
+cart.count();   // 3  (articles au total)
+cart.total();   // 9  (2 × 2 + 5)
+cart.remove(1); // retire la ligne du stylo
+cart.clear();   // vide le panier
+```
+
+**À faire** dans `CartService` :
+• `add` : si le produit est déjà dans `lines`, augmenter sa quantité `qty` de 1, sinon l'ajouter avec `qty: 1` ;
+• `remove` et `clear` modifient `lines` ;
+• `count` et `total` sont des `computed` calculés depuis `lines` ;
+• ne modifie jamais un objet existant : crée toujours un nouveau tableau (`update`).""",
+
+"service-http-users": r"""**Objectif** : un service qui récupère des utilisateurs depuis une API avec `HttpClient`.
+
+**Exemple d'utilisation** :
+```ts
+const users = inject(UserService);
+users.getActiveUsers().subscribe((noms) => console.log(noms));
+// requête : GET /api/users?active=true
+// réponse : [{ id: 1, name: 'Ada' }, { id: 2, name: 'Linus' }]
+// noms    : ['Ada', 'Linus']
+users.getUser(7).subscribe(...);   // requête : GET /api/users/7
+```
+
+**À faire** dans `UserService` :
+• `getActiveUsers()` : faire la requête avec le paramètre `active=true` (option `params`), puis ne garder que les noms (`map`) ;
+• en cas d'erreur HTTP, `getActiveUsers()` renvoie un tableau vide (`catchError` + `of([])`) ;
+• `getUser(id)` : requête GET sur `/api/users/` + l'id, résultat renvoyé tel quel.""",
+
+"interceptor-auth": r"""**Objectif** : un intercepteur HTTP qui ajoute automatiquement le token de connexion à chaque requête.
+
+**Exemple** : quand `TokenService.token()` vaut `'abc123'`, toute requête part avec l'en-tête :
+```html
+Authorization: Bearer abc123
+```
+Sans token (`null`), la requête part inchangée.
+
+**À faire** dans `authInterceptor` (une fonction `(req, next) => …`) :
+• lire le token avec `inject(TokenService).token()` ;
+• s'il n'y en a pas, renvoyer `next(req)` sans rien changer ;
+• sinon, une requête est immuable : crée une copie avec `req.clone({ setHeaders: { … } })` et passe-la à `next(...)` ;
+• les autres en-têtes de la requête doivent être conservés.""",
+
+"rxjs-search": r"""**Objectif** : une recherche « pendant la frappe » qui n'appelle pas le serveur à chaque touche.
+
+**Chronologie attendue** quand l'utilisateur tape « ngxs » :
+```html
+n, ng, ngx, ngxs   (frappes rapides)   → aucun appel
+…300 ms sans frappe…                   → un seul appel : service.search('ngxs')
+```
+
+**À faire** dans le constructeur de `SearchComponent` : `this.query.valueChanges` émet à chaque frappe. Enchaîne ces opérateurs RxJS dans un `.pipe(...)` :
+• `debounceTime(300)` : attendre 300 ms sans frappe ;
+• `filter` : ignorer les textes de moins de 2 caractères ;
+• `distinctUntilChanged()` : ignorer une valeur identique à la précédente ;
+• `switchMap` vers `this.service.search(q)` : si une nouvelle recherche part, l'ancienne réponse est ignorée ;
+• `takeUntilDestroyed()` : se désabonner à la destruction du composant.
+Termine par `.subscribe(r => this.results.set(r))` pour afficher les résultats.""",
+}
+
+def ex(id, title, diff, topic, starter, tests, hints, solution):
+    X.append({"id": id, "title": title, "difficulty": diff, "topic": topic, "description": DESCRIPTIONS[id].strip(),
               "starterCode": starter.lstrip("\n"), "tests": [{"name": n, "code": c.strip()} for n, c in tests],
               "hints": hints, "solution": solution.lstrip("\n")})
 
 # ───────────────────────── Pipes ─────────────────────────
 ex("pipe-truncate", "Pipe truncate", E, "Pipe",
- """Complète le pipe `truncate` : `{{ 'Bonjour tout le monde' | truncate:7 }}` doit afficher « Bonjour… ».
-• Au-delà de `max` caractères, on coupe et on ajoute « … » (un seul caractère).
-• Si le texte tient dans `max`, il reste inchangé.
-• `max` vaut 20 par défaut.""",
  r'''
 import { Pipe, PipeTransform } from '@angular/core';
 
@@ -48,10 +313,6 @@ export class TruncatePipe implements PipeTransform {
 ''')
 
 ex("pipe-filesize", "Pipe filesize", M, "Pipe",
- """Écris un pipe `filesize` qui convertit un nombre d'octets en texte lisible :
-512 → « 512 o » · 1024 → « 1 Ko » · 1536 → « 1.5 Ko » · 1048576 → « 1 Mo » · 5368709120 → « 5 Go ».
-• Une décimale maximum, sans « .0 » inutile.
-• `null` ou `undefined` → chaîne vide.""",
  r'''
 import { Pipe, PipeTransform } from '@angular/core';
 
@@ -91,11 +352,6 @@ export class FileSizePipe implements PipeTransform {
 
 # ───────────────────────── Composants ─────────────────────────
 ex("component-counter", "Composant compteur", E, "Composant · Signals",
- """Complète le composant `CounterComponent` avec un signal :
-• le bouton « + » incrémente, le bouton « − » décrémente ;
-• la valeur ne descend jamais sous 0 ;
-• le bouton « − » est désactivé quand la valeur vaut 0 ;
-• la valeur est affichée dans l'élément `data-test="value"`.""",
  r'''
 import { Component, signal } from '@angular/core';
 
@@ -144,11 +400,6 @@ export class CounterComponent {
 ''')
 
 ex("component-todo-list", "Liste de tâches (control flow)", E, "Composant · @for / @if",
- """Le composant `TodoListComponent` reçoit une liste de tâches via l'entrée `todos`. Complète son template :
-• une ligne `<li data-test="todo">` par tâche, avec son titre ;
-• la classe CSS `done` sur les tâches terminées ;
-• s'il n'y a aucune tâche : `<p data-test="empty">Aucune tâche</p>` ;
-• le nombre de tâches non terminées dans `data-test="remaining"` au format « 2 restante(s) ».""",
  r'''
 import { Component, computed, input } from '@angular/core';
 
@@ -208,11 +459,6 @@ export class TodoListComponent {
 ''')
 
 ex("card-projection", "Carte avec projection de contenu", E, "Composant · ng-content",
- """Un composant `CardComponent` doit afficher le contenu fourni par son parent à trois endroits :
-• `<header data-test="header">` : l'élément portant l'attribut `card-title` ;
-• `<div data-test="body">` : tout le reste du contenu ;
-• `<footer data-test="footer">` : l'élément portant l'attribut `card-footer`.
-Utilise `<ng-content>` avec `select`.""",
  r'''
 import { Component } from '@angular/core';
 
@@ -246,10 +492,6 @@ export class CardComponent {}
 ''')
 
 ex("component-rating", "Notation par étoiles (input / output)", M, "Composant · input / output",
- """Complète `RatingComponent` :
-• affiche `max` boutons `data-test="star"` (5 par défaut) ;
-• les `value` premières étoiles portent la classe `filled` ;
-• un clic sur la n-ième étoile émet `n` via la sortie `rated`.""",
  r'''
 import { Component, computed, input, output } from '@angular/core';
 
@@ -294,12 +536,6 @@ export class RatingComponent {
 ''')
 
 ex("component-product-filter", "Liste filtrable (signals)", M, "Composant · Signals",
- """`ProductListComponent` affiche des produits et les filtre pendant la frappe :
-• un champ `data-test="search"` met à jour le signal `query` à chaque saisie ;
-• `filtered` (computed) garde les produits dont le nom contient `query`, sans tenir compte de la casse ;
-• une ligne `data-test="product"` par produit (« Nom – 12 € ») ;
-• `data-test="count"` affiche « 2 résultat(s) » ;
-• aucun résultat : `<p data-test="empty">Aucun résultat</p>`.""",
  r'''
 import { Component, computed, input, signal } from '@angular/core';
 
@@ -363,11 +599,6 @@ export class ProductListComponent {
 ''')
 
 ex("form-login", "Formulaire de connexion réactif", M, "Formulaires réactifs",
- """Complète `LoginComponent` (formulaire réactif) :
-• `email` : obligatoire et au format email ; `password` : obligatoire, 6 caractères minimum ;
-• le bouton `data-test="submit"` est désactivé tant que le formulaire est invalide ;
-• quand le champ email a été touché (blur) et qu'il est invalide, affiche `<p data-test="email-error">Email invalide</p>` ;
-• à la soumission, la sortie `submitted` émet `{ email, password }`.""",
  r'''
 import { Component, output } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
@@ -438,10 +669,6 @@ export class LoginComponent {
 
 # ───────────────────────── Directives ─────────────────────────
 ex("directive-highlight", "Directive highlight", E, "Directive",
- """Complète `HighlightDirective` (attribut `appHighlight`) :
-• au survol (`mouseenter`), l'élément prend la couleur de fond `appHighlight` (« yellow » par défaut) ;
-• à la sortie (`mouseleave`), le fond est retiré.
-Exemple : `<p appHighlight="lightblue">…</p>`.""",
  r'''
 import { Directive, ElementRef, HostListener, Input, inject } from '@angular/core';
 
@@ -479,9 +706,6 @@ export class HighlightDirective {
 ''')
 
 ex("directive-click-outside", "Directive clic extérieur", M, "Directive · HostListener",
- """Écris `ClickOutsideDirective` (sélecteur `[appClickOutside]`) : elle émet sa sortie `appClickOutside` quand l'utilisateur clique **en dehors** de l'élément qui la porte (utile pour fermer un menu ou une modale).
-• Écoute les clics sur le `document` avec `@HostListener('document:click', ['$event'])`.
-• Un clic à l'intérieur de l'élément (ou d'un de ses enfants) n'émet rien.""",
  r'''
 import { Directive, ElementRef, HostListener, inject, output } from '@angular/core';
 
@@ -515,10 +739,6 @@ export class ClickOutsideDirective {
 ''')
 
 ex("directive-unless", "Directive structurelle *appUnless", H, "Directive structurelle",
- """Écris la directive structurelle `*appUnless` : l'inverse de `*ngIf`. Le contenu est affiché quand la condition est **fausse**.
-`<p *appUnless="hidden">Visible</p>` → affiché si `hidden` vaut `false`.
-• Utilise `TemplateRef` et `ViewContainerRef`.
-• Ne crée jamais deux fois la vue : change de condition = créer ou détruire, pas dupliquer.""",
  r'''
 import { Directive, Input, TemplateRef, ViewContainerRef, inject } from '@angular/core';
 
@@ -560,12 +780,6 @@ export class UnlessDirective {
 
 # ───────────────────────── Services / HTTP ─────────────────────────
 ex("service-cart", "Service panier (signals)", E, "Service · Signals",
- """Complète `CartService`, un service injectable qui gère un panier avec des signaux :
-• `add(product)` : ajoute un produit `{ id, name, price }` ; s'il est déjà dans le panier, incrémente sa quantité ;
-• `remove(id)` : retire la ligne correspondante ;
-• `count` (computed) : nombre total d'articles (somme des quantités) ;
-• `total` (computed) : somme des `price × quantité` ;
-• `clear()` : vide le panier.""",
  r'''
 import { Injectable, computed, signal } from '@angular/core';
 
@@ -646,10 +860,6 @@ export class CartService {
 ''')
 
 ex("service-http-users", "Service HTTP (HttpClient)", M, "Service · HttpClient",
- """Complète `UserService`, qui utilise `HttpClient` :
-• `getActiveUsers()` : GET `/api/users?active=true` (paramètre de requête via `params`) ; la réponse est un tableau `{ id, name }` ; retourne un Observable des **noms** seulement ;
-• en cas d'erreur HTTP, `getActiveUsers()` retourne un tableau vide (`catchError`) ;
-• `getUser(id)` : GET `/api/users/:id`, retourne l'utilisateur tel quel.""",
  r'''
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
@@ -708,10 +918,6 @@ export class UserService {
 ''')
 
 ex("interceptor-auth", "Intercepteur d'authentification", M, "HttpInterceptor",
- """Écris `authInterceptor` (un `HttpInterceptorFn`) : il ajoute l'en-tête `Authorization: Bearer <token>` à chaque requête sortante.
-• Le token vient de `TokenService.token()` (signal, `null` si non connecté) — utilise `inject()` dans l'intercepteur ;
-• sans token, la requête part inchangée (pas d'en-tête) ;
-• les requêtes HttpRequest sont immuables : utilise `req.clone(...)`.""",
  r'''
 import { HttpInterceptorFn } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
@@ -749,13 +955,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
 # ───────────────────────── RxJS dans un composant ─────────────────────────
 ex("rxjs-search", "Recherche avec debounce (RxJS)", H, "RxJS · Composant",
- """`SearchComponent` interroge `SearchService.search(q)` pendant la frappe. Branche le flux de `query.valueChanges` :
-• `debounceTime(300)` : attend 300 ms sans frappe ;
-• n'appelle le service que pour 2 caractères minimum ;
-• `distinctUntilChanged()` : pas de nouvel appel pour la même valeur ;
-• `switchMap` : une réponse tardive d'une ancienne recherche est ignorée ;
-• les résultats arrivent dans le signal `results`, affichés en `<li data-test="result">`.
-Désabonne proprement avec `takeUntilDestroyed()`.""",
  r'''
 import { Component, inject, Injectable, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
