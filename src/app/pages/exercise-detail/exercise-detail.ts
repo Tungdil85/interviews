@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, computed, effect, inject, input, signal, viewChild } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { switchMap } from 'rxjs';
-import { CodeEditor, ExercisesService, RunnerTsService, TestResults, type TestResult } from '@features/exercises';
+import { CodeEditor, ExercisesService, RunnerAngularService, TestResults, type TestResult } from '@features/exercises';
 import { ProgressService } from '@features/progress';
 import { difficultyLabel } from '@shared/question';
 
@@ -17,8 +17,9 @@ export class ExerciseDetail {
   readonly id = input.required<string>();
 
   private readonly exercises = inject(ExercisesService);
-  private readonly runner = inject(RunnerTsService);
+  private readonly runner = inject(RunnerAngularService);
   private readonly progress = inject(ProgressService);
+  private readonly preview = viewChild<ElementRef<HTMLElement>>('preview');
 
   protected readonly exercise = toSignal(toObservable(this.id).pipe(switchMap((id) => this.exercises.get(id))), {
     initialValue: undefined,
@@ -32,6 +33,7 @@ export class ExerciseDetail {
   protected readonly solved = computed(() => this.progress.solvedExercises().includes(this.id()));
 
   constructor() {
+    inject(DestroyRef).onDestroy(() => this.runner.clear());
     effect(() => {
       const e = this.exercise();
       if (e) {
@@ -53,7 +55,7 @@ export class ExerciseDetail {
     if (!e) return;
     this.running.set(true);
     try {
-      const results = await this.runner.run(this.code(), e.tests);
+      const results = await this.runner.run(this.code(), e.tests, this.preview()?.nativeElement);
       this.results.set(results);
       if (results.length > 0 && results.every((r) => r.passed)) this.progress.markExerciseSolved(e.id);
     } catch (error) {
@@ -69,5 +71,7 @@ export class ExerciseDetail {
     this.exercises.resetCode(e.id);
     this.code.set(e.starterCode);
     this.results.set(null);
+    this.runner.clear();
+    this.preview()?.nativeElement.replaceChildren();
   }
 }

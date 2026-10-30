@@ -32,7 +32,7 @@ export class CodeEditor implements OnDestroy {
         parent: this.host().nativeElement,
         extensions: [
           basicSetup,
-          javascript(),
+          javascript({ typescript: true }),
           oneDark,
           EditorView.contentAttributes.of({ 'aria-label': this.ariaLabel() }),
           EditorView.updateListener.of((update) => {

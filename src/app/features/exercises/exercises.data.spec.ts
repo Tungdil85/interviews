@@ -1,26 +1,36 @@
 import { readFileSync } from 'node:fs';
-import { RunnerTsService } from './features/runner-ts';
+import { TestBed } from '@angular/core/testing';
+import { loadNodeTypescript } from '../../../testing/node-typescript';
 import type { ExerciseDto } from './dto/exercise.dto';
+import { RunnerAngularService, TS_LOADER } from './features/runner-angular';
 
 const exercises = JSON.parse(readFileSync('public/data/exercises.json', 'utf-8')) as ExerciseDto[];
-const runner = new RunnerTsService();
 
 describe('exercises.json', () => {
+  let runner: RunnerAngularService;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({ providers: [{ provide: TS_LOADER, useValue: loadNodeTypescript }] });
+    runner = TestBed.inject(RunnerAngularService);
+  });
+
+  afterEach(() => runner.clear());
+
   it('a des ids uniques et au moins un test par exercice', () => {
     expect(new Set(exercises.map((e) => e.id)).size).toBe(exercises.length);
     expect(exercises.every((e) => e.tests.length > 0)).toBe(true);
   });
 
   describe.each(exercises.map((e) => [e.id, e] as const))('%s', (_id, exercise) => {
-    it('la solution passe tous les tests', async () => {
-      const results = await runner.execute(exercise.solution, exercise.tests);
-      const failed = results.filter((r) => !r.passed);
-      expect(failed).toEqual([]);
+    it('la solution passe tous les tests', { timeout: 20_000 }, async () => {
+      const results = await runner.run(exercise.solution, exercise.tests);
+      expect(results.filter((r) => !r.passed)).toEqual([]);
     });
 
-    it('le code de départ ne passe pas tous les tests', async () => {
-      const results = await runner.execute(exercise.starterCode, exercise.tests);
+    it('le code de départ compile mais ne passe pas tous les tests', { timeout: 20_000 }, async () => {
+      const results = await runner.run(exercise.starterCode, exercise.tests);
       expect(results.every((r) => r.passed)).toBe(false);
+      expect(results.some((r) => r.message?.includes('syntaxe'))).toBe(false);
     });
   });
 });

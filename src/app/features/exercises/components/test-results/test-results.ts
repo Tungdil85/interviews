@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import type { TestResult } from '../../features/runner-ts';
+import type { TestResult } from '../../models/test-result.model';
 
 @Component({
   selector: 'app-test-results',
