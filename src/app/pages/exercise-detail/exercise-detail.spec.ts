@@ -5,7 +5,7 @@ import { provideRouter } from '@angular/router';
 import { RunnerAlgoService, RunnerAngularService, TS_LOADER } from '@features/exercises';
 import { ProgressService } from '@features/progress';
 import { loadNodeTypescript } from '../../../testing/node-typescript';
-import { ExerciseDetail } from './exercise-detail';
+import { ExerciseDetail, LIVE_PREVIEW_DELAY_MS } from './exercise-detail';
 
 const solution = `import { Pipe } from '@angular/core';
 @Pipe({ name: 'shout' })
@@ -16,13 +16,20 @@ const dto = {
   starterCode: `import { Pipe } from '@angular/core';\n@Pipe({ name: 'shout' })\nexport class ShoutPipe { transform(v: string) { return v; } }`,
   tests: [{ name: 'majuscules', code: `const v = render('{{ t | shout }}', { imports: [ShoutPipe], props: { t: 'abc' } }); assert.equal(v.text(), 'ABC');` }],
   hints: ['indice 1'], solution,
+  preview: `render('{{ "abc" | shout }}', { imports: [ShoutPipe] });`,
 };
 
 describe('ExerciseDetail', () => {
   function setup(exercise: Record<string, unknown> = dto) {
     localStorage.clear();
     TestBed.configureTestingModule({
-      providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting(), { provide: TS_LOADER, useValue: loadNodeTypescript }],
+      providers: [
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: TS_LOADER, useValue: loadNodeTypescript },
+        { provide: LIVE_PREVIEW_DELAY_MS, useValue: 40 },
+      ],
     });
     const fixture = TestBed.createComponent(ExerciseDetail);
     fixture.componentRef.setInput('id', exercise['id'] as string);
@@ -117,6 +124,80 @@ describe('ExerciseDetail', () => {
       button(el, 'Lancer').click();
       await vi.waitFor(() => expect(el.textContent).toContain('1 / 1 tests réussis'));
       expect(TestBed.inject(ProgressService).solvedExercises()).toEqual(['a1']);
+    });
+  });
+
+  describe('aperçu interactif à la volée', () => {
+    const previewText = (el: HTMLElement) => el.querySelector('.preview')?.textContent?.trim() ?? '';
+    const setCode = (fixture: ReturnType<typeof setup>, code: string) =>
+      (fixture.componentInstance as unknown as { code: { set(v: string): void } }).code.set(code);
+
+    it('affiche un aperçu dès le chargement, avec le code de départ', async () => {
+      const el = setup().nativeElement as HTMLElement;
+      await vi.waitFor(() => expect(previewText(el)).toBe('abc'));
+    });
+
+    it('rafraîchit l’aperçu quand le code change, après le délai', async () => {
+      const fixture = setup();
+      const el = fixture.nativeElement as HTMLElement;
+      await vi.waitFor(() => expect(previewText(el)).toBe('abc'));
+
+      setCode(fixture, solution);
+      fixture.detectChanges();
+      expect(previewText(el)).toBe('abc'); // pas encore : le délai n'est pas écoulé
+      await vi.waitFor(() => expect(previewText(el)).toBe('ABC'));
+    });
+
+    it('n’enchaîne qu’un seul rendu pour une rafale de modifications (debounce)', async () => {
+      const fixture = setup();
+      const el = fixture.nativeElement as HTMLElement;
+      await vi.waitFor(() => expect(previewText(el)).toBe('abc'));
+      const renderLive = vi.spyOn(TestBed.inject(RunnerAngularService), 'renderLive');
+
+      for (const code of [`${solution}\n// 1`, `${solution}\n// 2`, `${solution}\n// 3`]) {
+        setCode(fixture, code);
+        fixture.detectChanges();
+      }
+      await vi.waitFor(() => expect(previewText(el)).toBe('ABC'));
+      expect(renderLive).toHaveBeenCalledTimes(1);
+    });
+
+    it('affiche les erreurs de compilation à la volée, en gardant l’ancien aperçu', async () => {
+      const fixture = setup();
+      const el = fixture.nativeElement as HTMLElement;
+      await vi.waitFor(() => expect(previewText(el)).toBe('abc'));
+
+      setCode(fixture, 'const a = ;');
+      fixture.detectChanges();
+      await vi.waitFor(() => expect(el.textContent).toContain('1 erreur de compilation'));
+      expect(previewText(el)).toBe('abc');
+
+      setCode(fixture, solution);
+      fixture.detectChanges();
+      await vi.waitFor(() => expect(el.textContent).not.toContain('erreur de compilation'));
+    });
+
+    it('Réinitialiser redessine tout de suite l’aperçu avec le code de départ', async () => {
+      const fixture = setup();
+      const el = fixture.nativeElement as HTMLElement;
+      setCode(fixture, solution);
+      fixture.detectChanges();
+      await vi.waitFor(() => expect(previewText(el)).toBe('ABC'));
+
+      button(el, 'Réinitialiser').click();
+      fixture.detectChanges();
+      await vi.waitFor(() => expect(previewText(el)).toBe('abc'));
+    });
+
+    it('un exercice algo n’a pas d’aperçu : le moteur Angular n’est pas sollicité', async () => {
+      const fixture = setup({
+        id: 'a1', kind: 'algo', durationMin: 30, title: 'Somme', difficulty: 'easy', topic: 'T', description: '**Objectif** : x',
+        starterCode: 'export function add() { return 0; }', tests: [], hints: [], solution: '',
+      });
+      const renderLive = vi.spyOn(TestBed.inject(RunnerAngularService), 'renderLive');
+      await new Promise((resolve) => setTimeout(resolve, 120));
+      expect(renderLive).not.toHaveBeenCalled();
+      expect((fixture.nativeElement as HTMLElement).querySelector('.preview')).toBeNull();
     });
   });
 });
