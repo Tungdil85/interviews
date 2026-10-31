@@ -1,4 +1,4 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Service, inject, signal } from '@angular/core';
 import type { ExerciseRunner } from '../../models/exercise-runner.model';
 import type { CompileError, LogEntry, LogLevel, RunReport, TestCase, TestResult } from '../../models/test-result.model';
 import { CompileFailure, TS_LOADER, TsApi, transpileTypescript } from '../../typescript';
@@ -19,7 +19,7 @@ type RunOne = (js: string, test: TestCase, post: (message: WorkerMessage) => voi
  * propre Web Worker, interrompu après {@link TEST_TIMEOUT_MS} : une boucle infinie ou une complexité
  * trop élevée échoue sans figer la page.
  */
-@Injectable({ providedIn: 'root' })
+@Service()
 export class RunnerAlgoService implements ExerciseRunner {
   private readonly loadTs = inject(TS_LOADER);
 

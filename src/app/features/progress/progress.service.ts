@@ -1,4 +1,4 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { Service, computed, inject, signal } from '@angular/core';
 import { StorageService } from '@core/storage';
 import type { Category } from '@shared/question';
 import type { ProgressData, SessionRecord } from './progress.model';
@@ -12,7 +12,7 @@ export interface QuestionOutcome {
   correct: boolean;
 }
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class ProgressService {
   private readonly storage = inject(StorageService);
   private readonly data = signal<ProgressData>({ ...EMPTY, ...this.storage.get<Partial<ProgressData>>(KEY, {}) });

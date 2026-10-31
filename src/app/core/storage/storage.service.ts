@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
+import { Service } from '@angular/core';
 
 /** Wrapper tolérant autour de localStorage (indisponible en navigation privée, SSR, tests…). */
-@Injectable({ providedIn: 'root' })
+@Service()
 export class StorageService {
   get<T>(key: string, fallback: T): T {
     try {

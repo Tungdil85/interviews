@@ -1,9 +1,9 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
+import { Service, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import type { ExerciseDto } from './dto/exercise.dto';
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class ExercisesGateway {
   private readonly http = inject(HttpClient);
 
