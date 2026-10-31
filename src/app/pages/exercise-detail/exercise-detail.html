@@ -45,7 +45,13 @@
 
     @if (e.kind === 'angular') {
       <section aria-label="Aperçu du composant" class="space-y-1">
-        <h2 class="text-sm font-semibold text-gray-700">Aperçu interactif <span class="font-normal">(clique dedans !)</span></h2>
+        <h2 class="text-sm font-semibold text-gray-700">
+          Aperçu interactif
+          <span class="font-normal">(clique dedans ! Il se met à jour quand tu arrêtes de taper)</span>
+          @if (previewPending()) {
+            <span class="ml-2 font-normal text-primary-dark" role="status">⏳ mise à jour…</span>
+          }
+        </h2>
         <div class="overflow-hidden border border-gray-300 bg-white shadow-sm">
           <div class="flex items-center gap-1.5 border-b border-gray-200 bg-gray-100 px-3 py-1.5" aria-hidden="true">
             <span class="size-2.5 rounded-full bg-red-400"></span>

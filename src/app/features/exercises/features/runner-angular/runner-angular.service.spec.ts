@@ -85,4 +85,61 @@ describe('RunnerAngularService', () => {
     ]);
     expect(results[0].passed).toBe(false);
   });
+
+  describe('renderLive (aperçu à la volée)', () => {
+    const preview = () => {
+      const el = document.createElement('div');
+      document.body.appendChild(el);
+      return el;
+    };
+    const previewCode = `render('{{ "salut" | shout }}', { imports: [ShoutPipe] });`;
+
+    it('rend uniquement l’aperçu, sans exécuter de test', async () => {
+      const el = preview();
+      expect(await runner.renderLive(pipeCode, previewCode, el)).toEqual([]);
+      expect(el.textContent).toContain('SALUT!');
+      el.remove();
+    });
+
+    it('renvoie les erreurs de syntaxe et conserve l’ancien aperçu', async () => {
+      const el = preview();
+      await runner.renderLive(pipeCode, previewCode, el);
+      const errors = await runner.renderLive('const a = ;', previewCode, el);
+      expect(errors?.[0].line).toBe(1);
+      expect(el.textContent).toContain('SALUT!');
+      el.remove();
+    });
+
+    it('renvoie une erreur de compilation pour un template invalide', async () => {
+      const el = preview();
+      const errors = await runner.renderLive(pipeCode, `render('{{ t | nope }}', { imports: [ShoutPipe], props: { t: 'a' } });`, el);
+      expect(errors?.[0].message).toMatch(/NG0\d+/);
+      el.remove();
+    });
+
+    it('une erreur d’exécution de l’aperçu va dans la console, pas dans les erreurs de compilation', async () => {
+      const el = preview();
+      expect(await runner.renderLive(pipeCode, `throw new Error('plantage');`, el)).toEqual([]);
+      expect(runner.logs().some((l) => l.level === 'error' && l.text.includes('plantage'))).toBe(true);
+      el.remove();
+    });
+
+    it('ignore (null) un rendu remplacé par un plus récent', async () => {
+      const el = preview();
+      const first = runner.renderLive(pipeCode, previewCode, el);
+      const second = runner.renderLive(pipeCode, previewCode, el);
+      expect(await first).toBeNull();
+      expect(await second).toEqual([]);
+      expect(el.children).toHaveLength(1); // un seul composant rendu, pas de doublon
+      el.remove();
+    });
+
+    it('un lancement des tests annule un rendu à la volée en cours', async () => {
+      const el = preview();
+      const live = runner.renderLive(pipeCode, previewCode, el);
+      await runner.run(pipeCode, [{ name: 't', code: 'assert.ok(true)' }], el, previewCode);
+      expect(await live).toBeNull();
+      el.remove();
+    });
+  });
 });

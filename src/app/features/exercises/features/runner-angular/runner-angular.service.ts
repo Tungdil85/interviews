@@ -11,6 +11,8 @@ const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor as
   ...args: string[]
 ) => (...values: unknown[]) => Promise<void>;
 
+type Execute = (body: string, harness?: Harness) => Promise<void>;
+
 const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 const MAX_LOGS = 300;
 /** Erreurs d'Angular à présenter comme des erreurs de compilation (template invalide, propriété inconnue…). */
@@ -35,56 +37,25 @@ export class RunnerAngularService implements ExerciseRunner {
   private readonly injector = inject(EnvironmentInjector);
   private readonly loadTs = inject(TS_LOADER);
   private harness?: Harness;
+  /** Numéro du dernier rendu demandé : un rendu plus ancien que lui est abandonné. */
+  private generation = 0;
 
   /** Sortie console du code de l'utilisateur, des tests et de l'aperçu (reste active tant que l'aperçu vit). */
   readonly logs = signal<LogEntry[]>([]);
 
   /**
+   * Compile le code, exécute les tests, puis rend l'aperçu interactif.
    * @param previewCode code exécuté après les tests pour rendre un exemple interactif dans `preview`.
    */
   async run(userCode: string, tests: TestCase[], preview?: HTMLElement | null, previewCode?: string): Promise<RunReport> {
+    this.generation++; // annule un éventuel rendu « à la volée » encore en cours
     this.clear();
     this.logs.set([]);
     preview?.replaceChildren();
 
-    let ts: TsApi;
-    let modules: Record<string, unknown>;
-    try {
-      [ts, modules] = await Promise.all([this.loadTs(), loadModules()]);
-    } catch (error) {
-      return { results: [], compileErrors: [{ message: `Chargement du moteur impossible : ${(error as Error).message}` }] };
-    }
-
-    let js: string;
-    try {
-      js = this.transpile(ts, userCode);
-    } catch (error) {
-      return { results: [], compileErrors: (error as CompileFailure).errors ?? [{ message: (error as Error).message }] };
-    }
-
-    const require = (name: string) => {
-      if (!(name in modules)) throw new Error(`Module non disponible : '${name}' (disponibles : ${Object.keys(modules).join(', ')})`);
-      return modules[name];
-    };
-    const console = this.createConsole();
-    const execute = (body: string, harness?: Harness) =>
-      new AsyncFunction('require', 'exports', '__ng', 'console', 'assert', 'render', 'createInjector', 'wait', body)(
-        require,
-        {},
-        modules['@angular/core'],
-        console,
-        assert,
-        harness?.render,
-        harness?.createInjector,
-        wait,
-      );
-
-    // Le module de l'utilisateur doit d'abord se charger seul : une erreur ici est inutile à répéter pour chaque test.
-    try {
-      await execute(js);
-    } catch (error) {
-      return { results: [], compileErrors: [{ message: this.describe(error) }] };
-    }
+    const prepared = await this.prepare(userCode);
+    if ('compileErrors' in prepared) return { results: [], compileErrors: prepared.compileErrors };
+    const { js, execute } = prepared;
 
     const onError = (error: unknown) => this.pushLog('error', formatValue(error));
     const results: TestResult[] = [];
@@ -102,8 +73,29 @@ export class RunnerAngularService implements ExerciseRunner {
     }
 
     const compileErrors = this.angularCompileErrors(results);
-    await this.renderPreview(js, previewCode, preview, execute, onError);
+    await this.mountPreview(js, previewCode, preview, execute, onError);
     return { results, compileErrors };
+  }
+
+  /**
+   * Rend seulement l'aperçu interactif (sans les tests) : sert à l'aperçu « à la volée ».
+   * Si le code ne compile pas, l'ancien aperçu reste affiché et les erreurs sont renvoyées.
+   *
+   * @returns les erreurs de compilation (tableau vide = tout va bien), ou `null` si ce rendu a été
+   * remplacé entre-temps par un plus récent (ou par un lancement des tests) : il faut alors l'ignorer.
+   */
+  async renderLive(userCode: string, previewCode: string, preview: HTMLElement): Promise<CompileError[] | null> {
+    const generation = ++this.generation;
+    this.logs.set([]);
+
+    const prepared = await this.prepare(userCode);
+    if (generation !== this.generation) return null;
+    if ('compileErrors' in prepared) return prepared.compileErrors;
+
+    const onError = (error: unknown) => this.pushLog('error', formatValue(error));
+    const failure = await this.mountPreview(prepared.js, previewCode, preview, prepared.execute, onError);
+    if (generation !== this.generation) return null;
+    return failure && ANGULAR_COMPILE_ERROR.test(failure) ? [{ message: failure }] : [];
   }
 
   /** Détruit l'aperçu courant. */
@@ -116,21 +108,74 @@ export class RunnerAngularService implements ExerciseRunner {
     this.logs.set([]);
   }
 
-  private async renderPreview(
+  /**
+   * Étapes communes au lancement des tests et à l'aperçu : charger les outils, transpiler le code,
+   * fabriquer l'environnement d'exécution (`require`, `console`…) et charger une première fois le module.
+   */
+  private async prepare(userCode: string): Promise<{ js: string; execute: Execute } | { compileErrors: CompileError[] }> {
+    let ts: TsApi;
+    let modules: Record<string, unknown>;
+    try {
+      [ts, modules] = await Promise.all([this.loadTs(), loadModules()]);
+    } catch (error) {
+      return { compileErrors: [{ message: `Chargement du moteur impossible : ${(error as Error).message}` }] };
+    }
+
+    let js: string;
+    try {
+      js = this.transpile(ts, userCode);
+    } catch (error) {
+      return { compileErrors: (error as CompileFailure).errors ?? [{ message: (error as Error).message }] };
+    }
+
+    const require = (name: string) => {
+      if (!(name in modules)) throw new Error(`Module non disponible : '${name}' (disponibles : ${Object.keys(modules).join(', ')})`);
+      return modules[name];
+    };
+    const console = this.createConsole();
+    const execute: Execute = (body, harness) =>
+      new AsyncFunction('require', 'exports', '__ng', 'console', 'assert', 'render', 'createInjector', 'wait', body)(
+        require,
+        {},
+        modules['@angular/core'],
+        console,
+        assert,
+        harness?.render,
+        harness?.createInjector,
+        wait,
+      );
+
+    // Le module de l'utilisateur doit d'abord se charger seul : une erreur ici est inutile à répéter pour chaque test.
+    try {
+      await execute(js);
+    } catch (error) {
+      return { compileErrors: [{ message: this.describe(error) }] };
+    }
+    return { js, execute };
+  }
+
+  /**
+   * Remplace l'aperçu par le rendu de `previewCode` (le composant reste vivant, donc cliquable).
+   * @returns le message de l'erreur survenue pendant le rendu, le cas échéant.
+   */
+  private async mountPreview(
     js: string,
     previewCode: string | undefined,
     preview: HTMLElement | null | undefined,
-    execute: (body: string, harness?: Harness) => Promise<void>,
+    execute: Execute,
     onError: (error: unknown) => void,
-  ): Promise<void> {
+  ): Promise<string | undefined> {
     this.clear();
     preview?.replaceChildren();
-    if (!previewCode) return;
+    if (!previewCode) return undefined;
     const harness = (this.harness = createHarness(this.injector, preview, onError));
     try {
       await execute(`${js}\n;${previewCode}`, harness);
+      return undefined;
     } catch (error) {
-      this.pushLog('error', `Aperçu : ${this.describe(error)}`);
+      const message = this.describe(error);
+      this.pushLog('error', `Aperçu : ${message}`);
+      return message;
     }
   }
 
