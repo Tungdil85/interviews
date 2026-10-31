@@ -167,7 +167,7 @@ Indice : `<ng-content select="[attribut]">` choisit les éléments portant cet a
 • afficher `<p data-test="email-error">Email invalide</p>` quand le champ email est invalide **et** touché (`touched`) ;
 • dans `submit()`, émettre la valeur du formulaire avec la sortie `submitted`.""",
 
-"directive-highlight": r"""**Objectif** : une directive d'attribut qui surligne un élément quand la souris le survole.
+"directive-highlight": r"""**Objectif** : une directive d'attribut qui surligne un élément quand la souris le survole. Version moderne : une entrée `input()` (signal) et des `host` bindings, sans toucher au DOM à la main.
 
 **Exemple d'utilisation** :
 ```html
@@ -179,9 +179,11 @@ Indice : `<ng-content select="[attribut]">` choisit les éléments portant cet a
 • la souris entre sur l'élément : sa couleur de fond devient celle donnée à `appHighlight` (« yellow » si aucune) ;
 • la souris sort : la couleur de fond est retirée.
 
-**À faire** dans `HighlightDirective` :
-• écouter `mouseenter` et `mouseleave` sur l'élément avec `@HostListener` ;
-• modifier `this.el.nativeElement.style.backgroundColor` (l'élément est déjà injecté dans `el`).""",
+**À faire** dans `HighlightDirective` (l'entrée et le signal sont déjà déclarés) :
+• lis l'entrée avec `this.appHighlight()` : c'est un signal, une chaîne vide signifie « pas de couleur donnée » ;
+• dans `host: { … }` du décorateur, écoute `(mouseenter)` et `(mouseleave)` pour modifier le signal `hovered` ;
+• toujours dans `host`, lie `[style.background-color]` à une expression qui donne la couleur quand `hovered()` est vrai, sinon `null` ;
+• ni `ElementRef`, ni `@HostListener`, ni `@Input` : c'est Angular qui applique le style.""",
 
 "directive-click-outside": r"""**Objectif** : une directive qui prévient quand l'utilisateur clique **en dehors** d'un élément (pratique pour fermer un menu ou une modale).
 
@@ -193,9 +195,9 @@ Indice : `<ng-content select="[attribut]">` choisit les éléments portant cet a
 <!-- un clic n'importe où ailleurs sur la page appelle fermerLeMenu() -->
 ```
 
-**À faire** dans `ClickOutsideDirective` :
-• écouter les clics sur **tout le document** : `@HostListener('document:click', ['$event'])` ;
-• si l'élément cliqué (`event.target`) n'est ni l'élément de la directive ni l'un de ses enfants (`this.el.nativeElement.contains(...)`), émettre la sortie `appClickOutside` ;
+**À faire** dans `ClickOutsideDirective` (la sortie `output()` et l'élément injecté sont déjà déclarés) :
+• dans `host: { … }` du décorateur, écoute les clics sur **tout le document** avec la clé `'(document:click)'`, qui appelle `onDocumentClick($event)` ;
+• dans `onDocumentClick`, si l'élément cliqué (`event.target`) n'est ni l'élément de la directive ni l'un de ses enfants (`this.el.nativeElement.contains(...)`), émets la sortie `appClickOutside` ;
 • un clic à l'intérieur n'émet rien.""",
 
 "directive-unless": r"""**Objectif** : une directive structurelle `*appUnless`, l'inverse de `*ngIf` : elle affiche son contenu quand la condition est **fausse**.
@@ -206,10 +208,12 @@ Indice : `<ng-content select="[attribut]">` choisit les éléments portant cet a
 <!-- affiché quand connecte vaut false, retiré du DOM quand il vaut true -->
 ```
 
-**À faire** dans `UnlessDirective` : l'entrée `appUnless` est un setter, appelé à chaque changement de la condition.
-• condition fausse : créer la vue avec `this.container.createEmbeddedView(this.template)` ;
-• condition vraie : la détruire avec `this.container.clear()` ;
-• ne jamais créer la vue deux fois : mémorise si elle est déjà affichée.""",
+**À faire** dans `UnlessDirective` : l'entrée `appUnless` est un **signal** (`input.required`). Réagis à ses changements dans l'`effect()` du constructeur :
+• lis la condition avec `this.appUnless()` ;
+• condition fausse : crée la vue avec `this.container.createEmbeddedView(this.template)` ;
+• condition vraie : détruis-la avec `this.container.clear()` ;
+• ne crée jamais la vue deux fois (mémorise si elle est déjà affichée) ;
+• enveloppe la création et la destruction de la vue dans `untracked(() => …)` : l'effet ne doit dépendre que de la condition.""",
 
 "service-cart": r"""**Objectif** : un service de panier d'achat, avec des signaux.
 
@@ -270,13 +274,12 @@ n, ng, ngx, ngxs   (frappes rapides)   → aucun appel
 …300 ms sans frappe…                   → un seul appel : service.search('ngxs')
 ```
 
-**À faire** dans le constructeur de `SearchComponent` : `this.query.valueChanges` émet à chaque frappe. Enchaîne ces opérateurs RxJS dans un `.pipe(...)` :
+**À faire** : `this.query.valueChanges` émet à chaque frappe. Dans la déclaration de `results`, enchaîne ces opérateurs RxJS dans un `.pipe(...)` :
 • `debounceTime(300)` : attendre 300 ms sans frappe ;
 • `filter` : ignorer les textes de moins de 2 caractères ;
 • `distinctUntilChanged()` : ignorer une valeur identique à la précédente ;
-• `switchMap` vers `this.service.search(q)` : si une nouvelle recherche part, l'ancienne réponse est ignorée ;
-• `takeUntilDestroyed()` : se désabonner à la destruction du composant.
-Termine par `.subscribe(r => this.results.set(r))` pour afficher les résultats.""",
+• `switchMap` vers `this.service.search(q)` : si une nouvelle recherche part, l'ancienne réponse est ignorée.
+`toSignal(…, { initialValue: [] })` convertit déjà le flux en signal et se désabonne tout seul à la destruction du composant : pas de `subscribe` ni de `takeUntilDestroyed`.""",
 }
 
 def ex(id, title, diff, topic, starter, tests, hints, solution):
@@ -669,68 +672,82 @@ export class LoginComponent {
 ''')
 
 # ───────────────────────── Directives ─────────────────────────
-ex("directive-highlight", "Directive highlight", E, "Directive",
+ex("directive-highlight", "Directive highlight", E, "Directive · host · input()",
  r'''
-import { Directive, ElementRef, HostListener, Input, inject } from '@angular/core';
+import { Directive, input, signal } from '@angular/core';
 
-@Directive({ selector: '[appHighlight]' })
+@Directive({
+  selector: '[appHighlight]',
+  host: {
+    // TODO : '(mouseenter)', '(mouseleave)' et '[style.background-color]'
+  },
+})
 export class HighlightDirective {
-  @Input() appHighlight = 'yellow';
-  private el = inject<ElementRef<HTMLElement>>(ElementRef);
-
-  // TODO : @HostListener('mouseenter') et @HostListener('mouseleave')
+  /** Couleur du surlignage (chaîne vide = aucune couleur donnée). */
+  appHighlight = input('yellow');
+  hovered = signal(false);
 }
 ''',
  [("Couleur par défaut au survol", r'''const v = render("<p appHighlight>Texte</p>", { imports: [HighlightDirective] }); v.trigger("p", "mouseenter"); assert.equal(v.query("p").style.backgroundColor, "yellow");'''),
   ("Couleur personnalisée", r'''const v = render('<p appHighlight="lightblue">Texte</p>', { imports: [HighlightDirective] }); v.trigger("p", "mouseenter"); assert.equal(v.query("p").style.backgroundColor, "lightblue");'''),
   ("Fond retiré à la sortie", r'''const v = render("<p appHighlight>Texte</p>", { imports: [HighlightDirective] }); v.trigger("p", "mouseenter"); v.trigger("p", "mouseleave"); assert.equal(v.query("p").style.backgroundColor, "");'''),
-  ("Pas de fond avant le survol", r'''const v = render("<p appHighlight>Texte</p>", { imports: [HighlightDirective] }); assert.equal(v.query("p").style.backgroundColor, "");''')],
- ["`@HostListener('mouseenter') onEnter() { ... }` écoute un événement de l'élément hôte.", "`this.el.nativeElement.style.backgroundColor = this.appHighlight` applique la couleur."],
+  ("Pas de fond avant le survol", r'''const v = render("<p appHighlight>Texte</p>", { imports: [HighlightDirective] }); assert.equal(v.query("p").style.backgroundColor, "");'''),
+  ("Suit un changement de couleur", r'''const v = render('<p [appHighlight]="color">Texte</p>', { imports: [HighlightDirective], props: { color: "red" } }); v.trigger("p", "mouseenter"); assert.equal(v.query("p").style.backgroundColor, "red"); v.component.color = "green"; v.detectChanges(); assert.equal(v.query("p").style.backgroundColor, "green");''')],
+ ["`host: { '(mouseenter)': 'hovered.set(true)' }` écoute un événement de l'élément hôte et exécute l'expression.", "`'[style.background-color]': 'hovered() ? couleur : null'` lie un style : Angular le met à jour tout seul quand le signal change.", "Une chaîne vide est « falsy » : `this.appHighlight() || 'yellow'` donne la couleur par défaut."],
  r'''
-import { Directive, ElementRef, HostListener, Input, inject } from '@angular/core';
+import { Directive, input, signal } from '@angular/core';
 
-@Directive({ selector: '[appHighlight]' })
+@Directive({
+  selector: '[appHighlight]',
+  host: {
+    '(mouseenter)': 'hovered.set(true)',
+    '(mouseleave)': 'hovered.set(false)',
+    '[style.background-color]': 'hovered() ? (appHighlight() || "yellow") : null',
+  },
+})
 export class HighlightDirective {
-  @Input() appHighlight = 'yellow';
-  private el = inject<ElementRef<HTMLElement>>(ElementRef);
-
-  @HostListener('mouseenter')
-  onEnter() {
-    this.el.nativeElement.style.backgroundColor = this.appHighlight || 'yellow';
-  }
-
-  @HostListener('mouseleave')
-  onLeave() {
-    this.el.nativeElement.style.backgroundColor = '';
-  }
+  /** Couleur du surlignage (chaîne vide = aucune couleur donnée). */
+  appHighlight = input('yellow');
+  hovered = signal(false);
 }
 ''')
 
-ex("directive-click-outside", "Directive clic extérieur", M, "Directive · HostListener",
+ex("directive-click-outside", "Directive clic extérieur", M, "Directive · host · output()",
  r'''
-import { Directive, ElementRef, HostListener, inject, output } from '@angular/core';
+import { Directive, ElementRef, inject, output } from '@angular/core';
 
-@Directive({ selector: '[appClickOutside]' })
+@Directive({
+  selector: '[appClickOutside]',
+  host: {
+    // TODO : écouter '(document:click)'
+  },
+})
 export class ClickOutsideDirective {
   appClickOutside = output<void>();
   private el = inject<ElementRef<HTMLElement>>(ElementRef);
 
-  // TODO : écouter document:click et émettre si la cible est hors de l'élément
+  onDocumentClick(event: MouseEvent) {
+    // TODO : émettre appClickOutside si le clic est en dehors de l'élément
+  }
 }
 ''',
  [("Un clic à l'extérieur émet", r'''const v = render('<div><div appClickOutside (appClickOutside)="n = n + 1"><button id="in">dedans</button></div><button id="out">dehors</button></div>', { imports: [ClickOutsideDirective], props: { n: 0 } }); v.click("#out"); assert.equal(v.component.n, 1);'''),
   ("Un clic à l'intérieur n'émet pas", r'''const v = render('<div><div appClickOutside (appClickOutside)="n = n + 1"><button id="in">dedans</button></div><button id="out">dehors</button></div>', { imports: [ClickOutsideDirective], props: { n: 0 } }); v.click("#in"); assert.equal(v.component.n, 0);'''),
   ("Chaque clic extérieur émet", r'''const v = render('<div><div appClickOutside (appClickOutside)="n = n + 1">x</div><button id="out">dehors</button></div>', { imports: [ClickOutsideDirective], props: { n: 0 } }); v.click("#out"); v.click("#out"); assert.equal(v.component.n, 2);''')],
- ["`event.target` est le noeud cliqué : `this.el.nativeElement.contains(event.target as Node)` dit s'il est à l'intérieur.", "`this.appClickOutside.emit()` pour notifier le parent."],
+ ["`host: { '(document:click)': 'onDocumentClick($event)' }` écoute les clics sur tout le document et appelle la méthode.", "`event.target` est le noeud cliqué : `this.el.nativeElement.contains(event.target as Node)` dit s'il est à l'intérieur.", "`this.appClickOutside.emit()` pour notifier le parent."],
  r'''
-import { Directive, ElementRef, HostListener, inject, output } from '@angular/core';
+import { Directive, ElementRef, inject, output } from '@angular/core';
 
-@Directive({ selector: '[appClickOutside]' })
+@Directive({
+  selector: '[appClickOutside]',
+  host: {
+    '(document:click)': 'onDocumentClick($event)',
+  },
+})
 export class ClickOutsideDirective {
   appClickOutside = output<void>();
   private el = inject<ElementRef<HTMLElement>>(ElementRef);
 
-  @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
     if (!this.el.nativeElement.contains(event.target as Node)) {
       this.appClickOutside.emit();
@@ -739,17 +756,22 @@ export class ClickOutsideDirective {
 }
 ''')
 
-ex("directive-unless", "Directive structurelle *appUnless", H, "Directive structurelle",
+ex("directive-unless", "Directive structurelle *appUnless", H, "Directive structurelle · input() · effect()",
  r'''
-import { Directive, Input, TemplateRef, ViewContainerRef, inject } from '@angular/core';
+import { Directive, TemplateRef, ViewContainerRef, effect, inject, input, untracked } from '@angular/core';
 
 @Directive({ selector: '[appUnless]' })
 export class UnlessDirective {
   private template = inject(TemplateRef<unknown>);
   private container = inject(ViewContainerRef);
 
-  @Input() set appUnless(condition: boolean) {
-    // TODO : afficher le template quand `condition` est faux, le retirer sinon
+  /** La condition : le contenu est affiché quand elle est fausse. */
+  appUnless = input.required<unknown>();
+
+  constructor() {
+    effect(() => {
+      // TODO : lire this.appUnless() puis afficher ou retirer le template
+    });
   }
 }
 ''',
@@ -757,9 +779,9 @@ export class UnlessDirective {
   ("Masqué quand la condition est vraie", r'''const v = render("<p *appUnless=\"hidden\">Visible</p>", { imports: [UnlessDirective], props: { hidden: true } }); assert.equal(v.query("p"), null);'''),
   ("Réagit aux changements", r'''const v = render("<p *appUnless=\"hidden\">Visible</p>", { imports: [UnlessDirective], props: { hidden: false } }); v.component.hidden = true; v.detectChanges(); assert.equal(v.query("p"), null); v.component.hidden = false; v.detectChanges(); assert.equal(v.queryAll("p").length, 1);'''),
   ("Jamais de doublon", r'''const v = render("<p *appUnless=\"hidden\">Visible</p>", { imports: [UnlessDirective], props: { hidden: 0 } }); v.component.hidden = false; v.detectChanges(); v.component.hidden = null; v.detectChanges(); assert.equal(v.queryAll("p").length, 1);''')],
- ["`this.container.createEmbeddedView(this.template)` crée la vue ; `this.container.clear()` la détruit.", "Mémorise dans un booléen si la vue est déjà affichée pour éviter les doublons."],
+ ["L'entrée est un signal : `this.appUnless()` lu dans l'`effect()` relance l'effet à chaque changement.", "`this.container.createEmbeddedView(this.template)` crée la vue ; `this.container.clear()` la détruit.", "Mémorise dans un booléen si la vue est déjà affichée, et fais la création / destruction dans `untracked(() => …)`."],
  r'''
-import { Directive, Input, TemplateRef, ViewContainerRef, inject } from '@angular/core';
+import { Directive, TemplateRef, ViewContainerRef, effect, inject, input, untracked } from '@angular/core';
 
 @Directive({ selector: '[appUnless]' })
 export class UnlessDirective {
@@ -767,14 +789,22 @@ export class UnlessDirective {
   private container = inject(ViewContainerRef);
   private shown = false;
 
-  @Input() set appUnless(condition: boolean) {
-    if (!condition && !this.shown) {
-      this.container.createEmbeddedView(this.template);
-      this.shown = true;
-    } else if (condition && this.shown) {
-      this.container.clear();
-      this.shown = false;
-    }
+  /** La condition : le contenu est affiché quand elle est fausse. */
+  appUnless = input.required<unknown>();
+
+  constructor() {
+    effect(() => {
+      const condition = this.appUnless();
+      untracked(() => {
+        if (!condition && !this.shown) {
+          this.container.createEmbeddedView(this.template);
+          this.shown = true;
+        } else if (condition && this.shown) {
+          this.container.clear();
+          this.shown = false;
+        }
+      });
+    });
   }
 }
 ''')
@@ -782,7 +812,7 @@ export class UnlessDirective {
 # ───────────────────────── Services / HTTP ─────────────────────────
 ex("service-cart", "Service panier (signals)", E, "Service · Signals",
  r'''
-import { Injectable, computed, signal } from '@angular/core';
+import { Service, computed, signal } from '@angular/core';
 
 export interface Product {
   id: number;
@@ -794,7 +824,7 @@ export interface CartLine extends Product {
   qty: number;
 }
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class CartService {
   readonly lines = signal<CartLine[]>([]);
 
@@ -823,7 +853,7 @@ export class CartService {
   ("Ne mute pas les lignes existantes (immutabilité)", r'''const cart = createInjector([CartService]).get(CartService); cart.add({ id: 1, name: "A", price: 2 }); const before = cart.lines(); cart.add({ id: 1, name: "A", price: 2 }); assert.ok(before !== cart.lines()); assert.equal(before[0].qty, 1);''')],
  ["`this.lines.update(lines => ...)` : retourne toujours un nouveau tableau.", "Cherche la ligne avec `find`, puis `map` pour créer une copie `{ ...line, qty: line.qty + 1 }`.", "`reduce` calcule les deux totaux dans les `computed`."],
  r'''
-import { Injectable, computed, signal } from '@angular/core';
+import { Service, computed, signal } from '@angular/core';
 
 export interface Product {
   id: number;
@@ -835,7 +865,7 @@ export interface CartLine extends Product {
   qty: number;
 }
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class CartService {
   readonly lines = signal<CartLine[]>([]);
 
@@ -863,7 +893,7 @@ export class CartService {
 ex("service-http-users", "Service HTTP (HttpClient)", M, "Service · HttpClient",
  r'''
 import { HttpClient } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
+import { Service, inject } from '@angular/core';
 import { Observable, catchError, map, of } from 'rxjs';
 
 export interface User {
@@ -871,7 +901,7 @@ export interface User {
   name: string;
 }
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class UserService {
   private http = inject(HttpClient);
 
@@ -893,7 +923,7 @@ export class UserService {
  ["`this.http.get<User[]>('/api/users', { params: { active: true } })`.", "`.pipe(map(users => users.map(u => u.name)), catchError(() => of([])))`."],
  r'''
 import { HttpClient } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
+import { Service, inject } from '@angular/core';
 import { Observable, catchError, map, of } from 'rxjs';
 
 export interface User {
@@ -901,7 +931,7 @@ export interface User {
   name: string;
 }
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class UserService {
   private http = inject(HttpClient);
 
@@ -921,9 +951,9 @@ export class UserService {
 ex("interceptor-auth", "Intercepteur d'authentification", M, "HttpInterceptor",
  r'''
 import { HttpInterceptorFn } from '@angular/common/http';
-import { Injectable, inject, signal } from '@angular/core';
+import { Service, inject, signal } from '@angular/core';
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class TokenService {
   token = signal<string | null>(null);
 }
@@ -940,9 +970,9 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
  ["`const token = inject(TokenService).token();` fonctionne dans un intercepteur fonctionnel.", "`req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })` retourne une nouvelle requête."],
  r'''
 import { HttpInterceptorFn } from '@angular/common/http';
-import { Injectable, inject, signal } from '@angular/core';
+import { Service, inject, signal } from '@angular/core';
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class TokenService {
   token = signal<string | null>(null);
 }
@@ -957,13 +987,13 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 # ───────────────────────── RxJS dans un composant ─────────────────────────
 ex("rxjs-search", "Recherche avec debounce (RxJS)", H, "RxJS · Composant",
  r'''
-import { Component, inject, Injectable, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, inject, Service } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Observable, of } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class SearchService {
   search(query: string): Observable<string[]> {
     return of([]); // remplacé par un faux service dans les tests
@@ -985,11 +1015,12 @@ export class SearchService {
 export class SearchComponent {
   private service = inject(SearchService);
   query = new FormControl('', { nonNullable: true });
-  results = signal<string[]>([]);
 
-  constructor() {
-    // TODO : query.valueChanges.pipe(...).subscribe(r => this.results.set(r))
-  }
+  // TODO : enchaîner les opérateurs RxJS (debounceTime, filter, distinctUntilChanged, switchMap)
+  results = toSignal(
+    this.query.valueChanges.pipe(switchMap(() => of([] as string[]))),
+    { initialValue: [] as string[] },
+  );
 }
 ''',
  [("Attend 300 ms avant de chercher", r'''const calls = []; const v = render(SearchComponent, { providers: [{ provide: SearchService, useValue: { search: (q) => { calls.push(q); return require("rxjs").of([q + "-1"]); } } }] }); v.type("[data-test=search]", "ng"); assert.equal(calls.length, 0); await wait(380); assert.deepEqual(calls, ["ng"]);'''),
@@ -998,15 +1029,15 @@ export class SearchComponent {
   ("Ignore moins de 2 caractères", r'''const calls = []; const v = render(SearchComponent, { providers: [{ provide: SearchService, useValue: { search: (q) => { calls.push(q); return require("rxjs").of([]); } } }] }); v.type("[data-test=search]", "a"); await wait(380); assert.equal(calls.length, 0);'''),
   ("Pas de nouvel appel pour la même valeur", r'''const calls = []; const v = render(SearchComponent, { providers: [{ provide: SearchService, useValue: { search: (q) => { calls.push(q); return require("rxjs").of([]); } } }] }); v.type("[data-test=search]", "angular"); await wait(380); v.type("[data-test=search]", "angular"); await wait(380); assert.equal(calls.length, 1);'''),
   ("Ignore la réponse d'une ancienne recherche (switchMap)", r'''const { timer } = require("rxjs"); const { map } = require("rxjs/operators"); const v = render(SearchComponent, { providers: [{ provide: SearchService, useValue: { search: (q) => timer(q === "ab" ? 400 : 20).pipe(map(() => [q])) } }] }); v.type("[data-test=search]", "ab"); await wait(340); v.type("[data-test=search]", "abc"); await wait(340); await wait(500); await v.stable(); assert.deepEqual(v.queryAll("[data-test=result]").map((e) => e.textContent.trim()), ["abc"]);''')],
- ["`this.query.valueChanges.pipe(debounceTime(300), filter(q => q.length >= 2), distinctUntilChanged(), switchMap(q => this.service.search(q)), takeUntilDestroyed())`.", "Appelle `.subscribe(r => this.results.set(r))` à la fin du pipe.", "`takeUntilDestroyed()` sans argument ne marche que dans le constructeur (contexte d'injection)."],
+ ["`toSignal(this.query.valueChanges.pipe(debounceTime(300), filter(q => q.length >= 2), distinctUntilChanged(), switchMap(q => this.service.search(q))), { initialValue: [] })`.", "`toSignal` s'abonne et se désabonne seul : plus besoin de `subscribe` ni de `takeUntilDestroyed`.", "`initialValue: []` est la valeur du signal tant qu'aucune recherche n'a répondu."],
  r'''
-import { Component, inject, Injectable, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, inject, Service } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Observable, of } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class SearchService {
   search(query: string): Observable<string[]> {
     return of([]); // remplacé par un faux service dans les tests
@@ -1028,19 +1059,16 @@ export class SearchService {
 export class SearchComponent {
   private service = inject(SearchService);
   query = new FormControl('', { nonNullable: true });
-  results = signal<string[]>([]);
 
-  constructor() {
-    this.query.valueChanges
-      .pipe(
-        debounceTime(300),
-        filter((q) => q.length >= 2),
-        distinctUntilChanged(),
-        switchMap((q) => this.service.search(q)),
-        takeUntilDestroyed(),
-      )
-      .subscribe((r) => this.results.set(r));
-  }
+  results = toSignal(
+    this.query.valueChanges.pipe(
+      debounceTime(300),
+      filter((q) => q.length >= 2),
+      distinctUntilChanged(),
+      switchMap((q) => this.service.search(q)),
+    ),
+    { initialValue: [] as string[] },
+  );
 }
 ''')
 
