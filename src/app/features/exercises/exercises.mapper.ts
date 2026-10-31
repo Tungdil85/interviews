@@ -1,9 +1,9 @@
-import { Injectable } from '@angular/core';
+import { Service } from '@angular/core';
 import type { Difficulty } from '@shared/question';
 import type { ExerciseDto } from './dto/exercise.dto';
 import type { Exercise } from './models/exercise.model';
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class ExercisesMapper {
   toExercise(dto: ExerciseDto): Exercise {
     return {

@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Service, inject } from '@angular/core';
 import { StorageService } from '@core/storage';
 import { Observable, map, shareReplay } from 'rxjs';
 import { ExercisesGateway } from './exercises.gateway';
@@ -7,7 +7,7 @@ import type { Exercise } from './models/exercise.model';
 
 const codeKey = (id: string) => `interviews.exercise.code.${id}`;
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class ExercisesService {
   private readonly gateway = inject(ExercisesGateway);
   private readonly mapper = inject(ExercisesMapper);

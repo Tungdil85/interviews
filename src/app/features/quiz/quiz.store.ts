@@ -1,4 +1,4 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { Service, computed, inject, signal } from '@angular/core';
 import type { Question } from '@shared/question';
 import { QuizService } from './quiz.service';
 
@@ -10,7 +10,7 @@ export interface AnswerResult {
   correct: boolean;
 }
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class QuizStore {
   private readonly service = inject(QuizService);
 

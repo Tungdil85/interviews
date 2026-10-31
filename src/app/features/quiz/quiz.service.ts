@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Service, inject } from '@angular/core';
 import { Observable, forkJoin, map } from 'rxjs';
 import type { Category, Difficulty, Question } from '@shared/question';
 import { QuizGateway } from './quiz.gateway';
@@ -12,7 +12,7 @@ export interface QuizFilter {
   onlyIds?: string[];
 }
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class QuizService {
   private readonly gateway = inject(QuizGateway);
   private readonly mapper = inject(QuizMapper);

@@ -10,9 +10,9 @@
     <p>Écris du vrai code Angular (pipe, composant, directive, service…), vois le résultat et lance les tests.</p>
   }
 
-  @if (exercises(); as list) {
+  @if (exercises()) {
     <ul class="grid gap-3 sm:grid-cols-2">
-      @for (e of list; track e.id) {
+      @for (e of exercises(); track e.id) {
         <li>
           <a [routerLink]="[basePath(), e.id]" class="flex h-full flex-col gap-1 border-2 bg-white p-4 hover:bg-purple-50"
             [class]="progress.solvedExercises().includes(e.id) ? 'border-brand-green' : 'border-gray-200'">

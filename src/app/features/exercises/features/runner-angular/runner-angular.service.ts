@@ -1,4 +1,4 @@
-import { EnvironmentInjector, Injectable, inject, signal } from '@angular/core';
+import { EnvironmentInjector, Service, inject, signal } from '@angular/core';
 import type { ExerciseRunner } from '../../models/exercise-runner.model';
 import type { CompileError, LogEntry, LogLevel, RunReport, TestCase, TestResult } from '../../models/test-result.model';
 import { assert } from './assert';
@@ -30,7 +30,7 @@ function formatValue(value: unknown): string {
  * Compile le TypeScript de l'utilisateur (transpilation + compilateur JIT d'Angular), rend ses
  * composants dans l'aperçu et exécute les tests contre le DOM obtenu.
  */
-@Injectable({ providedIn: 'root' })
+@Service()
 export class RunnerAngularService implements ExerciseRunner {
   private readonly injector = inject(EnvironmentInjector);
   private readonly loadTs = inject(TS_LOADER);

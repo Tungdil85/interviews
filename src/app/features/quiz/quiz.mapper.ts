@@ -1,8 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Service } from '@angular/core';
 import type { Category, Difficulty, Question } from '@shared/question';
 import type { QuestionDto } from './dto/question.dto';
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class QuizMapper {
   toQuestion(dto: QuestionDto): Question {
     const correct = [...dto.answer].sort((a, b) => a - b);
