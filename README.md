@@ -1,163 +1,146 @@
-# template-angular-claude
+# Interview Trainer
 
-Template de démarrage pour projets Angular, pré-configuré pour travailler avec [Claude Code](https://claude.com/claude-code).
+Application web d'entraînement aux entretiens techniques **Angular** : QCM, exercices de code avec aperçu interactif, et exercices d'algorithmique en TypeScript au format entretien. Tout tourne dans le navigateur, sans backend.
 
-Le template fournit un harnais Claude Code complet : règles d'architecture frontend, skills Angular officiels, et MCP Angular CLI — afin que Claude génère du code conforme aux standards dès la première interaction.
+Construit avec Angular 22 (composants standalone, signaux, `OnPush`), Tailwind 4 et Vitest.
 
 ---
 
-## Démarrage rapide
+## Fonctionnalités
+
+| Section | Contenu |
+|---------|---------|
+| **QCM** (`/quiz`) | 203 questions : Angular, TypeScript, RxJS, CSS. Mode **entraînement** (correction immédiate, retour arrière possible) ou **examen** chronométré. Choix unique ou multiple, explications, révision des erreurs. |
+| **Exercices Angular** (`/exercises`) | 15 exercices : pipe, composant, directive, service, formulaire réactif, intercepteur HTTP, RxJS. Tu écris du vrai code Angular, vois un **aperçu interactif** (mis à jour 2 s après ta dernière frappe), puis lances les tests. |
+| **Algo TypeScript** (`/algo`) | 11 exercices de 20 à 35 minutes (Two Sum, LRU, BFS, fenêtre glissante…), avec **chronomètre** d'entretien. Les tests incluent de grosses entrées : une solution trop lente échoue après 5 s. |
+| **Progression** (`/progress`) | Scores par catégorie, historique, questions à retravailler, exercices résolus. Stockée dans le `localStorage`. |
+
+Dans l'éditeur d'exercice : erreurs de compilation avec ligne et colonne, console (`console.log` du code et de l'aperçu), indices progressifs, solution masquée, code sauvegardé automatiquement. `Tab` indente ; `Échap` puis `Tab` quitte l'éditeur au clavier.
+
+---
+
+## Démarrage
+
+**Prérequis** : Node.js **≥ 22.22 ou ≥ 24.15** (exigé par la CLI Angular 22). Avec [Volta](https://volta.sh) : `volta install node@24`.
 
 ```bash
-# 1. Cloner le template
-git clone <url> mon-projet
-cd mon-projet
-
-# 2. Initialiser l'app Angular dans le template
-#    (Claude peut le faire pour toi : invoque le skill angular-new-app)
-
-# 3. Lancer Claude Code à la racine
-claude
+npm install          # si npm signale un conflit de peer dependencies : npm install --legacy-peer-deps
+npm run dev          # http://localhost:4200
 ```
 
-Au premier lancement, Claude Code demande l'**approbation du serveur MCP `angular-cli`** déclaré dans [.mcp.json](.mcp.json). Accepte pour activer les outils Angular CLI.
+| Commande | Rôle |
+|----------|------|
+| `npm run dev` | Serveur de développement |
+| `npm run build` | Build de production (`dist/`) |
+| `npm test` | Tests unitaires (Vitest). Une seule passe : `npx ng test --no-watch` |
+| `npm run lint` | ESLint, dont les règles d'architecture |
+
+> Le serveur de développement ne relit pas `angular.json` à chaud : redémarre-le si tu modifies ce fichier.
 
 ---
 
-## Structure du template
+## Architecture
+
+Architecture en couches descendantes, détaillée dans [.claude/rules/frontend-guidelines.md](.claude/rules/frontend-guidelines.md) et contrôlée par [eslint.config.mjs](eslint.config.mjs) :
 
 ```
-.
-├── CLAUDE.md                      → instructions chargées en permanence (importe les règles)
-├── .mcp.json                      → serveurs MCP du projet (Angular CLI)
-├── .claude/
-│   ├── README.md                  → détails de la config Claude
-│   ├── rules/
-│   │   └── frontend-guidelines.md → standards Angular (architecture, mobile, UX/UI, a11y)
-│   ├── skills/                    → symlinks vers .agents/skills/
-│   └── settings.local.json        → settings locaux (non versionnés)
-├── .agents/
-│   └── skills/                    → skills Angular officiels installés
-│       ├── angular-developer/     → guidance architecture & code Angular
-│       └── angular-new-app/       → création d'une nouvelle app Angular
-└── skills-lock.json               → version lock des skills (intégrité)
+pages/  ──→  features/  ──→  shared/  ──→  core/
 ```
+
+```
+src/app/
+├── core/storage/                  → wrapper localStorage
+├── shared/question/               → modèles Question, catégories, difficultés
+├── features/
+│   ├── quiz/                      → gateway / mapper / service / store + carte de question
+│   ├── progress/                  → progression (sessions, erreurs, exercices résolus)
+│   └── exercises/                 → exercices, éditeur, résultats, console, chrono
+│       └── features/
+│           ├── runner-angular/    → moteur des exercices Angular (voir plus bas)
+│           └── runner-algo/       → moteur des exercices d'algo (Web Workers)
+├── pages/                         → home, quiz-*, exercises-list, exercise-detail, progress, credits
+└── components/header/
+```
+
+Chaque feature suit `gateway → mapper → service → store` : seul le gateway fait des appels HTTP, les données (JSON) sont servies depuis `public/data/`. Chaque fichier exécutable a son `.spec.ts`.
+
+### Les deux moteurs d'exécution
+
+Le code de l'utilisateur est du **TypeScript**, transpilé dans le navigateur avec `typescript.js` (≈ 9 Mo, copié dans `vendor/` au build et chargé à la demande).
+
+- **`RunnerAngularService`** (exercices Angular) : transpile, puis laisse le **compilateur JIT d'Angular** compiler les composants. Un `require` maison donne accès à `@angular/core`, `common`, `forms`, `common/http`, `rxjs`. Un harnais de test (`render`, `click`, `type`…) rend les composants dans l'aperçu et les teste sur le DOM. Les `input()`, `output()` et `model()` sont supportés grâce à un pré-traitement qui ajoute les décorateurs que le compilateur AOT ajoute normalement.
+- **`RunnerAlgoService`** (algo) : un **Web Worker par test**, exécutés en parallèle et interrompus après 5 s (boucle infinie ou complexité trop élevée). La durée de chaque test est affichée.
+
+Limites : pas de vérification de types (seules les erreurs de syntaxe sont remontées) ; le code des exercices Angular tourne dans le thread principal, donc une boucle infinie y gèle l'onglet.
 
 ---
 
-## Comment Claude utilise ce template
+## Contenu et données
+
+Les données sont des fichiers JSON dans [public/data/](public/data/), **générés** par les scripts de [scripts/](scripts/) (Python 3) : ne modifie pas les JSON à la main.
+
+| Fichier | Source |
+|---------|--------|
+| `qcm-angular.json`, `qcm-typescript.json`, `qcm-rxjs.json` | [build_qcm_angular.py](scripts/build_qcm_angular.py), [build_qcm_other.py](scripts/build_qcm_other.py) |
+| `qcm-css.json` | questions originales + 122 questions importées de freeCodeCamp |
+| `exercises.json` | [build_exercises.py](scripts/build_exercises.py) (Angular) et [algo_exercises.py](scripts/algo_exercises.py) (algo) |
+
+Les options des QCM sont équilibrées (longueur et position de la bonne réponse) par [qcm_options.py](scripts/qcm_options.py) et [qcm_options_patch.py](scripts/qcm_options_patch.py), puis mélangées à chaque partie.
+
+**Régénérer les données** (dans cet ordre, depuis la racine) :
+
+```bash
+python3 scripts/build_qcm_angular.py
+python3 scripts/build_qcm_other.py
+python3 scripts/import_fcc_css.py <chemin/vers/css-quiz.ts>   # fichier freeCodeCamp, voir ci-dessous
+python3 scripts/build_exercises.py
+```
+
+`build_qcm_other.py` repart des questions originales : il faut donc relancer `import_fcc_css.py` après lui. Le fichier source se récupère avec :
+
+```bash
+gh api repos/freeCodeCamp/developer_quiz_site/contents/src/data/css-quiz.ts --jq .content | base64 -d > css-quiz.ts
+```
+
+Les tests valident les données : chaque solution d'exercice doit passer tous ses tests, chaque code de départ doit échouer, et chaque QCM doit être bien formé.
+
+**Ajouter un exercice** : ajoute un appel `ex(...)` dans `build_exercises.py` (ou `algo(...)` dans `algo_exercises.py`) avec sa consigne, son code de départ, ses tests, ses indices et sa solution, puis relance `build_exercises.py` et `npm test`.
+
+---
+
+## Licences et crédits
+
+- Les 122 questions CSS importées viennent de [freeCodeCamp/developer_quiz_site](https://github.com/freeCodeCamp/developer_quiz_site), licence **BSD 3-Clause** (© 2023 freeCodeCamp). L'attribution figure dans la page *Crédits* de l'application et dans les champs `source` / `license` des données.
+- Le reste du contenu (questions et exercices) est original.
+- `typescript.js` est distribué sous licence Apache 2.0 par Microsoft.
+
+---
+
+## Harnais Claude Code
+
+Le dépôt est configuré pour travailler avec [Claude Code](https://claude.com/claude-code) :
 
 | Mécanisme | Fichier / dossier | Rôle |
 |-----------|-------------------|------|
-| **Instructions permanentes** | [CLAUDE.md](CLAUDE.md) → [frontend-guidelines.md](.claude/rules/frontend-guidelines.md) | Règles toujours actives dans le contexte |
-| **Skills** | [.claude/skills/](.claude/skills/) | Procédures invoquées à la demande (ex: nouvelle app, nouveau composant) |
-| **MCP** | [.mcp.json](.mcp.json) | Outils Angular CLI exposés à Claude (build, generate, etc.) |
+| Instructions permanentes | [CLAUDE.md](CLAUDE.md) → [frontend-guidelines.md](.claude/rules/frontend-guidelines.md) | Règles d'architecture, conventions Angular, tests, UX et accessibilité |
+| Skills | [.claude/skills/](.claude/skills/) (liens vers `.agents/skills/`) | `angular-new-app`, `angular-developer` |
+| MCP | [.mcp.json](.mcp.json) | Outils Angular CLI (`@angular/cli mcp`), à approuver au premier lancement |
 
-### Règles frontend
+Pour la personnalisation (ajouter une règle, un skill ou un MCP), voir [.claude/README.md](.claude/README.md). Les préférences locales (`.claude/settings.local.json`) ne sont pas versionnées.
 
-Le fichier [.claude/rules/frontend-guidelines.md](.claude/rules/frontend-guidelines.md) définit :
+### Garde-fous ESLint
 
-- **Architecture** par domaines métier isolés (`domains/`, `pages/`, `shared/`, `layout/`)
-- **Mobile (Capacitor)** : safe areas, plugins natifs, contraintes de performance
-- **UX / UI** : palette de couleurs, conventions PrimeNG, responsive Tailwind
-- **Accessibilité** : RGAA, ARIA, navigation clavier
+[eslint.config.mjs](eslint.config.mjs) mécanise les frontières d'architecture :
 
-Ces règles sont chargées automatiquement au démarrage de Claude Code via l'import dans `CLAUDE.md`.
+- `core/` ne peut pas importer `shared/` ni `features/` ;
+- `shared/` ne peut pas importer `features/` ;
+- une feature ne peut importer que ses propres **ancêtres et descendants** (à chaque niveau d'imbrication). Les features sont découvertes automatiquement dans `src/app/features/`.
 
-### Skills disponibles
-
-- **[angular-new-app](.agents/skills/angular-new-app/)** — créer une nouvelle app Angular avec les bonnes pratiques
-- **[angular-developer](.agents/skills/angular-developer/)** — guidance pour signals, formulaires, DI, routing, SSR, tests, etc.
-
-Pour les invoquer : demande simplement à Claude (« crée une nouvelle app », « génère un composant ») — il chargera le skill pertinent automatiquement.
-
-### MCP Angular CLI
-
-Le MCP [`@angular/cli mcp`](https://angular.dev) expose les commandes Angular CLI à Claude. Une fois approuvé, les outils apparaissent avec le préfixe `mcp__angular-cli__…`.
-
----
-
-## Linter (ESLint)
-
-Le fichier [eslint.config.mjs](eslint.config.mjs) à la racine **mécanise les frontières d'architecture** définies dans [frontend-guidelines.md](.claude/rules/frontend-guidelines.md) :
-
-- `core/` ne peut pas importer `shared/` ni `features/`
-- `shared/` ne peut pas importer `features/`
-- Une feature ne peut importer que ses propres **ancêtres et descendants** (récursif via sous-features)
-
-Les features sont **auto-découvertes** en scannant `src/app/features/` récursivement — pas de liste à maintenir.
-
-### Sous-features (récursif)
-
-Une feature peut nidifier ses propres sous-features dans son dossier `features/` :
-
-```
-features/orders/
-├── features/
-│   ├── cart/         ← sous-feature, isolée de checkout
-│   └── checkout/     ← sous-feature, isolée de cart
-└── orders.service.ts
-```
-
-Règle : à chaque niveau, les features sont mutuellement isolées. Une feature ne peut importer **que** ses ancêtres et descendants. Voir la section [Sous-features](.claude/rules/frontend-guidelines.md#sous-features) pour le détail.
-
-### Mise en place
-
-Le linter est posé mais **pas encore actif** : il a besoin d'un projet Angular initialisé et des dépendances installées.
-
-```bash
-# 1. Installer les dépendances (après que l'app Angular existe)
-npm install -D eslint typescript-eslint
-
-# 2. Ajouter les scripts à package.json
-#    "lint":     "eslint src/"
-#    "lint:fix": "eslint --fix src/"
-
-# 3. Lancer
-npm run lint
-```
-
-Commandes ad-hoc utiles :
-```bash
-npx eslint src/                          # tout le projet
-npx eslint src/app/features/relay/       # un dossier précis
-npx eslint --fix src/                    # auto-fix
-```
-
-### Limitations restantes
-
-| Limitation | Détail | Contournement |
-|------------|--------|---------------|
-| **Imports relatifs invisibles** | `../../features/relay/...` contourne la règle (qui matche seulement `@features/*`) | Discipline d'équipe : toujours utiliser les path aliases |
-| **Façade non enforced depuis `pages/`** | Une page peut importer un fichier interne de feature (`@features/relay/relay.gateway`) au lieu de passer par `@features/relay` | Ajouter une règle ciblant `pages/**` qui bloque les deep imports |
-
-Demande à Claude d'enrichir le config si tu veux durcir l'une de ces limitations.
-
----
-
-## Personnalisation
-
-- **Modifier les règles** : édite [.claude/rules/frontend-guidelines.md](.claude/rules/frontend-guidelines.md) — les changements sont actifs au prochain redémarrage de Claude.
-- **Ajouter des règles** : crée un nouveau fichier dans `.claude/rules/` puis ajoute `@.claude/rules/<nom>.md` dans [CLAUDE.md](CLAUDE.md).
-- **Ajouter un skill** : place-le dans `.agents/skills/<nom>/SKILL.md` et ajoute un symlink dans `.claude/skills/`.
-- **Ajouter un MCP** : ajoute une entrée sous `mcpServers` dans [.mcp.json](.mcp.json).
-
----
-
-## Versionnement
-
-Sont **versionnés** (partagés avec l'équipe) :
-- `CLAUDE.md`, `.claude/rules/`, `.claude/skills/` (symlinks)
-- `.agents/skills/` (skills installés)
-- `.mcp.json`, `skills-lock.json`
-
-Sont **locaux** (non versionnés) :
-- `.claude/settings.local.json` (préférences perso)
+Limites connues : les imports relatifs (`../../features/x`) contournent la règle, qui ne vérifie que les alias `@features/*` ; utilise toujours les alias. Une page peut aussi importer un fichier interne d'une feature au lieu de passer par sa façade `index.ts`.
 
 ---
 
 ## Ressources
 
-- [Documentation Claude Code](https://docs.claude.com/claude-code)
 - [Angular](https://angular.dev)
-- [Skills Angular officiels](https://github.com/angular/skills)
+- [Documentation Claude Code](https://docs.claude.com/claude-code)
